@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@350;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-dark-900 font-sans antialiased selection:bg-tomato-100 selection:text-tomato-700 overflow-x-hidden;
+  }
+}
+
+/* Custom styling utilities for a premium experience */
+.smooth-transition {
+  @apply transition-all duration-300 ease-out;
+}
+
+.card-hover {
+  @apply border border-gray-200 rounded-2xl bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-tomato-300 smooth-transition;
+}
+
+.tomato-btn {
+  @apply bg-tomato-500 hover:bg-tomato-600 text-white font-medium py-2.5 px-5 rounded-xl shadow-md hover:shadow-lg active:scale-95 smooth-transition inline-flex items-center justify-center gap-2;
+}
+
+.tomato-btn-outline {
+  @apply border-2 border-tomato-500 text-tomato-600 hover:bg-tomato-50 hover:text-tomato-700 font-medium py-2 px-5 rounded-xl active:scale-95 smooth-transition inline-flex items-center justify-center gap-2;
+}
+
+.modal-backdrop {
+  @apply fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in;
+}
+
+.modal-content {
+  @apply bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-gray-100 overflow-hidden transform scale-95 animate-scale-up;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-50;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-tomato-300 transition-colors;
+}
