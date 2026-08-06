@@ -26,6 +26,8 @@ exports.logIncident = async (req, res) => {
     demeritPoints = 1;
   } else if (activityType === 'shortcut copy' || activityType === 'manual copy' || activityType === 'pasting answer') {
     demeritPoints = 1;
+  } else if (activityType === 'AI Detection') {
+    demeritPoints = 0;
   }
 
   try {
@@ -52,7 +54,7 @@ exports.logIncident = async (req, res) => {
 
     // 4. Update student's active exam attempt demerit points and block status
     const [attempts] = await db.query(
-      'SELECT demerit_points, status, block_until FROM student_exams WHERE student_id = ? AND exam_id = ?',
+      'SELECT demerit_points, status, block_until FROM student_exams WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
       [studentId, examId]
     );
 
@@ -85,7 +87,7 @@ exports.logIncident = async (req, res) => {
       }
 
       await db.query(
-        'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ? WHERE student_id = ? AND exam_id = ?',
+        'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ? WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
         [newDemerits, newStatus, newBlockUntil, studentId, examId]
       );
 

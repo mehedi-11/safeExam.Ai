@@ -54,7 +54,9 @@ router.post('/exams/:id/live', teacherController.toggleExamLive);
 
 // Exam Results & Grading
 router.get('/exams/:id/results', teacherController.getExamResults);
+router.put('/exams/:id/publish', teacherController.togglePublishResults);
 router.get('/exams/:examId/students/:studentId/answers', teacherController.getStudentAnswersheet);
+router.get('/exams/:examId/students/:studentId/logs', teacherController.downloadStudentLog);
 router.post('/exams/:examId/students/:studentId/grade/manual', teacherController.manualGradeAnswersheet);
 
 // Exam Questions
@@ -62,6 +64,7 @@ router.get('/exams/:examId/questions', teacherController.getQuestions);
 router.post('/questions', teacherController.createQuestion);
 router.put('/questions/:id', teacherController.updateQuestion);
 router.delete('/questions/:id', teacherController.deleteQuestion);
+router.put('/exams/:exam_id/questions/reorder', teacherController.reorderQuestions);
 
 // Exam Students & Logs
 router.get('/exams/:examId/students', teacherController.getExamStudents);

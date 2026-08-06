@@ -1,12 +1,12 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
-export default function Modal({ isOpen, onClose, title, children }) {
+export default function Modal({ isOpen, onClose, title, children, maxWidth = "max-w-lg" }) {
   if (!isOpen) return null;
 
   return (
     <div className="modal-backdrop">
-      <div className="modal-content max-w-lg w-full relative">
+      <div className={`modal-content ${maxWidth} w-full relative`}>
         <div className="flex justify-between items-center bg-gray-50 px-6 py-4 border-b border-gray-150">
           <h3 className="text-lg font-semibold text-dark-900">{title}</h3>
           <button 

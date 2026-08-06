@@ -99,15 +99,15 @@ exports.getExams = async (req, res) => {
 };
 
 exports.createExam = async (req, res) => {
-  const { title, duration_minutes, type, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts } = req.body;
-  if (!title || !duration_minutes || !type) {
-    return res.status(400).json({ message: 'All fields are required' });
+  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts } = req.body;
+  if (!title || !duration_minutes) {
+    return res.status(400).json({ message: 'Title and duration are required' });
   }
 
   try {
     const [result] = await db.query(
-      'INSERT INTO exams (title, exam_date, duration_minutes, type, teacher_id, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [title, duration_minutes, type, req.user.id, must_on_camera ?? true, must_on_microphone ?? true, exam_password || null, course_name || null, course_code || null, university_name || null, max_attempts || 1]
+      'INSERT INTO exams (title, exam_date, duration_minutes, teacher_id, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [title, duration_minutes, req.user.id, must_on_camera ?? true, must_on_microphone ?? true, exam_password || null, course_name || null, course_code || null, university_name || null, max_attempts || 1]
     );
 
     await db.query('INSERT INTO admin_notifications (message) VALUES (?)', [`Teacher ${req.user.name} created a new exam: ${title}`]);
@@ -121,17 +121,17 @@ exports.createExam = async (req, res) => {
 
 exports.updateExam = async (req, res) => {
   const { id } = req.params;
-  const { title, duration_minutes, type, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts } = req.body;
+  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts } = req.body;
   
-  if (!title || !duration_minutes || !type) {
-    return res.status(400).json({ message: 'All fields are required' });
+  if (!title || !duration_minutes) {
+    return res.status(400).json({ message: 'Title and duration are required' });
   }
   
   try {
     const [result] = await db.query(
-      `UPDATE exams SET title=?, duration_minutes=?, type=?, must_on_camera=?, must_on_microphone=?, exam_password=?, course_name=?, course_code=?, university_name=?, max_attempts=?
+      `UPDATE exams SET title=?, duration_minutes=?, must_on_camera=?, must_on_microphone=?, exam_password=?, course_name=?, course_code=?, university_name=?, max_attempts=?
        WHERE id=? AND teacher_id=?`,
-      [title, duration_minutes, type, must_on_camera ?? true, must_on_microphone ?? true, exam_password || null, course_name || null, course_code || null, university_name || null, max_attempts || 1, id, req.user.id]
+      [title, duration_minutes, must_on_camera ?? true, must_on_microphone ?? true, exam_password || null, course_name || null, course_code || null, university_name || null, max_attempts || 1, id, req.user.id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Exam not found or unauthorized' });
 
@@ -203,7 +203,7 @@ exports.getQuestions = async (req, res) => {
     const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
     if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
 
-    const [rows] = await db.query('SELECT * FROM exam_questions WHERE exam_id = ? ORDER BY id ASC', [examId]);
+    const [rows] = await db.query('SELECT * FROM exam_questions WHERE exam_id = ? ORDER BY sort_order ASC, id ASC', [examId]);
     return res.json(rows);
   } catch (error) {
     console.error(error);
@@ -283,7 +283,68 @@ exports.deleteQuestion = async (req, res) => {
   }
 };
 
+exports.reorderQuestions = async (req, res) => {
+  const { exam_id } = req.params;
+  const { ordered_ids } = req.body;
+
+  if (!Array.isArray(ordered_ids)) {
+    return res.status(400).json({ message: 'ordered_ids array is required' });
+  }
+
+  try {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // First, verify teacher owns this exam
+      const [examCheck] = await connection.query(
+        'SELECT id FROM exams WHERE id = ? AND teacher_id = ?',
+        [exam_id, req.user.id]
+      );
+      if (examCheck.length === 0) {
+        await connection.rollback();
+        connection.release();
+        return res.status(404).json({ message: 'Exam not found or unauthorized' });
+      }
+
+      // Perform updates
+      for (let i = 0; i < ordered_ids.length; i++) {
+        await connection.query(
+          'UPDATE exam_questions SET sort_order = ? WHERE id = ? AND exam_id = ?',
+          [i, ordered_ids[i], exam_id]
+        );
+      }
+
+      await connection.commit();
+      connection.release();
+      return res.json({ message: 'Questions reordered successfully' });
+    } catch (err) {
+      await connection.rollback();
+      connection.release();
+      throw err;
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error reordering questions' });
+  }
+};
+
 // --- EXAM RESULTS & GRADING ---
+
+exports.togglePublishResults = async (req, res) => {
+  const { id } = req.params;
+  const { results_published } = req.body;
+  try {
+    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
+    if (exam.length === 0) return res.status(404).json({ message: 'Exam not found' });
+
+    await db.query('UPDATE exams SET results_published = ? WHERE id = ?', [results_published ? 1 : 0, id]);
+    return res.json({ message: 'Exam results publish status updated successfully' });
+  } catch (error) {
+    console.error('Error toggling publish status:', error);
+    return res.status(500).json({ message: 'Server error updating publish status' });
+  }
+};
 
 exports.getExamResults = async (req, res) => {
   const { id } = req.params;
@@ -292,7 +353,7 @@ exports.getExamResults = async (req, res) => {
     if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
 
     const query = `
-      SELECT se.student_id, se.score, se.status, se.started_at, se.finished_at,
+      SELECT se.student_id, se.score, se.status, se.started_at, se.finished_at, se.demerit_points, se.id AS attempt_id,
              s.name, s.email
       FROM student_exams se
       JOIN students s ON se.student_id = s.id
@@ -303,6 +364,41 @@ exports.getExamResults = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching exam results' });
+  }
+};
+
+exports.downloadStudentLog = async (req, res) => {
+  const { examId, studentId } = req.params;
+  try {
+    // Verify exam ownership
+    const [exam] = await db.query('SELECT title FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
+    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+
+    // Fetch logs
+    const [logs] = await db.query(
+      'SELECT activity_type, details, demerit_points, timestamp FROM proctoring_logs WHERE exam_id = ? AND student_id = ? ORDER BY timestamp ASC',
+      [examId, studentId]
+    );
+
+    let logText = `AI Proctoring Log Feed\nExam: ${exam[0].title}\nStudent ID: ${studentId}\n-----------------------------------\n\n`;
+
+    if (logs.length === 0) {
+      logText += "No anomalies or alerts detected for this student.\n";
+    } else {
+      logs.forEach(log => {
+        const time = new Date(log.timestamp).toLocaleString();
+        logText += `[${time}] ${log.activity_type.toUpperCase()} (Points: ${log.demerit_points})\n`;
+        if (log.details) logText += `Details: ${log.details}\n`;
+        logText += `\n`;
+      });
+    }
+
+    res.setHeader('Content-disposition', `attachment; filename=log_${examId}_${studentId}.txt`);
+    res.setHeader('Content-type', 'text/plain');
+    return res.send(logText);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error generating log' });
   }
 };
 

@@ -1,8 +1,0 @@
-opencv-python
-mediapipe
-ultralytics
-openai-whisper
-numpy
-fastapi
-uvicorn
-python-multipart

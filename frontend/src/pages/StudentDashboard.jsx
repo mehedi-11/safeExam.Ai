@@ -4,7 +4,7 @@ import api, { API_BASE_URL } from '../api/axiosConfig';
 import { 
   Calendar, BookOpen, KeyRound, CheckCircle2, ShieldAlert, 
   Hourglass, Play, RefreshCw, GraduationCap,
-  Menu, LogOut, Eye, EyeOff
+  Menu, LogOut, Eye, EyeOff, LayoutGrid, List
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -18,6 +18,69 @@ export default function StudentDashboard() {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
   const [examPasswordInput, setExamPasswordInput] = useState('');
+  const [modalError, setModalError] = useState('');
+  const [startingExam, setStartingExam] = useState(false);
+
+  const handleOpenPasswordModal = (examId) => {
+    const blockKey = `exam_block_${examId}`;
+    const blockedUntil = localStorage.getItem(blockKey);
+    if (blockedUntil && new Date().getTime() < parseInt(blockedUntil)) {
+      const minsLeft = Math.ceil((parseInt(blockedUntil) - new Date().getTime()) / 60000);
+      setError(`You are temporarily blocked from this exam. Try again in ${minsLeft} minutes.`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    } else if (blockedUntil) {
+      localStorage.removeItem(blockKey);
+      localStorage.removeItem(`exam_attempts_${examId}`);
+    }
+    
+    setSelectedExamId(examId);
+    setExamPasswordInput('');
+    setModalError('');
+    setPasswordModalOpen(true);
+  };
+
+  const handleStartExamSubmit = async () => {
+    setModalError('');
+    setStartingExam(true);
+    
+    const blockKey = `exam_block_${selectedExamId}`;
+    const blockedUntil = localStorage.getItem(blockKey);
+    if (blockedUntil && new Date().getTime() < parseInt(blockedUntil)) {
+      const minsLeft = Math.ceil((parseInt(blockedUntil) - new Date().getTime()) / 60000);
+      setModalError(`You are blocked. Try again in ${minsLeft} minutes.`);
+      setStartingExam(false);
+      return;
+    }
+
+    try {
+      await api.post(`/student/exams/${selectedExamId}/start`, { exam_password: examPasswordInput });
+      
+      localStorage.removeItem(`exam_attempts_${selectedExamId}`);
+      localStorage.removeItem(blockKey);
+      setPasswordModalOpen(false);
+      sessionStorage.setItem(`exam_pwd_${selectedExamId}`, examPasswordInput);
+      window.open(`/exam/${selectedExamId}`, '_blank');
+    } catch (err) {
+      if (err.response?.status === 403 || err.response?.status === 404) {
+        const attemptKey = `exam_attempts_${selectedExamId}`;
+        let attempts = parseInt(localStorage.getItem(attemptKey) || '0') + 1;
+        
+        if (attempts >= 3) {
+           const unblockTime = new Date().getTime() + 10 * 60000;
+           localStorage.setItem(blockKey, unblockTime.toString());
+           setModalError(`Too many wrong attempts. You are blocked for 10 minutes.`);
+        } else {
+           localStorage.setItem(attemptKey, attempts.toString());
+           setModalError(err.response?.data?.message + ` ${3 - attempts} attempts left.`);
+        }
+      } else {
+         setModalError(err.response?.data?.message || 'Error starting exam');
+      }
+    } finally {
+      setStartingExam(false);
+    }
+  };
 
   // Data State
   const [exams, setExams] = useState([]);
@@ -25,6 +88,7 @@ export default function StudentDashboard() {
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('grid');
 
   // Password Update State
   const [pwData, setPwData] = useState({ oldPassword: '', newPassword: '' });
@@ -129,6 +193,7 @@ export default function StudentDashboard() {
           <div className="p-4 space-y-1.5">
             {[
               { id: 'exams', label: 'My Online Exams', icon: Calendar },
+              { id: 'results', label: 'My Results', icon: CheckCircle2 },
               { id: 'profile', label: 'Profile & Password', icon: KeyRound }
             ].map(tab => (
               <button
@@ -258,31 +323,115 @@ export default function StudentDashboard() {
                     </span>
                   </div>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Search by university, course name or code..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-80 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
-                />
+                <div className="flex items-center gap-3 w-full xl:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Search by university, course name or code..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full sm:w-80 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  />
+                  <div className="flex items-center bg-gray-100 p-1 rounded-xl">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-tomato-500' : 'text-gray-400 hover:text-gray-700'}`}
+                      title="Grid View"
+                    >
+                      <LayoutGrid size={18} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-tomato-500' : 'text-gray-400 hover:text-gray-700'}`}
+                      title="List View"
+                    >
+                      <List size={18} />
+                    </button>
+                  </div>
+                </div>
               </div>
               
               {filteredExams.length === 0 ? (
                 <div className="border border-dashed border-gray-200 bg-gray-50/20 py-12 text-center text-xs text-gray-400 rounded-xl">
                   {searchQuery ? 'No exams match your search.' : 'There are no exams available at the moment.'}
                 </div>
+              ) : viewMode === 'list' ? (
+                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left text-sm text-gray-500">
+                    <thead className="bg-gray-50 text-xs text-gray-700 uppercase border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-4 font-bold">Exam Title</th>
+                        <th className="px-6 py-4 font-bold">Course Details</th>
+                        <th className="px-6 py-4 font-bold">Schedule</th>
+                        <th className="px-6 py-4 font-bold">Status</th>
+                        <th className="px-6 py-4 text-center font-bold">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-150">
+                      {filteredExams.map(exam => {
+                        const isFinished = exam.exam_status === 'completed' && (exam.attempts || 1) >= (exam.max_attempts || 1);
+                        const isBlocked = exam.block_until && new Date(exam.block_until) > new Date();
+                        
+                        return (
+                          <tr key={exam.unique_id || exam.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <h4 className="font-bold text-dark-900">{exam.title}</h4>
+                            </td>
+                            <td className="px-6 py-4">
+                              {exam.university_name && <p className="text-xs text-tomato-600 font-semibold">{exam.university_name}</p>}
+                              {(exam.course_name || exam.course_code) && (
+                                <p className="text-[11px] text-gray-600 font-medium">
+                                  {exam.course_name} {exam.course_code && `(${exam.course_code})`}
+                                </p>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="space-y-1 text-xs text-gray-500">
+                                <p className="flex items-center gap-1.5"><Calendar size={13} /> {new Date(exam.exam_date).toLocaleString()}</p>
+                                <p className="flex items-center gap-1.5"><Hourglass size={13} /> {exam.duration_minutes} Mins</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              {exam.exam_status === 'completed' ? (
+                                <span className="bg-green-50 text-green-700 border border-green-250 px-2.5 py-0.5 rounded text-[10px] font-bold">Score: {exam.score}</span>
+                              ) : isBlocked ? (
+                                <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold flex items-center w-fit gap-1 animate-pulse">
+                                  <ShieldAlert size={12} /> Locked
+                                </span>
+                              ) : (
+                                <span className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold">Scheduled</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              {isFinished ? (
+                                <span className="text-xs font-semibold text-green-700">Completed</span>
+                              ) : (
+                                <button
+                                  onClick={() => handleOpenPasswordModal(exam.id)}
+                                  className="tomato-btn w-full py-1.5 px-3 text-xs flex items-center justify-center gap-1"
+                                >
+                                  <Play size={12} fill="white" />
+                                  <span>{exam.exam_status === 'started' ? 'Resume' : exam.exam_status === 'completed' ? 'Retake' : 'Enter'}</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredExams.map(exam => {
                     const isUpcoming = new Date(exam.exam_date) > new Date();
-                    const isFinished = exam.exam_status === 'completed';
+                    const isFinished = exam.exam_status === 'completed' && (exam.attempts || 1) >= (exam.max_attempts || 1);
                     const isBlocked = exam.block_until && new Date(exam.block_until) > new Date();
 
                     return (
-                      <div key={exam.id} className="border border-gray-150 p-5 rounded-2xl flex flex-col justify-between bg-white relative hover:shadow-md smooth-transition">
+                      <div key={exam.unique_id || exam.id} className="border border-gray-150 p-5 rounded-2xl flex flex-col justify-between bg-white relative hover:shadow-md smooth-transition">
                         <div>
                           <div className="flex justify-end items-start mb-3">
-                            {isFinished ? (
+                            {exam.exam_status === 'completed' ? (
                               <span className="bg-green-50 text-green-700 border border-green-250 px-2.5 py-0.5 rounded text-[10px] font-bold">
                                 Score: {exam.score}
                               </span>
@@ -322,15 +471,11 @@ export default function StudentDashboard() {
                             </div>
                           ) : (
                             <button
-                              onClick={() => {
-                                setSelectedExamId(exam.id);
-                                setExamPasswordInput('');
-                                setPasswordModalOpen(true);
-                              }}
+                              onClick={() => handleOpenPasswordModal(exam.id)}
                               className="tomato-btn w-full py-2.5 text-xs flex items-center justify-center gap-1"
                             >
                               <Play size={12} fill="white" />
-                              <span>{exam.exam_status === 'started' ? 'Resume Exam' : 'Enter Exam'}</span>
+                              <span>{exam.exam_status === 'started' ? 'Resume Exam' : exam.exam_status === 'completed' ? 'Retake Exam' : 'Enter Exam'}</span>
                             </button>
                           )}
                         </div>
@@ -344,6 +489,75 @@ export default function StudentDashboard() {
           })()}
 
 
+
+          {/* TAB: RESULTS */}
+          {activeTab === 'results' && (() => {
+            const completedExams = exams.filter(exam => exam.exam_status === 'completed');
+
+            return (
+              <div className="space-y-6 animate-fade-in">
+                <div className="flex items-center gap-6">
+                  <h3 className="text-lg font-bold text-dark-900">My Exam Results</h3>
+                </div>
+
+                {completedExams.length === 0 ? (
+                  <div className="border border-dashed border-gray-200 bg-gray-50/20 py-12 text-center text-xs text-gray-400 rounded-xl">
+                    You haven't completed any exams yet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full text-left text-sm text-gray-500">
+                      <thead className="bg-gray-50 text-xs text-gray-700 uppercase border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-4 font-bold">Exam Title</th>
+                          <th className="px-6 py-4 font-bold">Course Details</th>
+                          <th className="px-6 py-4 font-bold">Completed On</th>
+                          <th className="px-6 py-4 font-bold text-center">Score</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-150">
+                        {completedExams.map(exam => {
+                          const isPublished = exam.results_published;
+
+                          return (
+                            <tr key={exam.unique_id || exam.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4">
+                                <h4 className="font-bold text-dark-900">{exam.title}</h4>
+                              </td>
+                              <td className="px-6 py-4">
+                                {exam.university_name && <p className="text-xs text-tomato-600 font-semibold">{exam.university_name}</p>}
+                                {(exam.course_name || exam.course_code) && (
+                                  <p className="text-[11px] text-gray-600 font-medium">
+                                    {exam.course_name} {exam.course_code && `(${exam.course_code})`}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="space-y-1 text-xs text-gray-500">
+                                  <p className="flex items-center gap-1.5"><Calendar size={13} /> {new Date(exam.finished_at).toLocaleString()}</p>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                {isPublished ? (
+                                  <span className="bg-green-50 text-green-700 border border-green-250 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                    {exam.score}
+                                  </span>
+                                ) : (
+                                  <span className="bg-orange-50 text-orange-600 border border-orange-200 px-2 py-1 rounded text-[10px] font-bold">
+                                    Pending Publish
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* TAB: PROFILE & PASSWORD */}
           {activeTab === 'profile' && (
@@ -429,6 +643,11 @@ export default function StudentDashboard() {
               <button onClick={() => setPasswordModalOpen(false)} className="text-gray-400 hover:text-tomato-500 text-2xl leading-none">&times;</button>
             </div>
             <div className="p-6">
+              {modalError && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl font-medium">
+                  {modalError}
+                </div>
+              )}
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Enter Exam Password</label>
               <input 
                 type="password" 
@@ -441,14 +660,12 @@ export default function StudentDashboard() {
               <p className="text-[10px] text-gray-400 mt-2 text-center">Contact your instructor if you don't have the password.</p>
               
               <button 
-                onClick={() => {
-                  setPasswordModalOpen(false);
-                  sessionStorage.setItem(`exam_pwd_${selectedExamId}`, examPasswordInput);
-                  window.open(`/exam/${selectedExamId}`, '_blank');
-                }}
-                className="tomato-btn w-full py-2.5 mt-4"
+                onClick={handleStartExamSubmit}
+                disabled={startingExam}
+                className="tomato-btn w-full py-2.5 mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Proceed to Exam
+                {startingExam ? <RefreshCw className="animate-spin" size={16} /> : null}
+                {startingExam ? 'Verifying...' : 'Proceed to Exam'}
               </button>
             </div>
           </div>

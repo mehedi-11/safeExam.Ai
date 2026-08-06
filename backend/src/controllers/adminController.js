@@ -294,12 +294,35 @@ exports.getDashboardStats = async (req, res) => {
     const [[{ totalLiveExams }]] = await db.query("SELECT COUNT(*) AS totalLiveExams FROM exams WHERE is_live = 1");
     const [[{ totalExamsDone }]] = await db.query("SELECT COUNT(*) AS totalExamsDone FROM student_exams WHERE status = 'completed'");
     
+    // Get top 5 teachers by number of exams created
+    const [topTeachers] = await db.query(`
+      SELECT t.id, t.name, t.email, COUNT(e.id) AS exam_count
+      FROM teachers t
+      LEFT JOIN exams e ON t.id = e.teacher_id
+      GROUP BY t.id
+      ORDER BY exam_count DESC
+      LIMIT 5
+    `);
+
+    // Get top 10 students by average score
+    const [topStudents] = await db.query(`
+      SELECT s.id, s.name, s.email, AVG(se.score) AS average_score, COUNT(se.id) AS total_exams
+      FROM students s
+      JOIN student_exams se ON s.id = se.student_id
+      WHERE se.status = 'completed'
+      GROUP BY s.id
+      ORDER BY average_score DESC
+      LIMIT 10
+    `);
+
     return res.json({
       totalTeachers,
       totalStudents,
       totalExamsCreated,
       totalLiveExams,
-      totalExamsDone
+      totalExamsDone,
+      topTeachers,
+      topStudents
     });
   } catch (error) {
     console.error(error);
@@ -452,5 +475,24 @@ exports.getAnalytics = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching analytics' });
+  }
+};
+
+// --- STUDENT EXAMS DETAILS ---
+exports.getStudentExamsDetails = async (req, res) => {
+  const { studentId } = req.params;
+  try {
+    const query = `
+      SELECT e.title, se.score, se.finished_at 
+      FROM student_exams se 
+      JOIN exams e ON se.exam_id = e.id 
+      WHERE se.student_id = ? AND se.status = 'completed'
+      ORDER BY se.finished_at DESC
+    `;
+    const [rows] = await db.query(query, [studentId]);
+    return res.json(rows);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error fetching student exams details' });
   }
 };

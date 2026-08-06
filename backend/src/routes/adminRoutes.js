@@ -38,6 +38,7 @@ router.post('/students', adminController.addStudent);
 router.post('/students/bulk', adminController.addBulkStudents);
 router.put('/students/:id/status', adminController.updateStudentStatus);
 router.delete('/students/:id', adminController.deleteStudent);
+router.get('/student-exams/:studentId', adminController.getStudentExamsDetails);
 
 // Activity Logs & Settings & Analytics
 router.get('/activity-logs', adminController.getActivityLogs);

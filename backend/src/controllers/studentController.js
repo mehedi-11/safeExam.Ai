@@ -125,13 +125,69 @@ exports.getExams = async (req, res) => {
   try {
     const query = `
       SELECT e.*,
-             se.score, se.started_at, se.finished_at, se.status AS exam_status,
-             se.demerit_points, se.block_until
+             se.id AS attempt_id, se.score, se.started_at, se.finished_at, se.status AS exam_status,
+             se.demerit_points, se.block_until, se.attempts,
+             (SELECT MAX(started_at) FROM student_exams sub_se WHERE sub_se.exam_id = e.id AND sub_se.student_id = ?) AS latest_attempt_time
       FROM exams e
       LEFT JOIN student_exams se ON e.id = se.exam_id AND se.student_id = ?
+      ORDER BY e.id, se.started_at ASC
     `;
-    const [rows] = await db.query(query, [req.user.id]);
-    return res.json(rows);
+    const [rows] = await db.query(query, [req.user.id, req.user.id]);
+    
+    const examsMap = new Map();
+    const result = [];
+    
+    rows.forEach(row => {
+      if (row.attempt_id) {
+        let count = examsMap.get(row.id) || 0;
+        count++;
+        examsMap.set(row.id, count);
+        
+        let title = row.title;
+        if (count > 1) {
+          title = `${row.title} (${count})`;
+        }
+        
+        result.push({
+          ...row,
+          unique_id: `${row.id}-${row.attempt_id}`,
+          title: title
+        });
+      } else {
+        result.push({
+          ...row,
+          unique_id: `${row.id}-0`
+        });
+      }
+    });
+
+    const freshExams = new Map();
+    rows.forEach(row => {
+      if (row.is_live && row.latest_attempt_time) {
+        if (new Date(row.latest_attempt_time) < new Date(row.exam_date)) {
+           freshExams.set(row.id, row);
+        }
+      }
+    });
+
+    freshExams.forEach((row) => {
+       const nextCount = (examsMap.get(row.id) || 0) + 1;
+       result.push({
+          ...row,
+          unique_id: `${row.id}-new`,
+          title: nextCount > 1 ? `${row.title} (${nextCount})` : row.title,
+          attempt_id: null,
+          score: null,
+          started_at: null,
+          finished_at: null,
+          exam_status: null,
+          demerit_points: null,
+          block_until: null,
+          attempts: null
+       });
+    });
+
+    return res.json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching exams' });
@@ -161,28 +217,38 @@ exports.startExam = async (req, res) => {
 
     // Check if exam is already started/completed
     const [existing] = await db.query(
-      'SELECT * FROM student_exams WHERE student_id = ? AND exam_id = ?',
+      'SELECT * FROM student_exams WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
       [req.user.id, examId]
     );
 
     if (existing.length > 0) {
       if (existing[0].status === 'completed') {
         const attempts = existing[0].attempts || 1;
-        if (attempts >= max_attempts) {
-           return res.status(403).json({ message: 'You have already reached the maximum attempts allowed for this exam', limit_reached: true });
-        } else {
-           // Allow new attempt: Reset status to 'started', increment attempts, delete old answers
-           await db.query('UPDATE student_exams SET status = ?, attempts = attempts + 1, score = NULL, started_at = ? WHERE student_id = ? AND exam_id = ?', ['started', new Date(), req.user.id, examId]);
-           await db.query('DELETE FROM student_answers WHERE student_id = ? AND exam_id = ?', [req.user.id, examId]);
-           existing[0].status = 'started';
-           existing[0].attempts = attempts + 1;
-           return res.json(existing[0]);
-        }
+        
+        // Let's create a NEW attempt
+        const newAttempt = {
+          student_id: req.user.id,
+          exam_id: examId,
+          started_at: new Date(),
+          status: 'started',
+          demerit_points: 0,
+          attempts: attempts + 1
+        };
+
+        await db.query(
+          'INSERT INTO student_exams (student_id, exam_id, started_at, status, demerit_points, attempts) VALUES (?, ?, ?, ?, ?, ?)',
+          [newAttempt.student_id, newAttempt.exam_id, newAttempt.started_at, newAttempt.status, newAttempt.demerit_points, newAttempt.attempts]
+        );
+        
+        // Delete old answers so the new attempt is clean
+        await db.query('DELETE FROM student_answers WHERE student_id = ? AND exam_id = ?', [req.user.id, examId]);
+        
+        return res.json(newAttempt);
       }
       return res.json(existing[0]); // Return active session
     }
 
-    // Create new exam attempt
+    // Create very first exam attempt
     const newAttempt = {
       student_id: req.user.id,
       exam_id: examId,
@@ -192,21 +258,10 @@ exports.startExam = async (req, res) => {
       attempts: 1
     };
 
-    try {
-      await db.query(
-        'INSERT INTO student_exams (student_id, exam_id, started_at, status, demerit_points, attempts) VALUES (?, ?, ?, ?, ?, ?)',
-        [newAttempt.student_id, newAttempt.exam_id, newAttempt.started_at, newAttempt.status, newAttempt.demerit_points, newAttempt.attempts]
-      );
-    } catch (insertError) {
-      if (insertError.code === 'ER_DUP_ENTRY') {
-        const [existing] = await db.query(
-          'SELECT * FROM student_exams WHERE student_id = ? AND exam_id = ?',
-          [req.user.id, examId]
-        );
-        return res.json(existing[0]);
-      }
-      throw insertError;
-    }
+    await db.query(
+      'INSERT INTO student_exams (student_id, exam_id, started_at, status, demerit_points, attempts) VALUES (?, ?, ?, ?, ?, ?)',
+      [newAttempt.student_id, newAttempt.exam_id, newAttempt.started_at, newAttempt.status, newAttempt.demerit_points, newAttempt.attempts]
+    );
 
     return res.status(201).json(newAttempt);
   } catch (error) {
@@ -220,7 +275,7 @@ exports.getExamQuestions = async (req, res) => {
   const { examId } = req.params;
   try {
     const [attempt] = await db.query(
-      'SELECT status, block_until FROM student_exams WHERE student_id = ? AND exam_id = ?',
+      'SELECT status, block_until FROM student_exams WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
       [req.user.id, examId]
     );
 
@@ -277,7 +332,7 @@ exports.autoSaveExam = async (req, res) => {
 
   try {
     const [attempt] = await db.query(
-      'SELECT status, started_at FROM student_exams WHERE student_id = ? AND exam_id = ?',
+      'SELECT status, started_at FROM student_exams WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
       [req.user.id, examId]
     );
 
@@ -331,7 +386,7 @@ exports.submitExam = async (req, res) => {
 
   try {
     const [attempt] = await db.query(
-      'SELECT status FROM student_exams WHERE student_id = ? AND exam_id = ?',
+      'SELECT status FROM student_exams WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
       [req.user.id, examId]
     );
 
@@ -407,7 +462,7 @@ exports.submitExam = async (req, res) => {
 
     // Update status to completed
     await db.query(
-      "UPDATE student_exams SET score = ?, finished_at = NOW(), status = 'completed' WHERE student_id = ? AND exam_id = ?",
+      "UPDATE student_exams SET score = ?, finished_at = NOW(), status = 'completed' WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1",
       [pendingManualReview ? null : totalScore, req.user.id, examId]
     );
 

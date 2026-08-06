@@ -30,6 +30,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Search,
+  GripVertical,
 } from "lucide-react";
 import Modal from "../components/Modal";
 
@@ -88,7 +89,6 @@ export default function TeacherDashboard() {
     title: "",
     exam_date: "",
     duration_minutes: "",
-    type: "MCQ",
     must_on_camera: true,
     must_on_microphone: true,
     course_name: "",
@@ -319,6 +319,10 @@ export default function TeacherDashboard() {
   };
 
   // --- Question Actions ---
+  const [dragItemIndex, setDragItemIndex] = useState(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState(null);
+
+  // Fetch questions for an exam
   const fetchQuestions = async (examId) => {
     setSelectedExamId(examId);
     try {
@@ -328,6 +332,37 @@ export default function TeacherDashboard() {
       setError("Error fetching questions");
     }
   };
+
+  const handleSort = async () => {
+    if (dragItemIndex === null || dragOverItemIndex === null || dragItemIndex === dragOverItemIndex) {
+      setDragItemIndex(null);
+      setDragOverItemIndex(null);
+      return;
+    }
+
+    const items = Array.from(questions);
+    const [reorderedItem] = items.splice(dragItemIndex, 1);
+    items.splice(dragOverItemIndex, 0, reorderedItem);
+
+    setQuestions(items);
+    setDragItemIndex(null);
+    setDragOverItemIndex(null);
+
+    const ordered_ids = items.map((item) => item.id);
+
+    try {
+      await api.put(
+        `/teacher/exams/${selectedExamId}/questions/reorder`,
+        { ordered_ids }
+      );
+    } catch (err) {
+      console.error("Failed to reorder questions", err);
+      fetchQuestions(selectedExamId);
+      setError("Failed to save new order.");
+    }
+  };
+
+
 
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
@@ -373,6 +408,16 @@ export default function TeacherDashboard() {
       setExamResults(res.data);
     } catch (err) {
       setError("Error fetching exam results");
+    }
+  };
+
+  const handleTogglePublishResults = async (examId, currentStatus) => {
+    try {
+      await api.put(`/teacher/exams/${examId}/publish`, { results_published: !currentStatus });
+      triggerSuccess(`Exam results ${!currentStatus ? 'published' : 'unpublished'} successfully!`);
+      fetchExams(); // to update the state of results_published in exams array
+    } catch (err) {
+      setError("Error updating publish status");
     }
   };
 
@@ -463,7 +508,7 @@ export default function TeacherDashboard() {
         {/* Logo and Menu Links */}
         <div>
           {/* Brand Logo Header */}
-          <div className="p-6 border-b border-gray-150 hidden lg:flex items-center gap-3">
+          <div className="p-6 border-b border-gray-150 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
               <BookOpen className="w-6 h-6" />
             </div>
@@ -483,7 +528,6 @@ export default function TeacherDashboard() {
               { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
               { id: "add_exam", label: "Manage Exams", icon: FileText },
               { id: "exam_results", label: "Exam Results", icon: Award },
-              { id: "logs", label: "Proctor Alerts Feed", icon: ShieldAlert },
               { id: "profile", label: "Instructor Settings", icon: Settings },
             ].map((tab) => (
               <button
@@ -782,9 +826,6 @@ export default function TeacherDashboard() {
                         Date & Time
                       </th>
                       <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
-                        Type
-                      </th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
                         Status
                       </th>
                       <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">
@@ -854,13 +895,12 @@ export default function TeacherDashboard() {
                           </td>
                           <td className="py-3 px-4 text-xs text-gray-600">
                             {new Date(exam.exam_date).toLocaleString()}
-                            <br />
-                            <span className="text-gray-400">
-                              Duration: {exam.duration_minutes}m
-                            </span>
                           </td>
-                          <td className="py-3 px-4 text-xs font-semibold text-gray-600">
-                            {exam.type}
+                          <td className="py-3 px-4">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700">
+                              <Clock size={12} className="text-gray-400" />
+                              {exam.duration_minutes}m
+                            </span>
                           </td>
                           <td className="py-3 px-4">
                             {exam.is_live ? (
@@ -903,7 +943,6 @@ export default function TeacherDashboard() {
                                     .toISOString()
                                     .slice(0, 16),
                                   duration_minutes: exam.duration_minutes,
-                                  type: exam.type,
                                   must_on_camera:
                                     exam.must_on_camera === 1 ||
                                     exam.must_on_camera === true,
@@ -952,8 +991,8 @@ export default function TeacherDashboard() {
           {/* TAB: EXAM RESULTS */}
           {activeTab === "exam_results" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="flex items-center gap-4 border-b border-gray-150 pb-6">
-                <div className="flex-1">
+              <div className="flex items-center justify-between gap-4 border-b border-gray-150 pb-6 flex-wrap">
+                <div className="flex-1 w-full max-w-md">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">
                     Select Exam to View Results
                   </label>
@@ -966,7 +1005,7 @@ export default function TeacherDashboard() {
                         setExamResults([]);
                       }
                     }}
-                    className="w-full max-w-md px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
                   >
                     <option value="">-- Choose an Exam --</option>
                     {exams.map((e) => (
@@ -983,6 +1022,31 @@ export default function TeacherDashboard() {
                     ))}
                   </select>
                 </div>
+                {selectedResultExamId && (() => {
+                  const selectedExam = exams.find(e => e.id == selectedResultExamId);
+                  if(!selectedExam) return null;
+                  const isPublished = selectedExam.results_published;
+                  return (
+                    <button
+                      onClick={() => handleTogglePublishResults(selectedExam.id, isPublished)}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
+                        isPublished 
+                        ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
+                        : "bg-tomato-500 text-white shadow-md shadow-tomato-500/20 hover:bg-tomato-600"
+                      }`}
+                    >
+                      {isPublished ? (
+                        <>
+                          <EyeOff size={16} /> Unpublish Results
+                        </>
+                      ) : (
+                        <>
+                          <Eye size={16} /> Publish Results
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
               </div>
 
               {selectedResultExamId ? (
@@ -1002,6 +1066,9 @@ export default function TeacherDashboard() {
                             Status
                           </th>
                           <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                            Demerit Points
+                          </th>
+                          <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
                             Marks
                           </th>
                           <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">
@@ -1012,7 +1079,7 @@ export default function TeacherDashboard() {
                       <tbody>
                         {examResults.map((res) => (
                           <tr
-                            key={res.student_id}
+                            key={res.attempt_id || res.student_id}
                             className="border-b border-gray-100 hover:bg-gray-50/50"
                           >
                             <td className="py-3 px-4">
@@ -1034,6 +1101,15 @@ export default function TeacherDashboard() {
                                 </span>
                               )}
                             </td>
+                            <td className="py-3 px-4">
+                              {res.demerit_points > 0 ? (
+                                <span className="text-red-500 font-bold text-sm">
+                                  {res.demerit_points} pts
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 text-sm">0</span>
+                              )}
+                            </td>
                             <td className="py-3 px-4 text-sm font-bold text-dark-900">
                               {res.score !== null ? (
                                 res.score
@@ -1044,16 +1120,25 @@ export default function TeacherDashboard() {
                               )}
                             </td>
                             <td className="py-3 px-4 text-right space-x-2">
-                              {res.status === "completed" && (
-                                <button
-                                  onClick={() =>
-                                    handleViewAnswers(res.student_id, res.name)
-                                  }
-                                  className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[11px] font-bold transition-colors"
-                                >
-                                  View Answersheet
-                                </button>
-                              )}
+                              <button
+                                onClick={() =>
+                                  window.open(
+                                    `${API_BASE_URL}/api/teacher/exams/${selectedResultExamId}/students/${res.student_id}/logs`,
+                                    "_blank",
+                                  )
+                                }
+                                className="px-3 py-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg text-[11px] font-bold transition-colors"
+                              >
+                                Download Log
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleViewAnswers(res.student_id, res.name)
+                                }
+                                className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[11px] font-bold transition-colors"
+                              >
+                                View Answersheet
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -1069,137 +1154,7 @@ export default function TeacherDashboard() {
             </div>
           )}
 
-          {/* TAB: PROCTOR LOGS */}
-          {activeTab === "logs" && (
-            <div className="space-y-6 animate-fade-in">
-              <div>
-                <h3 className="text-lg font-bold text-dark-900 mb-4">
-                  Exam Submissions & Logs
-                </h3>
-                <div className="max-w-md">
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                    Select Exam
-                  </label>
-                  <select
-                    value={selectedLogExamId}
-                    onChange={(e) => {
-                      setSelectedLogExamId(e.target.value);
-                      if (e.target.value) fetchExamStudents(e.target.value);
-                      else setExamStudents([]);
-                    }}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition shadow-sm"
-                  >
-                    <option value="">-- Choose an Exam --</option>
-                    {exams.map((ex) => (
-                      <option key={ex.id} value={ex.id}>
-                        {[
-                          ex.university_name,
-                          ex.course_name,
-                          ex.course_code,
-                          ex.title,
-                        ]
-                          .filter(Boolean)
-                          .join(" - ")}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
 
-              {selectedLogExamId ? (
-                examStudents.length === 0 ? (
-                  <div className="border border-dashed border-gray-200 rounded-xl p-8 text-center text-xs text-gray-400 bg-gray-50/20">
-                    No students have attempted this exam yet.
-                  </div>
-                ) : (
-                  <div className="bg-white rounded-2xl border border-gray-150 overflow-hidden shadow-sm">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-gray-50 border-b border-gray-150 text-xs text-gray-500 uppercase">
-                        <tr>
-                          <th className="px-6 py-4 font-bold">Student Name</th>
-                          <th className="px-6 py-4 font-bold">Student ID</th>
-                          <th className="px-6 py-4 font-bold">Status</th>
-                          <th className="px-6 py-4 font-bold">
-                            Demerit Points
-                          </th>
-                          <th className="px-6 py-4 font-bold text-right">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-150 text-dark-900">
-                        {examStudents.map((student) => (
-                          <tr
-                            key={student.id}
-                            className="hover:bg-gray-50 transition-colors"
-                          >
-                            <td className="px-6 py-4 font-semibold">
-                              {student.name}
-                            </td>
-                            <td className="px-6 py-4 font-mono text-xs text-gray-500">
-                              {student.id}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                  student.status === "completed"
-                                    ? "bg-green-100 text-green-700"
-                                    : student.status === "blocked"
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-yellow-100 text-yellow-700"
-                                }`}
-                              >
-                                {student.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              {student.demerit_points > 0 ? (
-                                <span className="text-red-500 font-bold">
-                                  {student.demerit_points} pts
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">0</span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                              <button
-                                onClick={() =>
-                                  window.open(
-                                    `${API_BASE_URL}/api/teacher/exams/${selectedLogExamId}/logs/download`,
-                                    "_blank",
-                                  )
-                                }
-                                className="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold rounded-lg hover:bg-blue-100 transition-colors text-xs flex items-center gap-1"
-                              >
-                                <Download size={14} /> Log File
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setSelectedResultExamId(selectedLogExamId);
-                                  setSelectedStudentForAnswers(student);
-                                  fetchStudentAnswersheet(
-                                    selectedLogExamId,
-                                    student.id,
-                                  );
-                                }}
-                                className="px-3 py-1.5 bg-gray-100 text-dark-900 font-bold rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center gap-1"
-                              >
-                                <Eye size={14} /> Answers
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )
-              ) : (
-                <div className="py-24 text-center text-xs text-gray-400">
-                  Please select an exam to view students and proctor logs.
-                </div>
-              )}
-            </div>
-          )}
 
           {/* TAB: PROFILE SETTINGS */}
           {activeTab === "profile" && (
@@ -1357,7 +1312,7 @@ export default function TeacherDashboard() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
                 Course Name
@@ -1400,25 +1355,6 @@ export default function TeacherDashboard() {
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
               />
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                Exam Type
-              </label>
-              <select
-                required
-                value={examForm.type}
-                onChange={(e) =>
-                  setExamForm({ ...examForm, type: e.target.value })
-                }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
-              >
-                <option value="MCQ">MCQ Only</option>
-                <option value="Written">Written Only</option>
-                <option value="Both">Both (MCQ & Written)</option>
-              </select>
-            </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
                 Max Attempts
@@ -1432,7 +1368,8 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({
                     ...examForm,
-                    max_attempts: parseInt(e.target.value) || 1,
+                    max_attempts:
+                      e.target.value === "" ? "" : parseInt(e.target.value),
                   })
                 }
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
@@ -1516,8 +1453,9 @@ export default function TeacherDashboard() {
         isOpen={isManageQuestionsModalOpen}
         onClose={() => setIsManageQuestionsModalOpen(false)}
         title="Manage Questions"
+        maxWidth="max-w-7xl"
       >
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-[60vh]">
           <div className="flex items-center justify-between border-b border-gray-150 pb-4">
             <div>
               <h4 className="font-bold text-dark-900">
@@ -1563,69 +1501,81 @@ export default function TeacherDashboard() {
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               {questions.map((q, qidx) => (
                 <div
-                  key={q.id}
-                  className="border border-gray-150 bg-white p-5 rounded-xl relative hover:border-gray-300 transition-colors"
+                  key={q.id.toString()}
+                  draggable
+                  onDragStart={() => setDragItemIndex(qidx)}
+                  onDragEnter={() => setDragOverItemIndex(qidx)}
+                  onDragEnd={handleSort}
+                  onDragOver={(e) => e.preventDefault()}
+                  className={`border border-gray-150 bg-white p-5 rounded-xl relative hover:border-gray-300 transition-colors flex gap-3 ${
+                    dragItemIndex === qidx ? "opacity-50 border-dashed border-gray-300 bg-gray-50" : ""
+                  }`}
                 >
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <button
-                      onClick={() => {
-                        setQuestionTab(q.type);
-                        setQuestionForm({
-                          id: q.id,
-                          question_text: q.question_text,
-                          marks: q.marks,
-                          option_a: q.option_a || "",
-                          option_b: q.option_b || "",
-                          option_c: q.option_c || "",
-                          option_d: q.option_d || "",
-                          correct_option: q.correct_option || "A",
-                        });
-                        setIsEditingQuestion(true);
-                        setIsQuestionModalOpen(true);
-                      }}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteQuestion(q.id)}
-                      className="text-gray-300 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500">
+                    <GripVertical size={20} />
                   </div>
-
-                  <div className="flex items-start gap-3 mb-3 pr-16">
-                    <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
-                      {q.type}
-                    </span>
-                    <span className="bg-tomato-50 text-tomato-600 border border-tomato-100 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
-                      {q.marks} Mark(s)
-                    </span>
-                    <p className="font-bold text-sm text-dark-900 leading-tight">
-                      Q{qidx + 1}: {q.question_text}
-                    </p>
-                  </div>
-
-                  {q.type === "MCQ" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3 pl-20">
-                      {["A", "B", "C", "D"].map((opt) => (
-                        <div
-                          key={opt}
-                          className={`p-2 rounded-lg border ${q.correct_option === opt ? "bg-green-50 border-green-200 text-green-700 font-semibold" : "border-gray-100 text-gray-500"}`}
-                        >
-                          {opt}) {q[`option_${opt.toLowerCase()}`]}
-                        </div>
-                      ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <button
+                        onClick={() => {
+                          setQuestionTab(q.type);
+                          setQuestionForm({
+                            id: q.id,
+                            question_text: q.question_text,
+                            marks: q.marks,
+                            option_a: q.option_a || "",
+                            option_b: q.option_b || "",
+                            option_c: q.option_c || "",
+                            option_d: q.option_d || "",
+                            correct_option: q.correct_option || "A",
+                          });
+                          setIsEditingQuestion(true);
+                          setIsQuestionModalOpen(true);
+                        }}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteQuestion(q.id)}
+                        className="text-gray-300 hover:text-red-500"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                  )}
-                  {q.type === "Written" && (
-                    <div className="pl-20">
-                      <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-4 text-xs text-gray-400 italic">
-                        Students will type their answer in a text box.
+
+                    <div className="flex items-start gap-3 mb-3 pr-16">
+                      <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
+                        {q.type}
+                      </span>
+                      <span className="bg-tomato-50 text-tomato-600 border border-tomato-100 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
+                        {q.marks} Mark(s)
+                      </span>
+                      <p className="font-bold text-sm text-dark-900 leading-tight">
+                        Q{qidx + 1}: {q.question_text}
+                      </p>
+                    </div>
+
+                    {q.type === "MCQ" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3 pl-20">
+                        {["A", "B", "C", "D"].map((opt) => (
+                          <div
+                            key={opt}
+                            className={`p-2 rounded-lg border ${q.correct_option === opt ? "bg-green-50 border-green-200 text-green-700 font-semibold" : "border-gray-100 text-gray-500"}`}
+                          >
+                            {opt}) {q[`option_${opt.toLowerCase()}`]}
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                    {q.type === "Written" && (
+                      <div className="pl-20">
+                        <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-4 text-xs text-gray-400 italic">
+                          Students will type their answer in a text box.
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1688,7 +1638,7 @@ export default function TeacherDashboard() {
               onChange={(e) =>
                 setQuestionForm({
                   ...questionForm,
-                  marks: parseInt(e.target.value) || 0,
+                  marks: e.target.value === "" ? "" : parseInt(e.target.value),
                 })
               }
               className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
@@ -1811,7 +1761,10 @@ export default function TeacherDashboard() {
                             onChange={(e) =>
                               setManualGrades({
                                 ...manualGrades,
-                                [ans.answer_id]: parseInt(e.target.value) || 0,
+                                [ans.answer_id]:
+                                  e.target.value === ""
+                                    ? ""
+                                    : parseInt(e.target.value),
                               })
                             }
                             className="w-full text-right px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500"

@@ -30,6 +30,7 @@ export default function ExamInterface() {
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockTimeLeft, setBlockTimeLeft] = useState(0); // Block countdown seconds
   const [examStarted, setExamStarted] = useState(false);
+  const [webcamReady, setWebcamReady] = useState(false);
   const [examTitle, setExamTitle] = useState('');
   const [examDetails, setExamDetails] = useState(null);
   
@@ -137,7 +138,14 @@ export default function ExamInterface() {
       }
     };
 
+    const handleOffline = () => {
+      // Auto submit if internet disconnects
+      handleSubmitExam(true);
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('unload', handleUnload);
+    window.addEventListener('offline', handleOffline);
     window.addEventListener('unload', handleUnload);
 
     return () => {
@@ -145,8 +153,17 @@ export default function ExamInterface() {
       clearInterval(autoSaveTimer);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('unload', handleUnload);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [examStarted, isBlocked, timeLeft, answers, examId]);
+
+  // Handle 20+ demerit points auto-submit
+  useEffect(() => {
+    if (examStarted && demerits >= 20) {
+      alert("You have reached 20 demerit points. Your exam is being automatically submitted.");
+      handleSubmitExam(true);
+    }
+  }, [demerits, examStarted]);
 
   // 4. Block countdown Timer (Ticks every second if blocked)
   useEffect(() => {
@@ -243,6 +260,7 @@ export default function ExamInterface() {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
+      setWebcamReady(true);
     } catch (err) {
       console.warn('Webcam permission denied or unavailable:', err);
     }
@@ -256,7 +274,7 @@ export default function ExamInterface() {
 
   // Connect to AI WebSocket when exam starts
   useEffect(() => {
-    if (!examStarted || !streamRef.current || !examDetails) return;
+    if (!examStarted || !webcamReady || !examDetails) return;
 
     const queryParams = new URLSearchParams({
       exam_name: examDetails.title || 'Unknown_Exam',
@@ -277,6 +295,8 @@ export default function ExamInterface() {
       if (data.status === 'warning') {
         const items = data.items.map(i => i.item).join(', ');
         logCheating('AI Detection', `YOLOv8 detected: ${items}`);
+        const timestamp = new Date().toLocaleTimeString();
+        setShowLogFeed(prev => [`[${timestamp}] Detected: ${items}`, ...prev].slice(0, 5));
       }
     };
 
@@ -284,26 +304,32 @@ export default function ExamInterface() {
       console.error('WebSocket Error:', error);
     };
 
-    // Frame capture loop (5 FPS)
-    const frameInterval = setInterval(() => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && videoRef.current) {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const context = canvas.getContext('2d');
-          context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-          const base64Frame = canvas.toDataURL('image/jpeg', 0.5); // 0.5 quality
-          wsRef.current.send(base64Frame);
+    let frameInterval;
+    
+    // Start capturing after 20 seconds (20000ms delay)
+    const startDelay = setTimeout(() => {
+      // Frame capture loop (15 FPS)
+      frameInterval = setInterval(() => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && videoRef.current) {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            const context = canvas.getContext('2d');
+            context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const base64Frame = canvas.toDataURL('image/jpeg', 0.5); // 0.5 quality
+            wsRef.current.send(base64Frame);
+          }
         }
-      }
-    }, 200);
+      }, 66); // ~15 FPS
+    }, 20000);
 
     return () => {
-      clearInterval(frameInterval);
+      clearTimeout(startDelay);
+      if (frameInterval) clearInterval(frameInterval);
       if (wsRef.current) {
         wsRef.current.close();
       }
     };
-  }, [examStarted]);
+  }, [examStarted, examDetails, webcamReady]);
 
   // Log a cheating event (Actual copy/paste or Simulated YOLOv8)
   const logCheating = async (activityType, details) => {
@@ -599,54 +625,30 @@ export default function ExamInterface() {
               ))}
             </div>
             <p className="text-[10px] text-gray-400 mt-3 leading-normal">
-              Accumulating 5 demerit points locks the exam panel for 5 minutes. Real-time copy & pasting checked.
+              Accumulating 5 demerit points locks the exam panel for 5 minutes. Reaching 20 points auto-submits the exam. Real-time copy & pasting checked.
             </p>
           </div>
 
-          {/* YOLOv8 AI Model Simulator Panel */}
-          <div className="bg-white border border-tomato-200 p-5 rounded-2xl shadow-md bg-gradient-to-b from-white to-tomato-50/15">
-            <h4 className="font-bold text-[10px] uppercase tracking-wider text-tomato-600 mb-3 flex items-center gap-1.5">
-              <Terminal size={14} />
-              <span>YOLOv8 AI Simulator</span>
-            </h4>
-            <p className="text-[10px] text-gray-500 mb-4 leading-normal">
-              Simulate video feed frame evaluation alerts from the YOLOv8 AI model for testing/demo.
-            </p>
-            <div className="space-y-2.5">
-              <button
-                onClick={() => logCheating('talking', 'YOLOv8 flagged student talking/whispering with another person.')}
-                className="w-full bg-white hover:bg-tomato-500 hover:text-white border border-tomato-500/35 text-tomato-600 text-xs py-2 px-3 rounded-xl font-bold flex items-center justify-between smooth-transition shadow-sm active:scale-95"
-              >
-                <span>Simulate: Talking</span>
-                <span className="text-[9px] font-mono opacity-80">+1 Pt</span>
-              </button>
-              <button
-                onClick={() => logCheating('watching phone', 'YOLOv8 flagged student looking at mobile screen.')}
-                className="w-full bg-white hover:bg-tomato-500 hover:text-white border border-tomato-500/35 text-tomato-600 text-xs py-2 px-3 rounded-xl font-bold flex items-center justify-between smooth-transition shadow-sm active:scale-95"
-              >
-                <span>Simulate: Mobile Watch</span>
-                <span className="text-[9px] font-mono opacity-80">+2 Pts</span>
-              </button>
-              <button
-                onClick={() => logCheating('taking photo', 'YOLOv8 flagged student taking photo of question paper.')}
-                className="w-full bg-white hover:bg-tomato-500 hover:text-white border border-tomato-500/35 text-tomato-600 text-xs py-2 px-3 rounded-xl font-bold flex items-center justify-between smooth-transition shadow-sm active:scale-95"
-              >
-                <span>Simulate: Taking Photo</span>
-                <span className="text-[9px] font-mono opacity-80">+2 Pts</span>
-              </button>
-            </div>
 
-            {/* Simulated log output stream */}
-            {showLogFeed.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-tomato-100">
-                <span className="text-[9px] font-bold text-gray-400 block mb-1">Local Events:</span>
-                <div className="font-mono text-[9px] bg-dark-900 text-tomato-300 p-2 rounded-lg leading-tight space-y-1">
-                  {showLogFeed.map((f, idx) => (
-                    <div key={idx} className="truncate">{f}</div>
+          {/* Live AI Detection Logs */}
+          <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm">
+            <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5">
+              <Terminal size={14} className="text-tomato-500" />
+              <span>YOLOv8 AI Log Feed</span>
+            </h4>
+            <div className="bg-dark-900 rounded-xl p-3 h-32 overflow-y-auto">
+              {showLogFeed.length > 0 ? (
+                <div className="font-mono text-[9px] text-tomato-300 space-y-1.5">
+                  {showLogFeed.map((log, idx) => (
+                    <div key={idx} className="truncate">{log}</div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="h-full flex items-center justify-center text-[10px] text-gray-600 font-mono italic">
+                  No suspicious activity detected...
+                </div>
+              )}
+            </div>
           </div>
 
         </div>
