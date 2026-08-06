@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-ultralytics
-python-multipart
-opencv-python
-websockets

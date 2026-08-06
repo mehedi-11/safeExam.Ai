@@ -39,6 +39,7 @@ export default function ExamInterface() {
   const [error, setError] = useState('');
   const [limitReached, setLimitReached] = useState(false);
   const [showLogFeed, setShowLogFeed] = useState([]); // Local log stream on exam screen
+  const [processedFrame, setProcessedFrame] = useState(null); // Annotated image from backend
 
   // API setup centralized in axiosConfig
   // 1. Initial Exam Check & Webcam access
@@ -292,6 +293,9 @@ export default function ExamInterface() {
 
     wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      if (data.frame) {
+        setProcessedFrame(data.frame);
+      }
       if (data.status === 'warning') {
         const items = data.items.map(i => i.item).join(', ');
         logCheating('AI Detection', `YOLOv8 detected: ${items}`);
@@ -348,7 +352,10 @@ export default function ExamInterface() {
       setDemerits(res.data.demerit_points);
 
       // Handle locking on the fly
-      if (res.data.status === 'blocked' || (res.data.block_until && new Date(res.data.block_until) > new Date())) {
+      if (res.data.status === 'completed') {
+        alert('A prohibited item (Mobile Phone) was detected! Your exam has been instantly blocked and auto-submitted.');
+        navigate('/dashboard/student');
+      } else if (res.data.status === 'blocked' || (res.data.block_until && new Date(res.data.block_until) > new Date())) {
         setIsBlocked(true);
         const diff = Math.ceil((new Date(res.data.block_until) - new Date()) / 1000);
         setBlockTimeLeft(diff);
@@ -584,8 +591,15 @@ export default function ExamInterface() {
                 autoPlay 
                 playsInline 
                 muted 
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover ${processedFrame ? 'hidden' : ''}`}
               />
+              {processedFrame && (
+                <img 
+                  src={processedFrame} 
+                  alt="AI Labeled Frame" 
+                  className="w-full h-full object-cover" 
+                />
+              )}
               <canvas ref={canvasRef} width="320" height="240" style={{ display: 'none' }} />
               {!streamRef.current && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">

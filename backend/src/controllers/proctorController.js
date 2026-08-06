@@ -20,14 +20,31 @@ exports.logIncident = async (req, res) => {
 
   // Define demerit points per activity type
   let demeritPoints = 1;
+  let isInstantBlock = false;
+  
   if (activityType === 'watching phone' || activityType === 'taking photo') {
     demeritPoints = 2;
   } else if (activityType === 'talking') {
     demeritPoints = 1;
-  } else if (activityType === 'shortcut copy' || activityType === 'manual copy' || activityType === 'pasting answer') {
+  } else if (activityType === 'shortcut copy' || activityType === 'manual copy' || activityType === 'pasting answer' || activityType === 'Tab Switching' || activityType === 'Window Blur' || activityType === 'Clipboard Activity' || activityType === 'Shortcut Activity') {
     demeritPoints = 1;
   } else if (activityType === 'AI Detection') {
     demeritPoints = 0;
+    const lowerDetails = (details || '').toLowerCase();
+    
+    if (lowerDetails.includes('multiple persons detected')) {
+      demeritPoints += 1;
+    }
+    if (lowerDetails.includes('cell phone')) {
+      isInstantBlock = true;
+    }
+    if (/\bbook\b/.test(lowerDetails)) {
+      demeritPoints += 1;
+    }
+    if (/\bnotebook\b/.test(lowerDetails)) {
+      demeritPoints += 1;
+    }
+    // calculator adds 0 points (it's ignored)
   }
 
   try {
@@ -65,31 +82,44 @@ exports.logIncident = async (req, res) => {
       let newBlockUntil = currentAttempt.block_until ? new Date(currentAttempt.block_until) : null;
       const now = new Date();
 
-      if (newDemerits >= 5) {
-        // Check if student is already blocked
-        if (newBlockUntil && newBlockUntil > now) {
-          // If already blocked, extend block duration by 2 minutes
-          newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 2);
-          const extensionMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) performed additional cheating during block. Extending block by 2 minutes. New end time: ${newBlockUntil.toISOString()}\n`;
-          fs.appendFile(logFilePath, extensionMsg, (err) => {
-            if (err) console.error('Error writing block extension to log file:', err);
-          });
-        } else {
-          // Newly blocked for 5 minutes
-          newBlockUntil = new Date();
-          newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 5);
-          newStatus = 'blocked';
-          const blockMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) exceeded 5 demerit points. Student BLOCKED from exam for 5 minutes (until ${newBlockUntil.toISOString()}).\n`;
-          fs.appendFile(logFilePath, blockMsg, (err) => {
-            if (err) console.error('Error writing block status to log file:', err);
-          });
+      if (isInstantBlock) {
+        newStatus = 'completed';
+        newBlockUntil = null;
+        const blockMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) used a MOBILE PHONE. INSTANT BLOCK AND AUTO-SUBMIT.\n`;
+        fs.appendFile(logFilePath, blockMsg, (err) => {
+          if (err) console.error('Error writing block status to log file:', err);
+        });
+        await db.query(
+          'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ?, finished_at = NOW() WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
+          [newDemerits, newStatus, newBlockUntil, studentId, examId]
+        );
+      } else {
+        if (newDemerits >= 5) {
+          // Check if student is already blocked
+          if (newBlockUntil && newBlockUntil > now) {
+            // If already blocked, extend block duration by 2 minutes
+            newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 2);
+            const extensionMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) performed additional cheating during block. Extending block by 2 minutes. New end time: ${newBlockUntil.toISOString()}\n`;
+            fs.appendFile(logFilePath, extensionMsg, (err) => {
+              if (err) console.error('Error writing block extension to log file:', err);
+            });
+          } else {
+            // Newly blocked for 5 minutes
+            newBlockUntil = new Date();
+            newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 5);
+            newStatus = 'blocked';
+            const blockMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) exceeded 5 demerit points. Student BLOCKED from exam for 5 minutes (until ${newBlockUntil.toISOString()}).\n`;
+            fs.appendFile(logFilePath, blockMsg, (err) => {
+              if (err) console.error('Error writing block status to log file:', err);
+            });
+          }
         }
-      }
 
-      await db.query(
-        'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ? WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
-        [newDemerits, newStatus, newBlockUntil, studentId, examId]
-      );
+        await db.query(
+          'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ? WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
+          [newDemerits, newStatus, newBlockUntil, studentId, examId]
+        );
+      }
 
       return res.json({
         message: 'Incident logged',
