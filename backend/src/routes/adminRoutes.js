@@ -40,8 +40,7 @@ router.put('/students/:id/status', adminController.updateStudentStatus);
 router.delete('/students/:id', adminController.deleteStudent);
 router.get('/student-exams/:studentId', adminController.getStudentExamsDetails);
 
-// Activity Logs & Settings & Analytics
-router.get('/activity-logs', adminController.getActivityLogs);
+
 router.get('/settings', adminController.getSettings);
 router.put('/settings', adminController.updateSettings);
 router.get('/analytics', adminController.getAnalytics);

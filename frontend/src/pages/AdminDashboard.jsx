@@ -67,7 +67,6 @@ export default function AdminDashboard() {
   const [students, setStudents] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [activityLogs, setActivityLogs] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [stats, setStats] = useState({
     totalTeachers: 0,
@@ -146,7 +145,6 @@ export default function AdminDashboard() {
           api.get("/admin/dashboard-stats"),
           api.get("/admin/profile"),
           api.get("/admin/notifications"),
-          api.get("/admin/activity-logs"),
           api.get("/admin/analytics"),
         ]);
 
@@ -156,7 +154,6 @@ export default function AdminDashboard() {
       setStats(stRes.data);
       setProfile({ ...pRes.data, password: "" });
       setNotifications(nRes.data);
-      setActivityLogs(alRes.data);
       setAnalytics(anRes.data);
     } catch (err) {
       console.error(err);
@@ -813,54 +810,6 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-              {/* INJECTED ACTIVITY LOGS */}
-              <div className="mt-8 border-t border-gray-150 pt-8">
-                <div className="space-y-6 animate-fade-in">
-                  <h3 className="text-lg font-bold text-dark-900">
-                    Activity Logs (Audit Trail)
-                  </h3>
-                  <div className="overflow-x-auto border border-gray-150 rounded-xl">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-150 text-gray-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">Time</th>
-                          <th className="p-4">Admin</th>
-                          <th className="p-4">Action</th>
-                          <th className="p-4">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-150">
-                        {activityLogs.map((log) => (
-                          <tr key={log.id} className="hover:bg-gray-50/50">
-                            <td className="p-4 font-mono">
-                              {new Date(log.created_at).toLocaleString()}
-                            </td>
-                            <td className="p-4 font-bold text-dark-900">
-                              {log.admin_name || "System"}
-                            </td>
-                            <td className="p-4">
-                              <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-bold">
-                                {log.action}
-                              </span>
-                            </td>
-                            <td className="p-4 text-gray-600">{log.details}</td>
-                          </tr>
-                        ))}
-                        {activityLogs.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan="4"
-                              className="p-4 text-center text-gray-500"
-                            >
-                              No activity logs found.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

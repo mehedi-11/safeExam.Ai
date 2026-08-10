@@ -1,14 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
-// Helper for logging
-const logActivity = async (adminId, action, details) => {
-  try {
-    await db.query('INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)', [adminId, action, details]);
-  } catch (err) {
-    console.error('Logging error:', err);
-  }
-};
+
 
 // Get Admin Profile
 exports.getProfile = async (req, res) => {
@@ -351,7 +344,7 @@ exports.addBulkStudents = async (req, res) => {
         }
       }
     }
-    await logActivity(req.user.id, 'bulk_add_students', `Added ${count} students via bulk import.`);
+
     return res.status(201).json({ message: `${count} students added successfully` });
   } catch (error) {
     console.error(error);
@@ -379,7 +372,7 @@ exports.addBulkTeachers = async (req, res) => {
         }
       }
     }
-    await logActivity(req.user.id, 'bulk_add_teachers', `Added ${count} teachers via bulk import.`);
+
     return res.status(201).json({ message: `${count} teachers added successfully` });
   } catch (error) {
     console.error(error);
@@ -387,23 +380,7 @@ exports.addBulkTeachers = async (req, res) => {
   }
 };
 
-// --- ACTIVITY LOGS ---
-exports.getActivityLogs = async (req, res) => {
-  try {
-    const query = `
-      SELECT al.*, a.name as admin_name 
-      FROM activity_logs al 
-      LEFT JOIN admins a ON al.admin_id = a.id 
-      ORDER BY al.created_at DESC 
-      LIMIT 100
-    `;
-    const [rows] = await db.query(query);
-    return res.json(rows);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error fetching activity logs' });
-  }
-};
+
 
 // --- SETTINGS ---
 exports.getSettings = async (req, res) => {
@@ -433,7 +410,7 @@ exports.updateSettings = async (req, res) => {
         [key, value, value]
       );
     }
-    await logActivity(req.user.id, 'update_settings', 'Updated system settings.');
+
     return res.json({ message: 'Settings updated successfully' });
   } catch (error) {
     console.error(error);

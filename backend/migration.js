@@ -19,18 +19,20 @@ async function runMigration() {
       }
     }
 
-    // 2. Create activity_logs table
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS activity_logs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        admin_id INT NULL,
-        teacher_id INT NULL,
-        action VARCHAR(255) NOT NULL,
-        details TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    console.log('activity_logs table created.');
+    // 1.5. Alter exams table
+    try {
+      await db.query('ALTER TABLE exams ADD COLUMN results_published BOOLEAN DEFAULT FALSE');
+      console.log('Added results_published to exams table.');
+    } catch (e) {
+      if (e.code === 'ER_DUP_FIELDNAME') {
+        console.log('Column results_published already exists.');
+      } else {
+        throw e;
+      }
+    }
+
+
+
 
     // 3. Create system_settings table
     await db.query(`
