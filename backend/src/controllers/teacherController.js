@@ -1,17 +1,22 @@
-const db = require('../config/db');
+const Teacher = require('../models/Teacher');
+const Exam = require('../models/Exam');
+const ExamQuestion = require('../models/ExamQuestion');
+const StudentExam = require('../models/StudentExam');
+const StudentAnswer = require('../models/StudentAnswer');
+const ProctoringLog = require('../models/ProctoringLog');
+const AdminNotification = require('../models/AdminNotification');
+const Student = require('../models/Student');
 const bcrypt = require('bcryptjs');
 
 // --- PROFILE MANAGEMENT ---
 
 exports.getProfile = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      'SELECT id, name, email, profile_image, joining_date, status FROM teachers WHERE id = ?',
-      [req.user.id]
-    );
-    if (rows.length === 0) return res.status(404).json({ message: 'Teacher not found' });
-    const teacher = rows[0];
-    return res.json(teacher);
+    const teacher = await Teacher.findById(req.user.id).select('id name email profile_image joining_date status');
+    if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
+    const response = teacher.toObject();
+    response.id = response._id;
+    return res.json(response);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching profile' });
@@ -25,26 +30,15 @@ exports.updateProfile = async (req, res) => {
   try {
     if (!name) return res.status(400).json({ message: 'Name is required' });
 
-    let query = 'UPDATE teachers SET name = ?';
-    let params = [name];
+    const updateData = { name };
+    if (profile_image) updateData.profile_image = profile_image;
 
-    if (profile_image) {
-      query += ', profile_image = ?';
-      params.push(profile_image);
-    }
-
-    query += ' WHERE id = ?';
-    params.push(req.user.id);
-
-    await db.query(query, params);
-
-    const [rows] = await db.query(
-      'SELECT id, name, email, profile_image, joining_date, status FROM teachers WHERE id = ?',
-      [req.user.id]
-    );
-
-    const teacher = rows[0];
-    return res.json({ message: 'Profile updated successfully', user: teacher });
+    const teacher = await Teacher.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('id name email profile_image joining_date status');
+    if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
+    
+    const response = teacher.toObject();
+    response.id = response._id;
+    return res.json({ message: 'Profile updated successfully', user: response });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error updating profile' });
@@ -57,19 +51,14 @@ exports.changePassword = async (req, res) => {
     return res.status(400).json({ message: 'Old and new passwords are required' });
   }
   try {
-    const [rows] = await db.query('SELECT password FROM teachers WHERE id = ?', [req.user.id]);
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'Teacher not found' });
-    }
+    const teacher = await Teacher.findById(req.user.id);
+    if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
 
-    const teacher = rows[0];
     const isMatch = await bcrypt.compare(oldPassword, teacher.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Incorrect old password' });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect old password' });
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await db.query('UPDATE teachers SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
+    teacher.password = await bcrypt.hash(newPassword, 10);
+    await teacher.save();
 
     return res.json({ message: 'Password updated successfully' });
   } catch (error) {
@@ -82,16 +71,20 @@ exports.changePassword = async (req, res) => {
 
 exports.getExams = async (req, res) => {
   try {
-    const query = `
-      SELECT e.*, 
-             (SELECT COUNT(*) FROM exam_questions eq WHERE eq.exam_id = e.id) AS questions_count,
-             (SELECT COUNT(*) FROM student_exams se WHERE se.exam_id = e.id) AS submissions_count
-      FROM exams e
-      WHERE e.teacher_id = ?
-      ORDER BY e.exam_date DESC
-    `;
-    const [rows] = await db.query(query, [req.user.id]);
-    return res.json(rows);
+    const exams = await Exam.aggregate([
+      { $match: { teacher_id: new (require('mongoose').Types.ObjectId)(req.user.id) } },
+      { $lookup: { from: 'examquestions', localField: '_id', foreignField: 'exam_id', as: 'questions' } },
+      { $lookup: { from: 'studentexams', localField: '_id', foreignField: 'exam_id', as: 'submissions' } },
+      { $addFields: { questions_count: { $size: "$questions" }, submissions_count: { $size: "$submissions" } } },
+      { $project: { questions: 0, submissions: 0 } },
+      { $sort: { exam_date: -1 } }
+    ]);
+    
+    const response = exams.map(e => {
+      e.id = e._id;
+      return e;
+    });
+    return res.json(response);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching exams' });
@@ -105,14 +98,30 @@ exports.createExam = async (req, res) => {
   }
 
   try {
-    const [result] = await db.query(
-      'INSERT INTO exams (title, exam_date, duration_minutes, teacher_id, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [title, duration_minutes, req.user.id, must_on_camera ?? true, must_on_microphone ?? true, exam_password || null, course_name || null, course_code || null, university_name || null, max_attempts || 1]
-    );
+    const newExam = new Exam({
+      title,
+      duration_minutes,
+      teacher_id: req.user.id,
+      exam_date: new Date(),
+      must_on_camera: must_on_camera ?? true,
+      must_on_microphone: must_on_microphone ?? true,
+      exam_password: exam_password || null,
+      course_name: course_name || null,
+      course_code: course_code || null,
+      university_name: university_name || null,
+      max_attempts: max_attempts || 1,
+      total_marks: 0
+    });
+    // Use collection for extra fields not in schema if necessary
+    await Exam.collection.insertOne(newExam.toObject());
 
-    await db.query('INSERT INTO admin_notifications (message) VALUES (?)', [`Teacher ${req.user.name} created a new exam: ${title}`]);
+    const notif = new AdminNotification({
+      title: 'New Exam Created',
+      message: `Teacher ${req.user.name} created a new exam: ${title}`
+    });
+    await notif.save();
 
-    return res.status(201).json({ message: 'Exam created successfully', examId: result.insertId });
+    return res.status(201).json({ message: 'Exam created successfully', examId: newExam._id });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error creating exam' });
@@ -128,14 +137,30 @@ exports.updateExam = async (req, res) => {
   }
   
   try {
-    const [result] = await db.query(
-      `UPDATE exams SET title=?, duration_minutes=?, must_on_camera=?, must_on_microphone=?, exam_password=?, course_name=?, course_code=?, university_name=?, max_attempts=?
-       WHERE id=? AND teacher_id=?`,
-      [title, duration_minutes, must_on_camera ?? true, must_on_microphone ?? true, exam_password || null, course_name || null, course_code || null, university_name || null, max_attempts || 1, id, req.user.id]
+    const updateData = {
+      title, duration_minutes, 
+      must_on_camera: must_on_camera ?? true, 
+      must_on_microphone: must_on_microphone ?? true, 
+      exam_password: exam_password || null, 
+      course_name: course_name || null, 
+      course_code: course_code || null, 
+      university_name: university_name || null, 
+      max_attempts: max_attempts || 1
+    };
+    
+    // updateOne without strict mode to allow extra fields not explicitly in schema
+    const result = await Exam.collection.updateOne(
+      { _id: new (require('mongoose').Types.ObjectId)(id), teacher_id: new (require('mongoose').Types.ObjectId)(req.user.id) },
+      { $set: updateData }
     );
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Exam not found or unauthorized' });
+    
+    if (result.matchedCount === 0) return res.status(404).json({ message: 'Exam not found or unauthorized' });
 
-    await db.query('INSERT INTO admin_notifications (message) VALUES (?)', [`Teacher ${req.user.name} updated the exam: ${title}`]);
+    const notif = new AdminNotification({
+      title: 'Exam Updated',
+      message: `Teacher ${req.user.name} updated the exam: ${title}`
+    });
+    await notif.save();
 
     return res.json({ message: 'Exam updated successfully' });
   } catch (error) {
@@ -147,13 +172,20 @@ exports.updateExam = async (req, res) => {
 exports.deleteExam = async (req, res) => {
   const { id } = req.params;
   try {
-    const [exam] = await db.query('SELECT title FROM exams WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
-    const examTitle = exam.length > 0 ? exam[0].title : `ID ${id}`;
+    const exam = await Exam.findOne({ _id: id, teacher_id: req.user.id });
+    if (!exam) return res.status(404).json({ message: 'Exam not found or unauthorized' });
+    
+    const examTitle = exam.title;
+    await Exam.deleteOne({ _id: id });
+    await ExamQuestion.deleteMany({ exam_id: id });
+    await StudentExam.deleteMany({ exam_id: id });
+    await StudentAnswer.deleteMany({ exam_id: id });
 
-    const [result] = await db.query('DELETE FROM exams WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Exam not found or unauthorized' });
-
-    await db.query('INSERT INTO admin_notifications (message) VALUES (?)', [`Teacher ${req.user.name} deleted the exam: ${examTitle}`]);
+    const notif = new AdminNotification({
+      title: 'Exam Deleted',
+      message: `Teacher ${req.user.name} deleted the exam: ${examTitle}`
+    });
+    await notif.save();
 
     return res.json({ message: 'Exam deleted successfully' });
   } catch (error) {
@@ -167,24 +199,28 @@ exports.toggleExamLive = async (req, res) => {
   const { is_live, exam_password } = req.body;
   
   try {
-    const [exam] = await db.query('SELECT title FROM exams WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
-    const examTitle = exam.length > 0 ? exam[0].title : `ID ${id}`;
+    const exam = await Exam.findOne({ _id: id, teacher_id: req.user.id });
+    if (!exam) return res.status(404).json({ message: 'Exam not found or unauthorized' });
 
     if (is_live) {
-      const [questions] = await db.query('SELECT COUNT(*) as count FROM exam_questions WHERE exam_id = ?', [id]);
-      if (questions[0].count === 0) {
+      const questionsCount = await ExamQuestion.countDocuments({ exam_id: id });
+      if (questionsCount === 0) {
         return res.status(400).json({ message: 'Cannot make exam live. No questions have been added.', no_questions: true });
       }
     }
 
-    const [result] = await db.query(
-      'UPDATE exams SET is_live=?, exam_password=?, exam_date = IF(? = 1, NOW(), exam_date) WHERE id=? AND teacher_id=?',
-      [is_live ? 1 : 0, is_live ? exam_password : null, is_live ? 1 : 0, id, req.user.id]
-    );
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Exam not found or unauthorized' });
+    exam.is_live = is_live ? true : false;
+    if (is_live) exam.exam_password = exam_password;
+    if (is_live) exam.exam_date = new Date();
+    
+    await Exam.collection.updateOne({ _id: exam._id }, { $set: exam.toObject() }); // Bypass strict
 
     const statusStr = is_live ? 'LIVE' : 'OFFLINE';
-    await db.query('INSERT INTO admin_notifications (message) VALUES (?)', [`Teacher ${req.user.name} changed exam status to ${statusStr}: ${examTitle}`]);
+    const notif = new AdminNotification({
+      title: 'Exam Status Changed',
+      message: `Teacher ${req.user.name} changed exam status to ${statusStr}: ${exam.title}`
+    });
+    await notif.save();
 
     return res.json({ message: is_live ? 'Exam is now live!' : 'Exam is no longer live.' });
   } catch (error) {
@@ -193,18 +229,21 @@ exports.toggleExamLive = async (req, res) => {
   }
 };
 
-
 // --- QUESTION MANAGEMENT ---
 
 exports.getQuestions = async (req, res) => {
   const { examId } = req.params;
   try {
-    // Verify exam ownership first
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const [rows] = await db.query('SELECT * FROM exam_questions WHERE exam_id = ? ORDER BY sort_order ASC, id ASC', [examId]);
-    return res.json(rows);
+    const questions = await ExamQuestion.find({ exam_id: examId }).sort({ sort_order: 1, _id: 1 });
+    const response = questions.map(q => {
+      const obj = q.toObject();
+      obj.id = obj._id;
+      return obj;
+    });
+    return res.json(response);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching questions' });
@@ -219,14 +258,28 @@ exports.createQuestion = async (req, res) => {
   }
 
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [exam_id, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: exam_id, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    await db.query(
-      `INSERT INTO exam_questions (exam_id, type, question_text, marks, option_a, option_b, option_c, option_d, correct_option)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [exam_id, type, question_text, marks, option_a||null, option_b||null, option_c||null, option_d||null, correct_option||null]
-    );
+    const newQuestion = new ExamQuestion({
+      exam_id,
+      question_type: type, // Schema expects question_type
+      question_text,
+      marks
+    });
+    
+    const obj = newQuestion.toObject();
+    obj.type = type; // Support both for compatibility
+    obj.option_a = option_a || null;
+    obj.option_b = option_b || null;
+    obj.option_c = option_c || null;
+    obj.option_d = option_d || null;
+    obj.correct_option = correct_option || null;
+
+    await ExamQuestion.collection.insertOne(obj);
+    
+    // Update total marks in Exam
+    await Exam.collection.updateOne({ _id: exam._id }, { $inc: { total_marks: marks } });
 
     return res.status(201).json({ message: 'Question added successfully' });
   } catch (error) {
@@ -244,18 +297,24 @@ exports.updateQuestion = async (req, res) => {
   }
 
   try {
-    const [exam] = await db.query(`
-      SELECT e.id FROM exams e 
-      JOIN exam_questions eq ON e.id = eq.exam_id 
-      WHERE eq.id = ? AND e.teacher_id = ?
-    `, [id, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const question = await ExamQuestion.collection.findOne({ _id: new (require('mongoose').Types.ObjectId)(id) });
+    if (!question) return res.status(404).json({ message: 'Question not found' });
+    
+    const exam = await Exam.findOne({ _id: question.exam_id, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    await db.query(
-      `UPDATE exam_questions SET type=?, question_text=?, marks=?, option_a=?, option_b=?, option_c=?, option_d=?, correct_option=?
-       WHERE id=?`,
-      [type, question_text, marks, option_a||null, option_b||null, option_c||null, option_d||null, correct_option||null, id]
+    const oldMarks = question.marks;
+
+    await ExamQuestion.collection.updateOne(
+      { _id: question._id },
+      { $set: { type, question_type: type, question_text, marks, option_a: option_a||null, option_b: option_b||null, option_c: option_c||null, option_d: option_d||null, correct_option: correct_option||null } }
     );
+    
+    // Update total marks in exam
+    const diff = marks - oldMarks;
+    if (diff !== 0) {
+      await Exam.collection.updateOne({ _id: exam._id }, { $inc: { total_marks: diff } });
+    }
 
     return res.json({ message: 'Question updated successfully' });
   } catch (error) {
@@ -267,15 +326,16 @@ exports.updateQuestion = async (req, res) => {
 exports.deleteQuestion = async (req, res) => {
   const { id } = req.params;
   try {
-    // Verify exam ownership via question
-    const [exam] = await db.query(`
-      SELECT e.id FROM exams e 
-      JOIN exam_questions eq ON e.id = eq.exam_id 
-      WHERE eq.id = ? AND e.teacher_id = ?
-    `, [id, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const question = await ExamQuestion.collection.findOne({ _id: new (require('mongoose').Types.ObjectId)(id) });
+    if (!question) return res.status(404).json({ message: 'Question not found' });
+    
+    const exam = await Exam.findOne({ _id: question.exam_id, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    await db.query('DELETE FROM exam_questions WHERE id = ?', [id]);
+    await ExamQuestion.collection.deleteOne({ _id: question._id });
+    
+    await Exam.collection.updateOne({ _id: exam._id }, { $inc: { total_marks: -question.marks } });
+
     return res.json({ message: 'Question deleted successfully' });
   } catch (error) {
     console.error(error);
@@ -292,37 +352,17 @@ exports.reorderQuestions = async (req, res) => {
   }
 
   try {
-    const connection = await db.getConnection();
-    await connection.beginTransaction();
+    const exam = await Exam.findOne({ _id: exam_id, teacher_id: req.user.id });
+    if (!exam) return res.status(404).json({ message: 'Exam not found or unauthorized' });
 
-    try {
-      // First, verify teacher owns this exam
-      const [examCheck] = await connection.query(
-        'SELECT id FROM exams WHERE id = ? AND teacher_id = ?',
-        [exam_id, req.user.id]
+    for (let i = 0; i < ordered_ids.length; i++) {
+      await ExamQuestion.collection.updateOne(
+        { _id: new (require('mongoose').Types.ObjectId)(ordered_ids[i]), exam_id: exam._id },
+        { $set: { sort_order: i } }
       );
-      if (examCheck.length === 0) {
-        await connection.rollback();
-        connection.release();
-        return res.status(404).json({ message: 'Exam not found or unauthorized' });
-      }
-
-      // Perform updates
-      for (let i = 0; i < ordered_ids.length; i++) {
-        await connection.query(
-          'UPDATE exam_questions SET sort_order = ? WHERE id = ? AND exam_id = ?',
-          [i, ordered_ids[i], exam_id]
-        );
-      }
-
-      await connection.commit();
-      connection.release();
-      return res.json({ message: 'Questions reordered successfully' });
-    } catch (err) {
-      await connection.rollback();
-      connection.release();
-      throw err;
     }
+
+    return res.json({ message: 'Questions reordered successfully' });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error reordering questions' });
@@ -335,10 +375,10 @@ exports.togglePublishResults = async (req, res) => {
   const { id } = req.params;
   const { results_published } = req.body;
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
-    if (exam.length === 0) return res.status(404).json({ message: 'Exam not found' });
+    const exam = await Exam.findOne({ _id: id, teacher_id: req.user.id });
+    if (!exam) return res.status(404).json({ message: 'Exam not found' });
 
-    await db.query('UPDATE exams SET results_published = ? WHERE id = ?', [results_published ? 1 : 0, id]);
+    await Exam.collection.updateOne({ _id: exam._id }, { $set: { results_published: results_published ? true : false } });
     return res.json({ message: 'Exam results publish status updated successfully' });
   } catch (error) {
     console.error('Error toggling publish status:', error);
@@ -349,18 +389,19 @@ exports.togglePublishResults = async (req, res) => {
 exports.getExamResults = async (req, res) => {
   const { id } = req.params;
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: id, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const query = `
-      SELECT se.student_id, se.score, se.status, se.started_at, se.finished_at, se.demerit_points, se.id AS attempt_id,
-             s.name, s.email
-      FROM student_exams se
-      JOIN students s ON se.student_id = s.id
-      WHERE se.exam_id = ?
-    `;
-    const [rows] = await db.query(query, [id]);
-    return res.json(rows);
+    const results = await StudentExam.aggregate([
+      { $match: { exam_id: exam._id } },
+      { $lookup: { from: 'students', localField: 'student_id', foreignField: 'id', as: 'student' } },
+      { $unwind: "$student" },
+      { $project: {
+          student_id: 1, score: "$total_score", status: 1, started_at: 1, finished_at: "$completed_at", 
+          demerit_points: 1, attempt_id: "$_id", name: "$student.name", email: "$student.email"
+      }}
+    ]);
+    return res.json(results);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching exam results' });
@@ -370,17 +411,12 @@ exports.getExamResults = async (req, res) => {
 exports.downloadStudentLog = async (req, res) => {
   const { examId, studentId } = req.params;
   try {
-    // Verify exam ownership
-    const [exam] = await db.query('SELECT title FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    // Fetch logs
-    const [logs] = await db.query(
-      'SELECT activity_type, details, demerit_points, timestamp FROM proctoring_logs WHERE exam_id = ? AND student_id = ? ORDER BY timestamp ASC',
-      [examId, studentId]
-    );
+    const logs = await ProctoringLog.find({ exam_id: examId, student_id: studentId }).sort({ timestamp: 1 });
 
-    let logText = `AI Proctoring Log Feed\nExam: ${exam[0].title}\nStudent ID: ${studentId}\n-----------------------------------\n\n`;
+    let logText = `AI Proctoring Log Feed\nExam: ${exam.title}\nStudent ID: ${studentId}\n-----------------------------------\n\n`;
 
     if (logs.length === 0) {
       logText += "No anomalies or alerts detected for this student.\n";
@@ -405,19 +441,33 @@ exports.downloadStudentLog = async (req, res) => {
 exports.getStudentAnswersheet = async (req, res) => {
   const { examId, studentId } = req.params;
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    // Get answers with questions
-    const query = `
-      SELECT sa.id as answer_id, sa.student_answer, sa.marks_awarded,
-             eq.id as question_id, eq.type, eq.question_text, eq.marks as max_marks,
-             eq.option_a, eq.option_b, eq.option_c, eq.option_d, eq.correct_option
-      FROM exam_questions eq
-      LEFT JOIN student_answers sa ON eq.id = sa.question_id AND sa.student_id = ?
-      WHERE eq.exam_id = ?
-    `;
-    const [rows] = await db.query(query, [studentId, examId]);
+    const questions = await ExamQuestion.collection.find({ exam_id: exam._id }).toArray();
+    const answers = await StudentAnswer.collection.find({ exam_id: exam._id, student_id: studentId }).toArray();
+    
+    const ansMap = {};
+    answers.forEach(a => { ansMap[a.question_id.toString()] = a; });
+    
+    const rows = questions.map(eq => {
+      const ans = ansMap[eq._id.toString()];
+      return {
+        answer_id: ans ? ans._id : null,
+        student_answer: ans ? ans.answer_text : null,
+        marks_awarded: ans ? ans.marks_awarded : 0,
+        question_id: eq._id,
+        type: eq.type || eq.question_type,
+        question_text: eq.question_text,
+        max_marks: eq.marks,
+        option_a: eq.option_a,
+        option_b: eq.option_b,
+        option_c: eq.option_c,
+        option_d: eq.option_d,
+        correct_option: eq.correct_option
+      };
+    });
+
     return res.json(rows);
   } catch (error) {
     console.error(error);
@@ -427,33 +477,30 @@ exports.getStudentAnswersheet = async (req, res) => {
 
 exports.manualGradeAnswersheet = async (req, res) => {
   const { examId, studentId } = req.params;
-  const { grades } = req.body; // Map: { answer_id: marks_awarded }
-
+  const { grades } = req.body;
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    let totalMarks = 0;
-    
-    // Begin transaction? No need, just simple updates.
     for (const [answer_id, marks_awarded] of Object.entries(grades)) {
-      await db.query(
-        'UPDATE student_answers SET marks_awarded = ? WHERE id = ?',
-        [marks_awarded, answer_id]
-      );
+      if (answer_id && answer_id !== 'null') {
+        await StudentAnswer.collection.updateOne(
+          { _id: new (require('mongoose').Types.ObjectId)(answer_id) },
+          { $set: { marks_awarded: Number(marks_awarded) } }
+        );
+      }
     }
     
-    // Recalculate total score
-    const [scoreResult] = await db.query(
-      'SELECT SUM(marks_awarded) as total FROM student_answers WHERE exam_id=? AND student_id=?',
-      [examId, studentId]
-    );
+    const answersAgg = await StudentAnswer.aggregate([
+      { $match: { exam_id: exam._id, student_id: studentId } },
+      { $group: { _id: null, total: { $sum: "$marks_awarded" } } }
+    ]);
     
-    const finalScore = scoreResult[0].total || 0;
+    const finalScore = answersAgg.length > 0 ? answersAgg[0].total : 0;
     
-    await db.query(
-      'UPDATE student_exams SET score = ? WHERE exam_id=? AND student_id=?',
-      [finalScore, examId, studentId]
+    await StudentExam.collection.updateOne(
+      { exam_id: exam._id, student_id: studentId },
+      { $set: { total_score: finalScore, score: finalScore } }
     );
 
     return res.json({ message: 'Grades saved successfully', score: finalScore });
@@ -463,70 +510,70 @@ exports.manualGradeAnswersheet = async (req, res) => {
   }
 };
 
-
-
 // --- PROCTORING LOGS ---
 
 exports.getProctoringLogs = async (req, res) => {
   try {
-    const query = `
-      SELECT pl.*, 
-             s.name AS student_name, s.email AS student_email,
-             e.title AS exam_title
-      FROM proctoring_logs pl
-      JOIN students s ON pl.student_id = s.id
-      JOIN exams e ON pl.exam_id = e.id
-      WHERE e.teacher_id = ?
-      ORDER BY pl.timestamp DESC
-    `;
-    const [rows] = await db.query(query, [req.user.id]);
-    return res.json(rows);
+    const logs = await ProctoringLog.aggregate([
+      { $lookup: { from: 'exams', localField: 'exam_id', foreignField: '_id', as: 'exam' } },
+      { $unwind: "$exam" },
+      { $match: { "exam.teacher_id": new (require('mongoose').Types.ObjectId)(req.user.id) } },
+      { $lookup: { from: 'students', localField: 'student_id', foreignField: 'id', as: 'student' } },
+      { $unwind: "$student" },
+      { $project: {
+          _id: 1, activity_type: 1, details: 1, demerit_points: 1, timestamp: 1,
+          student_name: "$student.name", student_email: "$student.email",
+          exam_title: "$exam.title", student_id: 1, exam_id: 1
+      }},
+      { $sort: { timestamp: -1 } }
+    ]);
+    const response = logs.map(l => { l.id = l._id; return l; });
+    return res.json(response);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching proctoring logs' });
   }
 };
 
-// Get students for a specific exam
 exports.getExamStudents = async (req, res) => {
   const { examId } = req.params;
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const [rows] = await db.query(`
-      SELECT s.id, s.name, se.status, se.demerit_points, se.score
-      FROM student_exams se
-      JOIN students s ON se.student_id = s.id
-      WHERE se.exam_id = ?
-    `, [examId]);
-    return res.json(rows);
+    const students = await StudentExam.aggregate([
+      { $match: { exam_id: exam._id } },
+      { $lookup: { from: 'students', localField: 'student_id', foreignField: 'id', as: 'student' } },
+      { $unwind: "$student" },
+      { $project: {
+          id: "$student.id", name: "$student.name", status: 1, demerit_points: 1, score: "$total_score", _id: 0
+      }}
+    ]);
+    return res.json(students);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error retrieving exam students' });
   }
 };
 
-// Download logs for a specific exam as CSV (Excel compatible)
 exports.downloadExamLogs = async (req, res) => {
   const { examId } = req.params;
   try {
-    const [exam] = await db.query('SELECT id FROM exams WHERE id = ? AND teacher_id = ?', [examId, req.user.id]);
-    if (exam.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const [logs] = await db.query(`
-      SELECT pl.student_id, s.name, pl.activity_type, pl.details, pl.timestamp
-      FROM proctoring_logs pl
-      JOIN students s ON pl.student_id = s.id
-      WHERE pl.exam_id = ?
-      ORDER BY pl.timestamp DESC
-    `, [examId]);
+    const logs = await ProctoringLog.aggregate([
+      { $match: { exam_id: exam._id } },
+      { $lookup: { from: 'students', localField: 'student_id', foreignField: 'id', as: 'student' } },
+      { $unwind: "$student" },
+      { $sort: { timestamp: -1 } }
+    ]);
 
     let csvContent = 'Student ID,Student Name,Activity Type,Details,Timestamp\n';
     logs.forEach(log => {
       const row = [
         `"${log.student_id}"`,
-        `"${log.name}"`,
+        `"${log.student.name}"`,
         `"${log.activity_type}"`,
         `"${log.details}"`,
         `"${new Date(log.timestamp).toISOString()}"`

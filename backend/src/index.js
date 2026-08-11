@@ -3,6 +3,9 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const connectDB = require('./config/db');
+const Exam = require('./models/Exam');
+
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
@@ -11,6 +14,9 @@ const proctorRoutes = require('./routes/proctorRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(cors({
@@ -45,17 +51,25 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 
   // Background worker to auto-stop exams
-  const db = require('./config/db');
   setInterval(async () => {
     try {
-      const [result] = await db.query(`
-        UPDATE exams 
-        SET is_live = 0 
-        WHERE is_live = 1 
-        AND NOW() > DATE_ADD(exam_date, INTERVAL (duration_minutes + 5) MINUTE)
-      `);
-      if (result.affectedRows > 0) {
-        console.log(`[Auto-Stop] Stopped ${result.affectedRows} exam(s) that exceeded their duration.`);
+      const now = new Date();
+      // Find all live exams
+      const liveExams = await Exam.find({ is_live: true });
+      let stoppedCount = 0;
+      
+      for (const exam of liveExams) {
+        // Calculate end time: exam_date + duration_minutes + 5 minutes
+        const endTime = new Date(exam.exam_date.getTime() + (exam.duration_minutes + 5) * 60000);
+        if (now > endTime) {
+          exam.is_live = false;
+          await exam.save();
+          stoppedCount++;
+        }
+      }
+      
+      if (stoppedCount > 0) {
+        console.log(`[Auto-Stop] Stopped ${stoppedCount} exam(s) that exceeded their duration.`);
       }
     } catch (err) {
       console.error('[Auto-Stop] Error checking exams:', err.message);

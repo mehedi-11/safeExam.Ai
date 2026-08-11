@@ -1,24 +1,26 @@
-const db = require('../config/db');
 const fs = require('fs');
 const path = require('path');
+const ProctoringLog = require('../models/ProctoringLog');
+const Student = require('../models/Student');
+const Exam = require('../models/Exam');
+const StudentExam = require('../models/StudentExam');
 
 const logFilePath = path.join(__dirname, '../../cheating_activity.log');
 
-// Log a proctoring incident (YOLOv8 simulated frames or client event triggers)
+// Log a proctoring incident
 exports.logIncident = async (req, res) => {
   const { examId, activityType, details } = req.body;
   let studentId = req.body.studentId;
 
   // Security check: Use the authenticated user's ID if the requester is a student
   if (req.user && req.user.role === 'student') {
-    studentId = req.user.id;
+    studentId = req.user.id; // Wait, student ID might be the custom 'id' field, not _id. req.user.id in JWT is usually the custom student ID. I used student.id in authController.
   }
 
   if (!examId || !studentId || !activityType) {
     return res.status(400).json({ message: 'examId, studentId, and activityType are required' });
   }
 
-  // Define demerit points per activity type
   let demeritPoints = 1;
   let isInstantBlock = false;
   
@@ -26,36 +28,25 @@ exports.logIncident = async (req, res) => {
     demeritPoints = 2;
   } else if (activityType === 'talking') {
     demeritPoints = 1;
-  } else if (activityType === 'shortcut copy' || activityType === 'manual copy' || activityType === 'pasting answer' || activityType === 'Tab Switching' || activityType === 'Window Blur' || activityType === 'Clipboard Activity' || activityType === 'Shortcut Activity') {
+  } else if (['shortcut copy', 'manual copy', 'pasting answer', 'Tab Switching', 'Window Blur', 'Clipboard Activity', 'Shortcut Activity'].includes(activityType)) {
     demeritPoints = 1;
   } else if (activityType === 'AI Detection') {
     demeritPoints = 0;
     const lowerDetails = (details || '').toLowerCase();
     
-    if (lowerDetails.includes('multiple persons detected')) {
-      demeritPoints += 1;
-    }
-    if (lowerDetails.includes('cell phone')) {
-      isInstantBlock = true;
-    }
-    if (/\bbook\b/.test(lowerDetails)) {
-      demeritPoints += 1;
-    }
-    if (/\bnotebook\b/.test(lowerDetails)) {
-      demeritPoints += 1;
-    }
-    // calculator adds 0 points (it's ignored)
+    if (lowerDetails.includes('multiple persons detected')) demeritPoints += 1;
+    if (lowerDetails.includes('cell phone')) isInstantBlock = true;
+    if (/\bbook\b/.test(lowerDetails)) demeritPoints += 1;
+    if (/\bnotebook\b/.test(lowerDetails)) demeritPoints += 1;
   }
 
   try {
-    // 1. Fetch current student and exam info for logging
-    const [studentRows] = await db.query('SELECT name FROM students WHERE id = ?', [studentId]);
-    const [examRows] = await db.query('SELECT title FROM exams WHERE id = ?', [examId]);
+    const student = await Student.findOne({ id: studentId });
+    const exam = await Exam.findById(examId);
     
-    const studentName = studentRows.length > 0 ? studentRows[0].name : 'Unknown Student';
-    const examTitle = examRows.length > 0 ? examRows[0].title : 'Unknown Exam';
+    const studentName = student ? student.name : 'Unknown Student';
+    const examTitle = exam ? exam.title : 'Unknown Exam';
 
-    // 2. Append to physical log file
     const logTimestamp = new Date().toISOString();
     const logLine = `[${logTimestamp}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) engaged in cheating: ${activityType}. Details: ${details || 'None'}. Demerit Points Added: +${demeritPoints}\n`;
     
@@ -63,21 +54,20 @@ exports.logIncident = async (req, res) => {
       if (err) console.error('Error writing to cheating log file:', err);
     });
 
-    // 3. Save to database proctoring_logs table
-    await db.query(
-      'INSERT INTO proctoring_logs (student_id, exam_id, activity_type, details, demerit_points, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
-      [studentId, examId, activityType, details || '', demeritPoints]
-    );
+    const newLog = new ProctoringLog({
+      student_id: studentId,
+      exam_id: examId,
+      activity_type: activityType,
+      details: details || '',
+      demerit_points: demeritPoints
+    });
+    await newLog.save();
 
-    // 4. Update student's active exam attempt demerit points and block status
-    const [attempts] = await db.query(
-      'SELECT demerit_points, status, block_until FROM student_exams WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
-      [studentId, examId]
-    );
+    const attempts = await StudentExam.find({ student_id: studentId, exam_id: examId }).sort({ started_at: -1 });
 
     if (attempts.length > 0) {
       const currentAttempt = attempts[0];
-      let newDemerits = currentAttempt.demerit_points + demeritPoints;
+      let newDemerits = (currentAttempt.demerit_points || 0) + demeritPoints;
       let newStatus = currentAttempt.status;
       let newBlockUntil = currentAttempt.block_until ? new Date(currentAttempt.block_until) : null;
       const now = new Date();
@@ -89,22 +79,21 @@ exports.logIncident = async (req, res) => {
         fs.appendFile(logFilePath, blockMsg, (err) => {
           if (err) console.error('Error writing block status to log file:', err);
         });
-        await db.query(
-          'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ?, finished_at = NOW() WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
-          [newDemerits, newStatus, newBlockUntil, studentId, examId]
-        );
+        currentAttempt.demerit_points = newDemerits;
+        currentAttempt.status = newStatus;
+        currentAttempt.block_until = newBlockUntil;
+        currentAttempt.finished_at = new Date();
+        currentAttempt.completed_at = new Date();
+        await currentAttempt.save();
       } else {
         if (newDemerits >= 5) {
-          // Check if student is already blocked
           if (newBlockUntil && newBlockUntil > now) {
-            // If already blocked, extend block duration by 2 minutes
             newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 2);
             const extensionMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) performed additional cheating during block. Extending block by 2 minutes. New end time: ${newBlockUntil.toISOString()}\n`;
             fs.appendFile(logFilePath, extensionMsg, (err) => {
               if (err) console.error('Error writing block extension to log file:', err);
             });
           } else {
-            // Newly blocked for 5 minutes
             newBlockUntil = new Date();
             newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 5);
             newStatus = 'blocked';
@@ -115,10 +104,10 @@ exports.logIncident = async (req, res) => {
           }
         }
 
-        await db.query(
-          'UPDATE student_exams SET demerit_points = ?, status = ?, block_until = ? WHERE student_id = ? AND exam_id = ? ORDER BY started_at DESC LIMIT 1',
-          [newDemerits, newStatus, newBlockUntil, studentId, examId]
-        );
+        currentAttempt.demerit_points = newDemerits;
+        currentAttempt.status = newStatus;
+        currentAttempt.block_until = newBlockUntil;
+        await currentAttempt.save();
       }
 
       return res.json({
@@ -128,7 +117,6 @@ exports.logIncident = async (req, res) => {
         block_until: newBlockUntil
       });
     } else {
-      // If student hasn't started the exam, we still log but don't update attempt status
       return res.json({ message: 'Incident logged, but student has no active exam session' });
     }
   } catch (error) {
@@ -137,7 +125,6 @@ exports.logIncident = async (req, res) => {
   }
 };
 
-// Fetch raw log file contents (for teachers/admins to download or view)
 exports.getRawLogs = (req, res) => {
   fs.readFile(logFilePath, 'utf8', (err, data) => {
     if (err) {
@@ -150,7 +137,6 @@ exports.getRawLogs = (req, res) => {
   });
 };
 
-// Clear log file
 exports.clearRawLogs = (req, res) => {
   fs.writeFile(logFilePath, '', (err) => {
     if (err) return res.status(500).json({ message: 'Error clearing log file' });

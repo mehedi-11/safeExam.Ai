@@ -25,6 +25,7 @@ import {
   RefreshCw,
   ShieldAlert,
   ShieldCheck,
+  MoreVertical,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import Papa from "papaparse";
@@ -137,7 +138,7 @@ export default function AdminDashboard() {
     setLoading(true);
     setError("");
     try {
-      const [tRes, sRes, aRes, stRes, pRes, nRes, alRes, anRes] =
+      const [tRes, sRes, aRes, stRes, pRes, nRes, anRes] =
         await Promise.all([
           api.get("/admin/teachers"),
           api.get("/admin/students"),
@@ -872,41 +873,46 @@ export default function AdminDashboard() {
                         <Plus size={14} />{" "}
                         <span className="hidden sm:inline">Add Student</span>
                       </button>
+                      <div className="relative group">
+                        <button className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg text-gray-600 transition flex items-center justify-center border border-gray-200">
+                          <MoreVertical size={16} />
+                        </button>
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-150 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 flex flex-col p-1.5 gap-1">
+                          <label className="cursor-pointer hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full">
+                            <Upload size={13} /> <span>Bulk Import CSV</span>
+                            <input
+                              type="file"
+                              accept=".csv"
+                              className="hidden"
+                              onChange={(e) => handleBulkImport(e, "student")}
+                            />
+                          </label>
+                          <button
+                            onClick={() => exportToCSV(students, "Students")}
+                            className="hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                          >
+                            <Download size={13} /> <span>Export CSV</span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              exportToPDF(
+                                students,
+                                [
+                                  { key: "id", label: "ID" },
+                                  { key: "name", label: "Name" },
+                                  { key: "email", label: "Email" },
+                                  { key: "status", label: "Status" },
+                                ],
+                                "Students"
+                              )
+                            }
+                            className="hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                          >
+                            <Download size={13} /> <span>Export PDF</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2 mb-2">
-                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-gray-200 transition">
-                      <Upload size={13} /> <span>Bulk Import CSV</span>
-                      <input
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        onChange={(e) => handleBulkImport(e, "student")}
-                      />
-                    </label>
-                    <button
-                      onClick={() => exportToCSV(students, "Students")}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-gray-200 transition"
-                    >
-                      <Download size={13} /> <span>Export CSV</span>
-                    </button>
-                    <button
-                      onClick={() =>
-                        exportToPDF(
-                          students,
-                          [
-                            { key: "id", label: "ID" },
-                            { key: "name", label: "Name" },
-                            { key: "email", label: "Email" },
-                            { key: "status", label: "Status" },
-                          ],
-                          "Students",
-                        )
-                      }
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-gray-200 transition"
-                    >
-                      <Download size={13} /> <span>Export PDF</span>
-                    </button>
                   </div>
                   <div className="overflow-x-auto border border-gray-150 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
