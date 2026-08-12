@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   MoreVertical,
+  Calendar,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import Papa from "papaparse";
@@ -40,12 +41,13 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import EventsManager from "./EventsManager";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [activeTab, setActiveTab] = useState("overview");
-  const [activeUserTab, setActiveUserTab] = useState("students");
+  const [activeUserTab, setActiveUserTab] = useState("teachers");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notifRef = useRef(null);
@@ -69,6 +71,7 @@ export default function AdminDashboard() {
   const [admins, setAdmins] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [allExams, setAllExams] = useState([]);
   const [stats, setStats] = useState({
     totalTeachers: 0,
     totalStudents: 0,
@@ -138,7 +141,7 @@ export default function AdminDashboard() {
     setLoading(true);
     setError("");
     try {
-      const [tRes, sRes, aRes, stRes, pRes, nRes, anRes] =
+      const [tRes, sRes, aRes, stRes, pRes, nRes, anRes, eRes] =
         await Promise.all([
           api.get("/admin/teachers"),
           api.get("/admin/students"),
@@ -147,6 +150,7 @@ export default function AdminDashboard() {
           api.get("/admin/profile"),
           api.get("/admin/notifications"),
           api.get("/admin/analytics"),
+          api.get("/admin/all-exams"),
         ]);
 
       setTeachers(tRes.data);
@@ -156,6 +160,7 @@ export default function AdminDashboard() {
       setProfile({ ...pRes.data, password: "" });
       setNotifications(nRes.data);
       setAnalytics(anRes.data);
+      setAllExams(eRes.data);
     } catch (err) {
       console.error(err);
       if (err.response?.status === 401 || err.response?.status === 403) {
@@ -453,6 +458,8 @@ export default function AdminDashboard() {
             {[
               { id: "overview", label: "Dashboard", icon: LayoutDashboard },
               { id: "users", label: "Manage Users", icon: Users },
+              { id: "exams", label: "All Exams", icon: FileText },
+              { id: "events", label: "Events", icon: Calendar },
               { id: "settings", label: "Admin Profile", icon: Settings },
             ].map((tab) => {
               const unreadCount =
@@ -601,6 +608,13 @@ export default function AdminDashboard() {
 
         {/* Dynamic Content Sections */}
         <div className="bg-white rounded-2xl border border-gray-150 p-6 md:p-8 shadow-sm">
+          {/* TAB: EVENTS */}
+          {activeTab === "events" && (
+            <div className="animate-fade-in">
+              <EventsManager />
+            </div>
+          )}
+
           {/* TAB: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-8 animate-fade-in">
@@ -820,16 +834,16 @@ export default function AdminDashboard() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
                   <button
-                    onClick={() => setActiveUserTab("students")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-sm text-tomato-500" : "text-gray-500 hover:text-dark-900"}`}
-                  >
-                    Students
-                  </button>
-                  <button
                     onClick={() => setActiveUserTab("teachers")}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-white shadow-sm text-tomato-500" : "text-gray-500 hover:text-dark-900"}`}
                   >
                     Teachers
+                  </button>
+                  <button
+                    onClick={() => setActiveUserTab("students")}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-sm text-tomato-500" : "text-gray-500 hover:text-dark-900"}`}
+                  >
+                    Students
                   </button>
                 </div>
 
@@ -918,9 +932,9 @@ export default function AdminDashboard() {
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-150 text-gray-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">Student ID</th>
-                          <th className="p-4">Name</th>
+                          <th className="p-4">Student Info</th>
                           <th className="p-4">Email</th>
+                          <th className="p-4 text-center">Exams Info</th>
                           <th className="p-4">Status</th>
                           <th className="p-4 text-center">Actions</th>
                         </tr>
@@ -941,13 +955,15 @@ export default function AdminDashboard() {
                               key={student.id}
                               className="hover:bg-gray-50/50"
                             >
-                              <td className="p-4 font-mono font-bold text-dark-900">
-                                {student.id}
-                              </td>
-                              <td className="p-4 font-bold text-dark-900">
-                                {student.name}
+                              <td className="p-4">
+                                <div className="font-bold text-dark-900">{student.name}</div>
+                                <div className="text-gray-500 text-[11px] font-mono mt-0.5">{student.id}</div>
                               </td>
                               <td className="p-4">{student.email}</td>
+                              <td className="p-4 text-center">
+                                <div className="font-semibold text-dark-900">{student.totalExams || 0}</div>
+                                <div className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
+                              </td>
                               <td className="p-4">
                                 <span
                                   className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${student.status === "approved" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}
@@ -1021,53 +1037,58 @@ export default function AdminDashboard() {
                         <Plus size={14} />{" "}
                         <span className="hidden sm:inline">Add Teacher</span>
                       </button>
+                      <div className="relative group">
+                        <button className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg text-gray-600 transition flex items-center justify-center border border-gray-200">
+                          <MoreVertical size={16} />
+                        </button>
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-150 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 flex flex-col p-1.5 gap-1">
+                          <label className="cursor-pointer hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full">
+                            <Upload size={13} /> <span>Bulk Import CSV</span>
+                            <input
+                              type="file"
+                              accept=".csv"
+                              className="hidden"
+                              onChange={(e) => handleBulkImport(e, "teacher")}
+                            />
+                          </label>
+                          <button
+                            onClick={() =>
+                              exportToCSV(
+                                teachers.filter((t) => t.status !== "pending"),
+                                "Teachers"
+                              )
+                            }
+                            className="hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                          >
+                            <Download size={13} /> <span>Export CSV</span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              exportToPDF(
+                                teachers.filter((t) => t.status !== "pending"),
+                                [
+                                  { key: "name", label: "Name" },
+                                  { key: "email", label: "Email" },
+                                  { key: "status", label: "Status" },
+                                  { key: "joining_date", label: "Joined Date" },
+                                ],
+                                "Teachers"
+                              )
+                            }
+                            className="hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                          >
+                            <Download size={13} /> <span>Export PDF</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2 mb-2">
-                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-gray-200 transition">
-                      <Upload size={13} /> <span>Bulk Import CSV</span>
-                      <input
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        onChange={(e) => handleBulkImport(e, "teacher")}
-                      />
-                    </label>
-                    <button
-                      onClick={() =>
-                        exportToCSV(
-                          teachers.filter((t) => t.status !== "pending"),
-                          "Teachers",
-                        )
-                      }
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-gray-200 transition"
-                    >
-                      <Download size={13} /> <span>Export CSV</span>
-                    </button>
-                    <button
-                      onClick={() =>
-                        exportToPDF(
-                          teachers.filter((t) => t.status !== "pending"),
-                          [
-                            { key: "name", label: "Name" },
-                            { key: "email", label: "Email" },
-                            { key: "status", label: "Status" },
-                            { key: "joining_date", label: "Joined Date" },
-                          ],
-                          "Teachers",
-                        )
-                      }
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-gray-200 transition"
-                    >
-                      <Download size={13} /> <span>Export PDF</span>
-                    </button>
                   </div>
                   <div className="overflow-x-auto border border-gray-150 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-150 text-gray-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">Name</th>
-                          <th className="p-4">Email</th>
+                          <th className="p-4">Teacher Info</th>
+                          <th className="p-4 text-center">Exams Info</th>
                           <th className="p-4">Status</th>
                           <th className="p-4">Joined Date</th>
                           <th className="p-4 text-center">Actions</th>
@@ -1085,15 +1106,22 @@ export default function AdminDashboard() {
                                   .toLowerCase()
                                   .includes(teacherSearch.toLowerCase())),
                           )
-                          .map((teacher) => (
+                          .map((teacher) => {
+                            const tExams = allExams.filter(e => e.teacher_id && (e.teacher_id._id === teacher.id || e.teacher_id === teacher.id));
+                            const completedCount = tExams.filter(e => !e.is_live).length;
+                            return (
                             <tr
                               key={teacher.id}
                               className="hover:bg-gray-50/50"
                             >
-                              <td className="p-4 font-bold text-dark-900">
-                                {teacher.name}
+                              <td className="p-4">
+                                <div className="font-bold text-dark-900">{teacher.name}</div>
+                                <div className="text-gray-500 text-[11px] mt-0.5">{teacher.email}</div>
                               </td>
-                              <td className="p-4">{teacher.email}</td>
+                              <td className="p-4 text-center">
+                                <div className="font-semibold text-dark-900">{tExams.length} <span className="text-gray-400 font-normal mx-1">/</span> {completedCount}</div>
+                                <div className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
+                              </td>
                               <td className="p-4">
                                 <span
                                   className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${teacher.status === "approved" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}
@@ -1137,7 +1165,7 @@ export default function AdminDashboard() {
                                 </button>
                               </td>
                             </tr>
-                          ))}
+                          );})}
                       </tbody>
                     </table>
                   </div>
@@ -1223,6 +1251,59 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          )}
+
+          {/* TAB: ALL EXAMS */}
+          {activeTab === "exams" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold text-dark-900 flex items-center gap-2">
+                  <FileText size={18} className="text-tomato-500" />
+                  <span>All Exams</span>
+                </h3>
+                <button onClick={() => fetchData()} className="text-sm font-bold text-tomato-500 hover:underline flex items-center gap-1">
+                  <RefreshCw size={14} /> Refresh
+                </button>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-gray-600">
+                    <thead className="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-4 font-bold">Exam Title</th>
+                        <th className="px-6 py-4 font-bold">Teacher Name</th>
+                        <th className="px-6 py-4 font-bold">Date</th>
+                        <th className="px-6 py-4 font-bold">Duration</th>
+                        <th className="px-6 py-4 font-bold text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {allExams.length > 0 ? (
+                        allExams.map((exam) => (
+                          <tr key={exam.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4 font-semibold text-dark-900">{exam.title}</td>
+                            <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
+                            <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
+                            <td className="px-6 py-4">{exam.duration_minutes} mins</td>
+                            <td className="px-6 py-4 text-center">
+                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${exam.is_live ? "bg-green-100 text-green-700 border border-green-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                {exam.is_live ? "Live" : "Not Live"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                            No exams found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
         </div>

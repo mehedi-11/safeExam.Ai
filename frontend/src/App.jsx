@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import ExamInterface from './pages/ExamInterface';
+import EventDetails from './pages/EventDetails';
 
 // Protected Route Guard
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -68,6 +69,16 @@ function App() {
           element={
             <ProtectedRoute allowedRole="student">
               <ExamInterface />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Event Details */}
+        <Route 
+          path="/event/:id" 
+          element={
+            <ProtectedRoute allowedRole="student">
+              <EventDetails />
             </ProtectedRoute>
           } 
         />

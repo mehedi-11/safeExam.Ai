@@ -39,6 +39,15 @@ export default function Login() {
     return () => clearTimeout(timer);
   }, [blockTimeLeft]);
 
+  // Reset states when changing roles/tabs
+  useEffect(() => {
+    setBlockTimeLeft(0);
+    setError('');
+    setSuccess('');
+    setFormData({ email: '', studentId: '', password: '' });
+    setResetMode(false);
+  }, [role]);
+
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;

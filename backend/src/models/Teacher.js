@@ -5,6 +5,6 @@ const teacherSchema = new mongoose.Schema({
   password: { type: String, required: true },
   profile_image: { type: String, default: null },
   joining_date: { type: Date, default: Date.now },
-  status: { type: String, enum: ['active', 'blocked'], default: 'active' }
+  status: { type: String, enum: ['active', 'blocked', 'suspended', 'pending'], default: 'active' }
 });
 module.exports = mongoose.model('Teacher', teacherSchema);

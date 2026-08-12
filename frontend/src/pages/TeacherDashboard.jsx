@@ -33,6 +33,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import Modal from "../components/Modal";
+import EventsManager from "./EventsManager";
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
@@ -110,6 +111,7 @@ export default function TeacherDashboard() {
     correct_option: "A",
   });
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
+  const [examTypeTab, setExamTypeTab] = useState('academic');
 
   const [liveForm, setLiveForm] = useState({ password: "" });
 
@@ -528,6 +530,7 @@ export default function TeacherDashboard() {
               { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
               { id: "add_exam", label: "Manage Exams", icon: FileText },
               { id: "exam_results", label: "Exam Results", icon: Award },
+              { id: "events", label: "Events", icon: Calendar },
               { id: "profile", label: "Instructor Settings", icon: Settings },
             ].map((tab) => (
               <button
@@ -731,6 +734,13 @@ export default function TeacherDashboard() {
                   </div>
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* TAB: EVENTS */}
+          {activeTab === "events" && (
+            <div className="animate-fade-in">
+              <EventsManager />
             </div>
           )}
 
@@ -1278,8 +1288,34 @@ export default function TeacherDashboard() {
         onClose={() => setIsExamModalOpen(false)}
         title={isEditingExam ? "Edit Exam" : "Schedule Exam"}
       >
-        <form onSubmit={handleSaveExam} className="space-y-4">
-          <div>
+        <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+          <button
+            type="button"
+            onClick={() => setExamTypeTab("academic")}
+            className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
+              examTypeTab === "academic"
+                ? "bg-white text-dark-900 shadow-sm"
+                : "text-gray-500 hover:text-dark-900"
+            }`}
+          >
+            Academic
+          </button>
+          <button
+            type="button"
+            onClick={() => setExamTypeTab("event")}
+            className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
+              examTypeTab === "event"
+                ? "bg-white text-dark-900 shadow-sm"
+                : "text-gray-500 hover:text-dark-900"
+            }`}
+          >
+            Event
+          </button>
+        </div>
+
+        {examTypeTab === "academic" ? (
+          <form onSubmit={handleSaveExam} className="space-y-4">
+            <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Exam Title
             </label>
@@ -1381,6 +1417,11 @@ export default function TeacherDashboard() {
             Save Exam
           </button>
         </form>
+        ) : (
+          <div className="text-center py-10 text-gray-400 text-sm">
+            Event form will be implemented here.
+          </div>
+        )}
       </Modal>
 
       {/* Modal: Make Live */}

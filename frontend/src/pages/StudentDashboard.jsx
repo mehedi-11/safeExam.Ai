@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { API_BASE_URL } from '../api/axiosConfig';
+import StudentEvents from './StudentEvents';
 import { 
   Calendar, BookOpen, KeyRound, CheckCircle2, ShieldAlert, 
   Hourglass, Play, RefreshCw, GraduationCap,
-  Menu, LogOut, Eye, EyeOff, LayoutGrid, List
+  Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -192,9 +193,10 @@ export default function StudentDashboard() {
           {/* Navigation Links */}
           <div className="p-4 space-y-1.5">
             {[
-              { id: 'exams', label: 'My Online Exams', icon: Calendar },
-              { id: 'results', label: 'My Results', icon: CheckCircle2 },
-              { id: 'profile', label: 'Profile & Password', icon: KeyRound }
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'exams', label: 'My Exams', icon: FileText },
+              { id: 'events', label: 'Events', icon: Calendar },
+              { id: 'profile', label: 'Student Profile', icon: Settings }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -290,6 +292,13 @@ export default function StudentDashboard() {
         {/* Dynamic Panel */}
         <div className="bg-white rounded-2xl border border-gray-150 p-6 md:p-8 shadow-sm">
           
+          {/* TAB: EVENTS */}
+          {activeTab === 'events' && (
+            <div className="animate-fade-in">
+              <StudentEvents />
+            </div>
+          )}
+
           {/* TAB: EXAMS */}
           {activeTab === 'exams' && (() => {
             const now = new Date();

@@ -8,37 +8,64 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 // --- RATE LIMITING HELPERS ---
-const checkRateLimit = async (identifier) => {
+const checkRateLimit = async (identifier, role = 'admin') => {
   const attempt = await LoginAttempt.findOne({ identifier });
   if (attempt) {
-    if (attempt.lock_until && new Date(attempt.lock_until) > new Date()) {
+    if (role === 'admin' && attempt.lock_until && new Date(attempt.lock_until) > new Date()) {
       return { blocked: true, blocked_until: attempt.lock_until };
     }
   }
   return { blocked: false };
 };
 
-const handleFailedLogin = async (identifier) => {
+const handleFailedLogin = async (identifier, role = 'admin') => {
   let attempt = await LoginAttempt.findOne({ identifier });
   if (!attempt) {
     attempt = new LoginAttempt({ identifier, attempts: 1 });
     await attempt.save();
+    return null;
   } else {
     attempt.attempts += 1;
-    let blockUntil = null;
-    if (attempt.attempts === 3) {
-      blockUntil = new Date();
-      blockUntil.setMinutes(blockUntil.getMinutes() + 5);
-    } else if (attempt.attempts > 3) {
-      blockUntil = new Date();
-      blockUntil.setMinutes(blockUntil.getMinutes() + (5 * (attempt.attempts - 2)));
+    
+    if (role === 'admin') {
+      let blockUntil = null;
+      if (attempt.attempts === 3) {
+        blockUntil = new Date();
+        blockUntil.setMinutes(blockUntil.getMinutes() + 5);
+      } else if (attempt.attempts > 3) {
+        blockUntil = new Date();
+        blockUntil.setMinutes(blockUntil.getMinutes() + (5 * (attempt.attempts - 2)));
+      }
+      attempt.lock_until = blockUntil;
+      attempt.last_attempt = new Date();
+      await attempt.save();
+      return blockUntil;
+    } else {
+      // For Teacher and Student
+      attempt.last_attempt = new Date();
+      await attempt.save();
+
+      if (attempt.attempts >= 3) {
+        // Suspend the account
+        let user;
+        if (role === 'teacher') {
+          user = await Teacher.findOneAndUpdate({ email: identifier }, { status: 'suspended' }, { new: true });
+        } else if (role === 'student') {
+          user = await Student.findOneAndUpdate({ id: identifier }, { status: 'suspended' }, { new: true });
+        }
+
+        if (user) {
+          const notif = new AdminNotification({
+            title: 'Account Suspended',
+            message: `${role === 'teacher' ? 'Teacher' : 'Student'} ${user.name} (${identifier}) is blocked due to this reason: Exceeded maximum login attempts with wrong password.`
+          });
+          await notif.save();
+        }
+        return 'suspended';
+      }
+      return null;
     }
-    attempt.lock_until = blockUntil;
-    attempt.last_attempt = new Date();
-    await attempt.save();
-    return blockUntil;
   }
-  return null;
 };
 
 const handleSuccessfulLogin = async (identifier) => {
@@ -132,20 +159,20 @@ exports.adminLogin = async (req, res) => {
   }
 
   try {
-    const rateLimit = await checkRateLimit(email);
+    const rateLimit = await checkRateLimit(email, 'admin');
     if (rateLimit.blocked) {
       return res.status(403).json({ message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
     }
 
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      await handleFailedLogin(email);
+      await handleFailedLogin(email, 'admin');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      const blockUntil = await handleFailedLogin(email);
+      const blockUntil = await handleFailedLogin(email, 'admin');
       if (blockUntil) {
         return res.status(403).json({ message: 'Too many failed attempts. Account blocked.', blocked_until: blockUntil });
       }
@@ -178,14 +205,14 @@ exports.teacherLogin = async (req, res) => {
   }
 
   try {
-    const rateLimit = await checkRateLimit(email);
+    const rateLimit = await checkRateLimit(email, 'teacher');
     if (rateLimit.blocked) {
       return res.status(403).json({ message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
     }
 
     const teacher = await Teacher.findOne({ email });
     if (!teacher) {
-      await handleFailedLogin(email);
+      await handleFailedLogin(email, 'teacher');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -198,9 +225,9 @@ exports.teacherLogin = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, teacher.password);
     if (!isMatch) {
-      const blockUntil = await handleFailedLogin(email);
-      if (blockUntil) {
-        return res.status(403).json({ message: 'Too many failed attempts. Account blocked.', blocked_until: blockUntil });
+      const suspendStatus = await handleFailedLogin(email, 'teacher');
+      if (suspendStatus === 'suspended') {
+        return res.status(403).json({ message: 'Your account has been suspended due to multiple failed login attempts. Contact support.' });
       }
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -238,14 +265,14 @@ exports.studentLogin = async (req, res) => {
   }
 
   try {
-    const rateLimit = await checkRateLimit(studentId);
+    const rateLimit = await checkRateLimit(studentId, 'student');
     if (rateLimit.blocked) {
       return res.status(403).json({ message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
     }
 
     const student = await Student.findOne({ id: studentId });
     if (!student) {
-      await handleFailedLogin(studentId);
+      await handleFailedLogin(studentId, 'student');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -258,9 +285,9 @@ exports.studentLogin = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
-      const blockUntil = await handleFailedLogin(studentId);
-      if (blockUntil) {
-        return res.status(403).json({ message: 'Too many failed attempts. Account blocked.', blocked_until: blockUntil });
+      const suspendStatus = await handleFailedLogin(studentId, 'student');
+      if (suspendStatus === 'suspended') {
+        return res.status(403).json({ message: 'Your account has been suspended due to multiple failed login attempts. Contact support.' });
       }
       return res.status(401).json({ message: 'Invalid credentials' });
     }

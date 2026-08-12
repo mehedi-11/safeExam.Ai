@@ -158,8 +158,22 @@ exports.deleteTeacher = async (req, res) => {
 
 exports.getStudents = async (req, res) => {
   try {
-    const students = await Student.find().select('id name email profile_image status');
-    return res.json(students);
+    const students = await Student.find().select('id name email profile_image status joining_date');
+    const stats = await StudentExam.aggregate([
+      { $group: { _id: "$student_id", totalExams: { $sum: 1 }, avgScore: { $avg: "$total_score" } } }
+    ]);
+    const statsMap = {};
+    stats.forEach(s => { statsMap[s._id] = s; });
+
+    const response = students.map(st => {
+      const obj = st.toObject();
+      const s = statsMap[obj.id] || { totalExams: 0, avgScore: 0 };
+      obj.totalExams = s.totalExams;
+      obj.avgScore = s.avgScore ? Math.round(s.avgScore) : 0;
+      return obj;
+    });
+
+    return res.json(response);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching students' });
