@@ -31,16 +31,19 @@ exports.createEvent = async (req, res) => {
 exports.getEvents = async (req, res) => {
   try {
     let events = [];
-    if (req.user.role === 'admin') {
-      events = await Event.find().sort({ created_at: -1 });
-    } else if (req.user.role === 'teacher') {
-      // Teachers might only see their own events or all. Let's say they see all for now, or just their own.
-      // Usually, teachers might collaborate. Let's give them all events.
-      events = await Event.find().sort({ created_at: -1 });
+    if (req.user.role === 'admin' || req.user.role === 'teacher') {
+      events = await Event.find().sort({ created_at: -1 }).lean();
     } else if (req.user.role === 'student') {
-      events = await Event.find({ status: 'live' }).sort({ event_date: 1 });
+      events = await Event.find({ status: 'live' }).sort({ event_date: 1 }).lean();
     }
-    return res.json(events);
+
+    // Attach registration count
+    const eventsWithCounts = await Promise.all(events.map(async (evt) => {
+      const count = await EventRegistration.countDocuments({ event_id: evt._id });
+      return { ...evt, registration_count: count };
+    }));
+
+    return res.json(eventsWithCounts);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error fetching events' });
@@ -70,7 +73,7 @@ exports.getEventDetails = async (req, res) => {
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
     let isRegistered = false;
-    if (req.user.role === 'student') {
+    if (req.user && req.user.role === 'student') {
       const reg = await EventRegistration.findOne({ event_id: event._id, student_id: req.user.id });
       if (reg) isRegistered = true;
     }
@@ -84,8 +87,9 @@ exports.getEventDetails = async (req, res) => {
 
 exports.registerForEvent = async (req, res) => {
   try {
-    if (req.user.role !== 'student') {
-      return res.status(403).json({ message: 'Only students can register' });
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) {
+      return res.status(400).json({ message: 'Name, email, and phone are required.' });
     }
 
     const event = await Event.findById(req.params.id);
@@ -93,14 +97,22 @@ exports.registerForEvent = async (req, res) => {
       return res.status(404).json({ message: 'Event not found or not live' });
     }
 
-    const existingReg = await EventRegistration.findOne({ event_id: event._id, student_id: req.user.id });
+    // Check existing registration by email
+    const existingReg = await EventRegistration.findOne({ event_id: event._id, email });
     if (existingReg) {
-      return res.status(400).json({ message: 'Already registered' });
+      return res.status(400).json({ message: 'Already registered with this email' });
     }
+
+    // Generate a 6 digit security code
+    const security_code = Math.floor(100000 + Math.random() * 900000).toString();
 
     const reg = new EventRegistration({
       event_id: event._id,
-      student_id: req.user.id
+      student_id: req.user ? req.user.id : undefined,
+      name,
+      email,
+      phone,
+      security_code
     });
     await reg.save();
 
@@ -121,5 +133,49 @@ exports.getEventRegistrations = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error fetching registrations' });
+  }
+};
+
+exports.updateEvent = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    const { title, description, event_date, end_date, image, status } = req.body;
+    
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    if (title) event.title = title;
+    if (description) event.description = description;
+    if (event_date) event.event_date = event_date;
+    if (end_date) event.end_date = end_date;
+    if (image !== undefined) event.image = image;
+    if (status) event.status = status;
+
+    await event.save();
+    return res.json({ message: 'Event updated successfully', event });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error updating event' });
+  }
+};
+
+exports.deleteEvent = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    
+    const event = await Event.findByIdAndDelete(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    // Optional: Delete associated registrations? 
+    await EventRegistration.deleteMany({ event_id: req.params.id });
+
+    return res.json({ message: 'Event deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error deleting event' });
   }
 };

@@ -13,7 +13,7 @@ export default {
           200: '#ffcfc3',
           300: '#ffa794',
           400: '#ff7256',
-          500: '#FF6347', // Primary Tomato
+          500: '#FF6347',
           600: '#e0482c',
           700: '#bc361d',
           800: '#9b2e1b',
@@ -47,19 +47,6 @@ export default {
           900: '#111111', // Black Text
         }
       },
-      fontFamily: {
-        sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
-      },
-      borderRadius: {
-        'sm': '0px',
-        DEFAULT: '0px',
-        'md': '0px',
-        'lg': '0px',
-        'xl': '0px',
-        '2xl': '0px',
-        '3xl': '0px',
-        'full': '9999px',
-      }
     },
   },
   plugins: [],

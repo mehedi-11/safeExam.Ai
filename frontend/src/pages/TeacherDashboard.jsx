@@ -43,8 +43,8 @@ export default function TeacherDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [examFilter, setExamFilter] = useState("all");
 
-  // Data State
   const [exams, setExams] = useState([]);
+  const [eventsList, setEventsList] = useState([]);
   const [proctoringLogs, setProctoringLogs] = useState([]);
   const [rawLogs, setRawLogs] = useState("");
   const [profile, setProfile] = useState({
@@ -96,6 +96,8 @@ export default function TeacherDashboard() {
     course_code: "",
     university_name: "",
     max_attempts: 1,
+    event_id: "",
+    exam_password: "",
   });
   const [isEditingExam, setIsEditingExam] = useState(false);
 
@@ -141,14 +143,16 @@ export default function TeacherDashboard() {
     setLoading(true);
     setError("");
     try {
-      const [eRes, pRes] = await Promise.all([
+      const [eRes, pRes, evRes] = await Promise.all([
         api.get("/teacher/exams"),
         api.get("/teacher/profile"),
+        api.get("/events").catch(() => ({ data: [] })),
       ]);
 
       setExams(eRes.data);
       setProfile(pRes.data);
       setProfileName(pRes.data.name);
+      setEventsList(evRes.data || []);
 
       await fetchProctoringData();
     } catch (err) {
@@ -810,7 +814,10 @@ export default function TeacherDashboard() {
                         course_code: "",
                         university_name: "",
                         max_attempts: 1,
+                        event_id: "",
+                        exam_password: "",
                       });
+                      setExamTypeTab("academic");
                       setIsEditingExam(false);
                       setIsExamModalOpen(true);
                     }}
@@ -963,7 +970,10 @@ export default function TeacherDashboard() {
                                   course_code: exam.course_code || "",
                                   university_name: exam.university_name || "",
                                   max_attempts: exam.max_attempts || 1,
+                                  event_id: exam.event_id || "",
+                                  exam_password: exam.exam_password || "",
                                 });
+                                setExamTypeTab(exam.event_id ? "event" : "academic");
                                 setIsEditingExam(true);
                                 setIsExamModalOpen(true);
                               }}
@@ -1418,9 +1428,67 @@ export default function TeacherDashboard() {
           </button>
         </form>
         ) : (
-          <div className="text-center py-10 text-gray-400 text-sm">
-            Event form will be implemented here.
-          </div>
+          <form onSubmit={handleSaveExam} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
+                Select Event
+              </label>
+              <select
+                required
+                value={examForm.event_id}
+                onChange={(e) => {
+                  const selectedEvent = eventsList.find(ev => ev._id === e.target.value);
+                  setExamForm({ 
+                    ...examForm, 
+                    event_id: e.target.value,
+                    title: selectedEvent ? selectedEvent.title : ""
+                  });
+                }}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+              >
+                <option value="">-- Choose an Event --</option>
+                {eventsList.map(ev => (
+                  <option key={ev._id} value={ev._id}>{ev.title}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
+                  Duration (Minutes)
+                </label>
+                <input
+                  type="number"
+                  required
+                  placeholder="e.g. 45"
+                  min="1"
+                  value={examForm.duration_minutes}
+                  onChange={(e) =>
+                    setExamForm({ ...examForm, duration_minutes: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
+                  Exam Password (Secret Code)
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. EVENT123"
+                  value={examForm.exam_password}
+                  onChange={(e) =>
+                    setExamForm({ ...examForm, exam_password: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                />
+              </div>
+            </div>
+            <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
+              Create Event Exam
+            </button>
+          </form>
         )}
       </Modal>
 

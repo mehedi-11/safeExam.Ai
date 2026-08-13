@@ -75,7 +75,22 @@ exports.requestEnrollment = async (req, res) => {
 
 exports.getExams = async (req, res) => {
   try {
-    const exams = await Exam.find().lean();
+    const rawExams = await Exam.find().lean();
+    
+    // Auto expire live exams
+    const now = new Date();
+    const exams = rawExams.map(exam => {
+      if (exam.is_live) {
+        const examDate = new Date(exam.exam_date);
+        const durationMs = (exam.duration_minutes + 5) * 60000;
+        const expireTime = new Date(examDate.getTime() + durationMs);
+        if (now > expireTime) {
+          exam.is_live = false;
+        }
+      }
+      return exam;
+    });
+
     const studentExams = await StudentExam.find({ student_id: req.user.id }).lean();
     
     const examsMap = new Map();
@@ -156,12 +171,22 @@ exports.startExam = async (req, res) => {
     const examDetails = await Exam.findById(examId);
     if (!examDetails) return res.status(404).json({ message: 'Exam not found' });
 
-    if (examDetails.is_live) {
+    let actualIsLive = examDetails.is_live;
+    if (actualIsLive) {
+      const examDate = new Date(examDetails.exam_date);
+      const durationMs = (examDetails.duration_minutes + 5) * 60000;
+      const expireTime = new Date(examDate.getTime() + durationMs);
+      if (new Date() > expireTime) {
+        actualIsLive = false;
+      }
+    }
+
+    if (actualIsLive) {
       if (!exam_password || exam_password !== examDetails.exam_password) {
         return res.status(403).json({ message: 'Invalid or missing exam password.' });
       }
     } else {
-       return res.status(403).json({ message: 'This exam is not currently live.' });
+       return res.status(403).json({ message: 'This exam is not currently live or has expired.' });
     }
 
     const max_attempts = examDetails.max_attempts || 1;

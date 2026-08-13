@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Modal from '../components/Modal';
-import { Calendar, Clock, UserCheck, ArrowLeft, Info, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, UserCheck, ArrowLeft, Info, CheckCircle2, CheckCircle } from 'lucide-react';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -10,7 +10,12 @@ const EventDetails = () => {
   const [event, setEvent] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
+  
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  
+  const [regForm, setRegForm] = useState({ name: '', email: '', phone: '' });
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     fetchEventDetails();
@@ -28,16 +33,23 @@ const EventDetails = () => {
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setEmailError("");
+
+    if (!regForm.email.includes('@')) {
+      setEmailError("Invalid email. An '@' symbol is required.");
+      return;
+    }
+
     try {
-      await api.post(`/events/${id}/register`);
+      await api.post(`/events/${id}/register`, regForm);
       setIsRegisterModalOpen(false);
       setIsRegistered(true);
-      alert('Registered successfully!');
+      setIsSuccessModalOpen(true);
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || 'Failed to register');
-      setIsRegisterModalOpen(false);
     }
   };
 
@@ -124,7 +136,11 @@ const EventDetails = () => {
               <h3 className="text-xl font-bold text-dark-900">Interested in joining?</h3>
               <p className="text-gray-500 text-sm mb-4">Secure your spot for this event by registering now.</p>
               <button 
-                onClick={() => setIsRegisterModalOpen(true)}
+                onClick={() => {
+                  setRegForm({ name: '', email: '', phone: '' });
+                  setEmailError("");
+                  setIsRegisterModalOpen(true);
+                }}
                 className="bg-tomato-500 hover:bg-tomato-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm transition-colors inline-flex items-center gap-2"
               >
                 <UserCheck size={18} /> Register for Event
@@ -134,13 +150,78 @@ const EventDetails = () => {
         </div>
       </div>
 
-      <Modal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} title="Confirm Registration">
-        <div className="p-4 space-y-4">
-          <p className="text-sm text-gray-600">Are you sure you want to register for <strong>{event.title}</strong>?</p>
-          <div className="flex gap-4">
-            <button onClick={() => setIsRegisterModalOpen(false)} className="flex-1 py-2 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition-colors text-sm">Cancel</button>
-            <button onClick={handleRegister} className="flex-1 py-2 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm text-sm">Confirm</button>
+      {/* Registration Form Modal */}
+      <Modal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} title="Event Registration">
+        <form onSubmit={handleRegisterSubmit} className="space-y-4">
+          <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-xs font-semibold flex items-start gap-2 border border-yellow-200">
+            <Info size={16} className="mt-0.5 shrink-0" />
+            <p>Please use your original email. A security code will be sent to this email which is required to log into the event exam.</p>
           </div>
+          
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name</label>
+            <input 
+              type="text" 
+              required 
+              value={regForm.name} 
+              onChange={e => setRegForm({...regForm, name: e.target.value})} 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              placeholder="e.g. John Doe"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Email Address</label>
+            <input 
+              type="text" 
+              required 
+              value={regForm.email} 
+              onChange={e => {
+                setRegForm({...regForm, email: e.target.value});
+                if(emailError) setEmailError("");
+              }} 
+              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-tomato-500'}`} 
+              placeholder="johndoe@example.com"
+            />
+            {emailError && <p className="text-red-500 text-xs font-bold mt-1">{emailError}</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number</label>
+            <input 
+              type="tel" 
+              required 
+              value={regForm.phone} 
+              onChange={e => setRegForm({...regForm, phone: e.target.value})} 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              placeholder="+8801XXXXXXXXX"
+            />
+          </div>
+
+          <div className="pt-2">
+            <button type="submit" className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm">
+              Submit Registration
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)}>
+        <div className="py-6 text-center space-y-4">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <CheckCircle size={40} className="text-green-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-dark-900">Registration Successful!</h2>
+          <p className="text-gray-600 max-w-sm mx-auto">
+            Please check your email. A <strong>security code</strong> has been sent to <span className="font-semibold text-dark-900">{regForm.email}</span>. You will need this code to login to the event exam.
+          </p>
+          <button 
+            onClick={() => setIsSuccessModalOpen(false)} 
+            className="mt-6 px-8 py-2.5 bg-gray-100 text-gray-800 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+          >
+            Close
+          </button>
         </div>
       </Modal>
     </div>

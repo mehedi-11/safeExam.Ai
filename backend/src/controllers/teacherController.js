@@ -92,7 +92,7 @@ exports.getExams = async (req, res) => {
 };
 
 exports.createExam = async (req, res) => {
-  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts } = req.body;
+  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, event_id, course_name, course_code, university_name, max_attempts } = req.body;
   if (!title || !duration_minutes) {
     return res.status(400).json({ message: 'Title and duration are required' });
   }
@@ -106,6 +106,7 @@ exports.createExam = async (req, res) => {
       must_on_camera: must_on_camera ?? true,
       must_on_microphone: must_on_microphone ?? true,
       exam_password: exam_password || null,
+      event_id: event_id || null,
       course_name: course_name || null,
       course_code: course_code || null,
       university_name: university_name || null,
@@ -130,7 +131,7 @@ exports.createExam = async (req, res) => {
 
 exports.updateExam = async (req, res) => {
   const { id } = req.params;
-  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, course_name, course_code, university_name, max_attempts } = req.body;
+  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, event_id, course_name, course_code, university_name, max_attempts } = req.body;
   
   if (!title || !duration_minutes) {
     return res.status(400).json({ message: 'Title and duration are required' });
@@ -142,6 +143,7 @@ exports.updateExam = async (req, res) => {
       must_on_camera: must_on_camera ?? true, 
       must_on_microphone: must_on_microphone ?? true, 
       exam_password: exam_password || null, 
+      event_id: event_id || null,
       course_name: course_name || null, 
       course_code: course_code || null, 
       university_name: university_name || null, 

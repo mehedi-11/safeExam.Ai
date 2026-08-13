@@ -26,6 +26,26 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    next();
+  }
+};
+
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     const userRole = req.user?.role?.toLowerCase()?.trim();
@@ -39,5 +59,6 @@ const authorizeRoles = (...roles) => {
 
 module.exports = {
   verifyToken,
+  optionalAuth,
   authorizeRoles
 };

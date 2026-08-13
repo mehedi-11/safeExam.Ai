@@ -12,7 +12,7 @@ export default function StudentDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const [activeTab, setActiveTab] = useState('exams');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Exam Password Modal State
@@ -292,6 +292,161 @@ export default function StudentDashboard() {
         {/* Dynamic Panel */}
         <div className="bg-white rounded-2xl border border-gray-150 p-6 md:p-8 shadow-sm">
           
+          {/* TAB: DASHBOARD */}
+          {activeTab === 'dashboard' && (() => {
+            const liveExamsCount = exams.filter(e => e.is_live && e.exam_status !== 'completed').length;
+            const completedExams = exams.filter(e => e.exam_status === 'completed' && e.score !== null && !isNaN(e.score));
+            const completedCount = completedExams.length;
+            const avgPercentage = completedCount > 0 
+              ? (completedExams.reduce((sum, e) => {
+                  const maxMarks = e.total_marks || 100; // fallback to 100 if undefined
+                  return sum + ((Number(e.score) / maxMarks) * 100);
+                }, 0) / completedCount).toFixed(1)
+              : 0;
+            
+            let suggestionTitle = "Keep going!";
+            let suggestionText = "Take some exams to start seeing your performance insights and suggestions here.";
+            let suggestionColor = "text-blue-700";
+            let suggestionBg = "bg-blue-50 border-blue-200";
+
+            if (completedCount > 0) {
+              if (avgPercentage >= 80) {
+                suggestionTitle = "Excellent Performance!";
+                suggestionText = "You have an outstanding average score. Keep up the great work and consider taking advanced courses to challenge yourself further.";
+                suggestionColor = "text-green-700";
+                suggestionBg = "bg-green-50 border-green-200";
+              } else if (avgPercentage >= 50) {
+                suggestionTitle = "Good, but can improve!";
+                suggestionText = "You are doing well, but there's room for improvement. Focus on your weaker topics and review past mistakes to boost your score.";
+                suggestionColor = "text-yellow-700";
+                suggestionBg = "bg-yellow-50 border-yellow-200";
+              } else {
+                suggestionTitle = "Needs Attention!";
+                suggestionText = "Your average score is quite low. We strongly suggest revising core concepts before attempting more exams. Don't hesitate to ask your instructors for help.";
+                suggestionColor = "text-red-700";
+                suggestionBg = "bg-red-50 border-red-200";
+              }
+            }
+
+            return (
+              <div className="space-y-6 animate-fade-in">
+                <h3 className="text-xl font-bold text-dark-900 mb-6">Dashboard Overview</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 bg-tomato-100 text-tomato-500 rounded-xl flex items-center justify-center shrink-0">
+                      <Play size={24} />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Live Exams</p>
+                      <h4 className="text-2xl font-black text-dark-900">{liveExamsCount}</h4>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-100 text-green-500 rounded-xl flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={24} />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Completed Exams</p>
+                      <h4 className="text-2xl font-black text-dark-900">{completedCount}</h4>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+                      <GraduationCap size={24} />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Average %</p>
+                      <h4 className="text-2xl font-black text-dark-900">{avgPercentage}%</h4>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`p-6 rounded-2xl border ${suggestionBg} flex items-start gap-4 mt-8 shadow-sm`}>
+                  <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-sm`}>
+                    <ShieldAlert size={20} className={suggestionColor} />
+                  </div>
+                  <div>
+                    <h4 className={`text-sm font-bold ${suggestionColor} mb-1 uppercase tracking-wider`}>Insight & Suggestion</h4>
+                    <h5 className={`font-black ${suggestionColor} mb-2`}>{suggestionTitle}</h5>
+                    <p className={`text-sm ${suggestionColor} opacity-90 leading-relaxed font-medium`}>{suggestionText}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                  {/* Recent Results */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-lg font-bold text-dark-900">Recent Results</h4>
+                      <button onClick={() => setActiveTab('results')} className="text-tomato-500 text-xs font-bold hover:underline">View All</button>
+                    </div>
+                    {completedExams.length === 0 ? (
+                      <div className="bg-gray-50 border border-gray-150 rounded-xl p-5 text-center text-xs text-gray-500">
+                        No recent results.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {completedExams.sort((a, b) => new Date(b.finished_at) - new Date(a.finished_at)).slice(0, 3).map(exam => (
+                          <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+                            <div className="min-w-0 pr-4">
+                              <h5 className="font-bold text-dark-900 text-sm truncate">{exam.title}</h5>
+                              <p className="text-[11px] text-gray-500 mt-0.5">{new Date(exam.finished_at).toLocaleDateString()}</p>
+                            </div>
+                            <div className="shrink-0 bg-green-50 text-green-700 font-black text-sm px-3 py-1.5 rounded-lg border border-green-200">
+                              {exam.score}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Upcoming Schedule */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-lg font-bold text-dark-900">Upcoming Schedule</h4>
+                      <button onClick={() => setActiveTab('exams')} className="text-tomato-500 text-xs font-bold hover:underline">View All</button>
+                    </div>
+                    {(() => {
+                      const upcoming = exams.filter(e => !e.is_live && e.exam_status !== 'completed' && new Date(e.exam_date) > new Date())
+                                            .sort((a, b) => new Date(a.exam_date) - new Date(b.exam_date))
+                                            .slice(0, 3);
+                      if (upcoming.length === 0) {
+                        return (
+                          <div className="bg-gray-50 border border-gray-150 rounded-xl p-5 text-center text-xs text-gray-500">
+                            No upcoming exams scheduled.
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="space-y-3">
+                          {upcoming.map(exam => (
+                            <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-sm">
+                              <div className="bg-blue-50 border border-blue-100 w-12 h-12 rounded-lg flex flex-col items-center justify-center shrink-0">
+                                <span className="text-[10px] font-bold text-blue-500 uppercase">{new Date(exam.exam_date).toLocaleString('default', { month: 'short' })}</span>
+                                <span className="text-lg font-black text-blue-700 leading-none">{new Date(exam.exam_date).getDate()}</span>
+                              </div>
+                              <div className="min-w-0">
+                                <h5 className="font-bold text-dark-900 text-sm truncate">{exam.title}</h5>
+                                <div className="flex items-center gap-3 mt-1 text-[11px] text-gray-500 font-medium">
+                                  <span className="flex items-center gap-1"><Clock size={12}/> {new Date(exam.exam_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                  <span className="flex items-center gap-1"><Hourglass size={12}/> {exam.duration_minutes} Mins</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+              </div>
+            );
+          })()}
+
           {/* TAB: EVENTS */}
           {activeTab === 'events' && (
             <div className="animate-fade-in">
@@ -310,10 +465,6 @@ export default function StudentDashboard() {
                 (exam.course_code || '').toLowerCase().includes(q) ||
                 (exam.title || '').toLowerCase().includes(q)
               );
-              
-              const examDate = new Date(exam.exam_date);
-              const durationMs = (exam.duration_minutes + 5) * 60000;
-              const expireTime = new Date(examDate.getTime() + durationMs);
               
               const matchesFilter = exam.is_live;
               

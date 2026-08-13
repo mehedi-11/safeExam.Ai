@@ -35,7 +35,7 @@
 }
 
 .modal-content {
-  @apply bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-gray-100 overflow-hidden transform scale-95 animate-scale-up;
+  @apply bg-white rounded-2xl shadow-2xl w-full border border-gray-100 overflow-hidden transform scale-95 animate-scale-up;
 }
 
 /* Animations */
@@ -67,4 +67,9 @@
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300 rounded-full hover:bg-tomato-300 transition-colors;
+}
+
+/* Custom Quill Editor Height */
+.quill-large .ql-editor {
+  min-height: 250px;
 }

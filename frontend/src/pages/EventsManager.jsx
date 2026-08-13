@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Plus, Clock, Users, Play, Image as ImageIcon } from 'lucide-react';
+import { Plus, Play, Image as ImageIcon, Edit, Trash2, Search } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import api from '../api/axiosConfig';
@@ -9,7 +9,18 @@ const EventsManager = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ title: '', description: '', event_date: '', end_date: '', image: '' });
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [eventFilter, setEventFilter] = useState("all");
+  
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    description: '', 
+    event_date: '', 
+    end_date: '', 
+    image: '',
+    status: 'live'
+  });
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -27,10 +38,43 @@ const EventsManager = () => {
     }
   };
 
-  const handleCreate = async (e) => {
+  const openCreateModal = () => {
+    setEditingEventId(null);
+    setFormData({ title: '', description: '', event_date: '', end_date: '', image: '', status: 'live' });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (evt) => {
+    setEditingEventId(evt._id);
+    
+    const startDate = evt.event_date ? new Date(evt.event_date).toISOString().slice(0, 16) : '';
+    const endDate = evt.end_date ? new Date(evt.end_date).toISOString().slice(0, 10) : '';
+
+    setFormData({ 
+      title: evt.title, 
+      description: evt.description, 
+      event_date: startDate, 
+      end_date: endDate, 
+      image: evt.image || '',
+      status: evt.status || 'live'
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+    try {
+      await api.delete(`/events/${id}`);
+      fetchEvents();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete event');
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Set end_date time to match event_date time
       let finalEndDate = formData.end_date;
       if (formData.event_date && formData.end_date) {
         const start = new Date(formData.event_date);
@@ -39,23 +83,30 @@ const EventsManager = () => {
         finalEndDate = end.toISOString();
       }
 
-      await api.post('/events', { ...formData, end_date: finalEndDate });
+      const payload = { ...formData, end_date: finalEndDate };
+
+      if (editingEventId) {
+        await api.put(`/events/${editingEventId}`, payload);
+      } else {
+        await api.post('/events', payload);
+      }
+      
       setIsModalOpen(false);
-      setFormData({ title: '', description: '', event_date: '', end_date: '', image: '' });
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert('Failed to create event');
+      alert(`Failed to ${editingEventId ? 'update' : 'create'} event`);
     }
   };
 
-  const handleMakeLive = async (id) => {
+  const handleToggleStatus = async (evt) => {
     try {
-      await api.put(`/events/${id}/live`);
+      const newStatus = evt.status === 'live' ? 'closed' : 'live';
+      await api.put(`/events/${evt._id}`, { status: newStatus });
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert('Failed to make event live');
+      alert('Failed to update event status');
     }
   };
 
@@ -92,89 +143,201 @@ const EventsManager = () => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to low quality JPEG (0.5 quality)
         const lowQualityImage = canvas.toDataURL('image/jpeg', 0.5);
         setFormData({ ...formData, image: lowQualityImage });
       };
     };
   };
 
+  const filteredEvents = events.filter((evt) => {
+    const matchesSearch = evt.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+    let matchesFilter = false;
+    if (eventFilter === "all") matchesFilter = true;
+    else if (eventFilter === "live") matchesFilter = evt.status === 'live';
+    else if (eventFilter === "closed") matchesFilter = evt.status === 'closed' || evt.status === 'draft';
+
+    return matchesSearch && matchesFilter;
+  });
+
   if (loading) return <div className="text-center py-10">Loading Events...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-dark-900 flex items-center gap-2">
-          <Calendar className="text-tomato-500" /> My Events
-        </h2>
-        <button onClick={() => setIsModalOpen(true)} className="tomato-btn">
-          <Plus size={18} /> Create Event
-        </button>
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="flex items-center gap-6">
+          <h3 className="text-lg font-bold text-dark-900">
+            Manage Events
+          </h3>
+          <div className="flex bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setEventFilter("all")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+            >
+              All Events
+            </button>
+            <button
+              onClick={() => setEventFilter("live")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+            >
+              {eventFilter === "live" && (
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              )}
+              Active
+            </button>
+            <button
+              onClick={() => setEventFilter("closed")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+            >
+              Inactive
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
+            />
+            <Search
+              className="absolute left-3 top-2.5 text-gray-400"
+              size={16}
+            />
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="tomato-btn py-2 text-xs flex items-center gap-1"
+          >
+            <Plus size={14} />
+            <span>Create Event</span>
+          </button>
+        </div>
       </div>
 
-      {events.length === 0 ? (
-        <div className="bg-white p-10 rounded-2xl border border-gray-200 text-center text-gray-500">
-          No events created yet.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((evt) => (
-            <div key={evt._id} className="card-hover p-6 flex flex-col justify-between h-full bg-white relative">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                    evt.status === 'live' ? 'bg-green-100 text-green-700' : 
-                    evt.status === 'draft' ? 'bg-gray-100 text-gray-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {evt.status}
-                  </span>
-                </div>
-                {evt.image && (
-                  <div className="mb-4 rounded-xl overflow-hidden h-32 w-full bg-gray-100 border border-gray-200">
-                    <img src={evt.image} alt={evt.title} className="w-full h-full object-cover" />
-                  </div>
-                )}
-                <h3 className="text-lg font-bold text-dark-900 mb-2 line-clamp-2">{evt.title}</h3>
-                <div className="text-sm text-gray-500 mb-4 line-clamp-3 prose prose-sm" dangerouslySetInnerHTML={{ __html: evt.description }}></div>
-                <div className="space-y-2 mb-6">
-                  <div className="flex items-center text-sm text-gray-600 gap-2">
-                    <Clock size={16} className="text-green-500" />
-                    <span><strong className="font-semibold text-gray-700">Starts:</strong> {new Date(evt.event_date).toLocaleString()}</span>
-                  </div>
-                  {evt.end_date && (
-                    <div className="flex items-center text-sm text-gray-600 gap-2">
-                      <Clock size={16} className="text-red-500" />
-                      <span><strong className="font-semibold text-gray-700">Ends:</strong> {new Date(evt.end_date).toLocaleString()}</span>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                Image
+              </th>
+              <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                Event Title
+              </th>
+              <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                Date & Time
+              </th>
+              <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-center">
+                Registrations
+              </th>
+              <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                Status
+              </th>
+              <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredEvents.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="5"
+                  className="py-8 text-center text-xs text-gray-400"
+                >
+                  No events found.
+                </td>
+              </tr>
+            ) : (
+              filteredEvents.map((evt) => (
+                <tr
+                  key={evt._id}
+                  className="border-b border-gray-100 hover:bg-gray-50/50"
+                >
+                  <td className="py-3 px-4">
+                    {evt.image ? (
+                      <img src={evt.image} alt={evt.title} className="w-16 h-12 rounded object-cover border border-gray-200" />
+                    ) : (
+                      <div className="w-16 h-12 rounded bg-gray-100 flex items-center justify-center border border-gray-200">
+                        <ImageIcon size={16} className="text-gray-400" />
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 font-bold text-sm text-dark-900">
+                    {evt.title}
+                  </td>
+                  <td className="py-3 px-4 text-xs text-gray-600">
+                    {new Date(evt.event_date).toLocaleString()}
+                    {evt.end_date && (
+                      <>
+                        <br />
+                        <span className="text-gray-400">
+                          Ends: {new Date(evt.end_date).toLocaleString()}
+                        </span>
+                      </>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-100">
+                      {evt.registration_count || 0}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => handleToggleStatus(evt)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                          evt.status === 'live' ? 'bg-tomato-500' : 'bg-gray-300'
+                        }`}
+                        title={`Toggle to ${evt.status === 'live' ? 'Inactive' : 'Active'}`}
+                      >
+                        <span className="sr-only">Toggle status</span>
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            evt.status === 'live' ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${evt.status === 'live' ? 'text-tomato-600' : 'text-gray-500'}`}>
+                        {evt.status === 'live' ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </td>
+                  <td className="py-3 px-4 text-right space-x-2">
+                    <button
+                      onClick={() => openEditModal(evt)}
+                      className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Edit Event"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(evt._id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete Event"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-              <div className="flex gap-2">
-                {evt.status === 'draft' && (
-                  <button 
-                    onClick={() => handleMakeLive(evt._id)}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
-                  >
-                    <Play size={14} /> Make Live
-                  </button>
-                )}
-                {/* View details button maybe later */}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create Event">
-        <form onSubmit={handleCreate} className="space-y-4">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingEventId ? "Edit Event" : "Create Event"} maxWidth="max-w-[70%]">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Title</label>
             <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Description</label>
-            <ReactQuill theme="snow" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} className="bg-white rounded-xl" />
+            <ReactQuill theme="snow" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} className="bg-white rounded-xl quill-large" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -186,6 +349,7 @@ const EventsManager = () => {
               <input type="date" required value={formData.end_date} onChange={e => setFormData({...formData, end_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
             </div>
           </div>
+          
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Image</label>
             <div 
@@ -215,7 +379,7 @@ const EventsManager = () => {
               onChange={handleImageUpload} 
             />
           </div>
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">Save Event</button>
+          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">{editingEventId ? "Update Event" : "Save Event"}</button>
         </form>
       </Modal>
     </div>
