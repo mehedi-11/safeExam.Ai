@@ -42,6 +42,7 @@ export default function TeacherDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [examFilter, setExamFilter] = useState("all");
+  const [examCategoryFilter, setExamCategoryFilter] = useState("academic");
 
   const [exams, setExams] = useState([]);
   const [eventsList, setEventsList] = useState([]);
@@ -83,6 +84,13 @@ export default function TeacherDashboard() {
   const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
   const [isAnswersModalOpen, setIsAnswersModalOpen] = useState(false);
   const [isNoQuestionsModalOpen, setIsNoQuestionsModalOpen] = useState(false);
+  const [isStopExamModalOpen, setIsStopExamModalOpen] = useState(false);
+  const [examToStopId, setExamToStopId] = useState(null);
+  
+  const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
+  const [selectedEventRegistrations, setSelectedEventRegistrations] = useState([]);
+  const [registrationsLoading, setRegistrationsLoading] = useState(false);
+  const [selectedEventTitle, setSelectedEventTitle] = useState("");
 
   // Forms
   const [examForm, setExamForm] = useState({
@@ -113,7 +121,6 @@ export default function TeacherDashboard() {
     correct_option: "A",
   });
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
-  const [examTypeTab, setExamTypeTab] = useState('academic');
 
   const [liveForm, setLiveForm] = useState({ password: "" });
 
@@ -201,7 +208,25 @@ export default function TeacherDashboard() {
 
   const triggerSuccess = (msg) => {
     setSuccess(msg);
-    setTimeout(() => setSuccess(""), 4000);
+    setTimeout(() => {
+      setSuccess("");
+    }, 3000);
+  };
+
+  const fetchRegistrations = async (eventId, eventTitle) => {
+    setSelectedEventTitle(eventTitle);
+    setIsRegistrationsModalOpen(true);
+    setRegistrationsLoading(true);
+    try {
+      const res = await api.get(`/events/${eventId}/registrations`);
+      setSelectedEventRegistrations(res.data);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to fetch registrations');
+      setSelectedEventRegistrations([]);
+    } finally {
+      setRegistrationsLoading(false);
+    }
   };
 
   // --- Profile Upload Action ---
@@ -306,18 +331,20 @@ export default function TeacherDashboard() {
   };
 
   const handleStopLive = async (id) => {
-    if (
-      !window.confirm(
-        "Stop this exam? Students will no longer be able to enter.",
-      )
-    )
-      return;
+    setExamToStopId(id);
+    setIsStopExamModalOpen(true);
+  };
+
+  const confirmStopLive = async () => {
+    if (!examToStopId) return;
     try {
-      await api.post(`/teacher/exams/${id}/live`, {
+      await api.post(`/teacher/exams/${examToStopId}/live`, {
         is_live: false,
         exam_password: "",
       });
       triggerSuccess("Exam stopped.");
+      setIsStopExamModalOpen(false);
+      setExamToStopId(null);
       fetchData();
     } catch (err) {
       setError("Error stopping exam");
@@ -421,7 +448,7 @@ export default function TeacherDashboard() {
     try {
       await api.put(`/teacher/exams/${examId}/publish`, { results_published: !currentStatus });
       triggerSuccess(`Exam results ${!currentStatus ? 'published' : 'unpublished'} successfully!`);
-      fetchExams(); // to update the state of results_published in exams array
+      fetchData(); 
     } catch (err) {
       setError("Error updating publish status");
     }
@@ -610,22 +637,43 @@ export default function TeacherDashboard() {
       <div className="flex-grow flex-1 min-w-0 p-6 md:p-10 max-h-screen overflow-y-auto">
         {/* Header Summary */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-dark-900">
-              Teacher Console
-            </h1>
-            <p className="text-gray-400 text-sm">
-              Schedule tests, write questions, and monitor real-time integrity
-              logs.
-            </p>
+          <div className="w-full flex flex-col gap-6">
+            <div className="flex justify-between items-start w-full">
+              <div>
+                <h1 className="text-3xl font-bold text-dark-900">
+                  Teacher Console
+                </h1>
+                <p className="text-gray-400 text-sm">
+                  Schedule tests, write questions, and monitor real-time integrity
+                  logs.
+                </p>
+              </div>
+              <button
+                onClick={fetchData}
+                className="tomato-btn-outline py-2 text-xs flex items-center gap-1.5 shrink-0"
+              >
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                <span>Reload data</span>
+              </button>
+            </div>
+            
+            {activeTab === 'add_exam' && (
+              <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-sm">
+                <button
+                  onClick={() => setExamCategoryFilter("academic")}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-dark-900 scale-95"}`}
+                >
+                  Academic Exams
+                </button>
+                <button
+                  onClick={() => setExamCategoryFilter("event")}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-dark-900 scale-95"}`}
+                >
+                  Event Exams
+                </button>
+              </div>
+            )}
           </div>
-          <button
-            onClick={fetchData}
-            className="tomato-btn-outline py-2 text-xs flex items-center gap-1.5"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            <span>Reload data</span>
-          </button>
         </div>
 
         {/* Global Notifications */}
@@ -756,7 +804,7 @@ export default function TeacherDashboard() {
                   <h3 className="text-lg font-bold text-dark-900">
                     Manage Exams
                   </h3>
-                  <div className="flex bg-gray-100 p-1 rounded-lg">
+                  <div className="flex bg-gray-100 p-1 rounded-lg w-max">
                     <button
                       onClick={() => setExamFilter("all")}
                       className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${examFilter === "all" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
@@ -817,7 +865,6 @@ export default function TeacherDashboard() {
                         event_id: "",
                         exam_password: "",
                       });
-                      setExamTypeTab("academic");
                       setIsEditingExam(false);
                       setIsExamModalOpen(true);
                     }}
@@ -854,34 +901,40 @@ export default function TeacherDashboard() {
                     {(() => {
                       const sq = searchQuery.toLowerCase();
                       const now = new Date();
-                      const filteredExams = exams.filter((exam) => {
-                        const matchesSearch =
-                          (exam.title &&
-                            exam.title.toLowerCase().includes(sq)) ||
-                          (exam.university_name &&
-                            exam.university_name.toLowerCase().includes(sq)) ||
-                          (exam.course_name &&
-                            exam.course_name.toLowerCase().includes(sq)) ||
-                          (exam.course_code &&
-                            exam.course_code.toLowerCase().includes(sq));
+                      const filteredExams = exams
+                        .slice()
+                        .sort((a, b) => b.id.localeCompare(a.id))
+                        .filter((exam) => {
+                          if (examCategoryFilter === "academic" && exam.event_id) return false;
+                          if (examCategoryFilter === "event" && !exam.event_id) return false;
 
-                        const examDate = new Date(exam.exam_date);
-                        const durationMs = (exam.duration_minutes + 5) * 60000;
-                        const expireTime = new Date(
-                          examDate.getTime() + durationMs,
-                        );
+                          const matchesSearch =
+                            (exam.title &&
+                              exam.title.toLowerCase().includes(sq)) ||
+                            (exam.university_name &&
+                              exam.university_name.toLowerCase().includes(sq)) ||
+                            (exam.course_name &&
+                              exam.course_name.toLowerCase().includes(sq)) ||
+                            (exam.course_code &&
+                              exam.course_code.toLowerCase().includes(sq));
 
-                        let matchesFilter = false;
-                        if (examFilter === "all") matchesFilter = true;
-                        else if (examFilter === "live")
-                          matchesFilter = exam.is_live;
-                        else if (examFilter === "upcoming")
-                          matchesFilter = now < examDate;
-                        else if (examFilter === "ended")
-                          matchesFilter = now > expireTime;
+                          const examDate = new Date(exam.exam_date);
+                          const durationMs = (exam.duration_minutes + 5) * 60000;
+                          const expireTime = new Date(
+                            examDate.getTime() + durationMs,
+                          );
 
-                        return matchesSearch && matchesFilter;
-                      });
+                          let matchesFilter = false;
+                          if (examFilter === "all") matchesFilter = true;
+                          else if (examFilter === "live")
+                            matchesFilter = exam.is_live;
+                          else if (examFilter === "upcoming")
+                            matchesFilter = now < examDate;
+                          else if (examFilter === "ended")
+                            matchesFilter = now > expireTime;
+
+                          return matchesSearch && matchesFilter;
+                        });
                       if (filteredExams.length === 0) {
                         return (
                           <tr>
@@ -932,7 +985,9 @@ export default function TeacherDashboard() {
                             )}
                           </td>
                           <td className="py-3 px-4 text-right space-x-2">
-                            {exam.is_live ? (
+                            {exam.event_id ? (
+                              <span className="text-xs text-gray-400 italic">Auto-starts</span>
+                            ) : exam.is_live ? (
                               <button
                                 onClick={() => handleStopLive(exam.id)}
                                 className="px-3 py-1.5 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-xs font-bold transition-colors"
@@ -973,7 +1028,6 @@ export default function TeacherDashboard() {
                                   event_id: exam.event_id || "",
                                   exam_password: exam.exam_password || "",
                                 });
-                                setExamTypeTab(exam.event_id ? "event" : "academic");
                                 setIsEditingExam(true);
                                 setIsExamModalOpen(true);
                               }}
@@ -1186,7 +1240,7 @@ export default function TeacherDashboard() {
               <form onSubmit={handleProfileSubmit} className="space-y-4 pt-2">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                    Display Name
+                    Display Name <span className="text-red-500 ml-1">*</span>
                   </label>
                   <input
                     type="text"
@@ -1223,7 +1277,7 @@ export default function TeacherDashboard() {
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      Current Password
+                      Current Password <span className="text-red-500 ml-1">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1251,7 +1305,7 @@ export default function TeacherDashboard() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      New Password
+                      New Password <span className="text-red-500 ml-1">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1298,36 +1352,11 @@ export default function TeacherDashboard() {
         onClose={() => setIsExamModalOpen(false)}
         title={isEditingExam ? "Edit Exam" : "Schedule Exam"}
       >
-        <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
-          <button
-            type="button"
-            onClick={() => setExamTypeTab("academic")}
-            className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
-              examTypeTab === "academic"
-                ? "bg-white text-dark-900 shadow-sm"
-                : "text-gray-500 hover:text-dark-900"
-            }`}
-          >
-            Academic
-          </button>
-          <button
-            type="button"
-            onClick={() => setExamTypeTab("event")}
-            className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${
-              examTypeTab === "event"
-                ? "bg-white text-dark-900 shadow-sm"
-                : "text-gray-500 hover:text-dark-900"
-            }`}
-          >
-            Event
-          </button>
-        </div>
-
-        {examTypeTab === "academic" ? (
+        {examCategoryFilter === "academic" ? (
           <form onSubmit={handleSaveExam} className="space-y-4">
             <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Exam Title
+              Exam Title <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1343,7 +1372,7 @@ export default function TeacherDashboard() {
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                Duration (Minutes)
+                Duration (Minutes) <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 type="number"
@@ -1403,7 +1432,7 @@ export default function TeacherDashboard() {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                Max Attempts
+                Max Attempts <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 type="number"
@@ -1430,9 +1459,20 @@ export default function TeacherDashboard() {
         ) : (
           <form onSubmit={handleSaveExam} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                Select Event
-              </label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-xs font-bold text-gray-700 uppercase">
+                  Select Event <span className="text-red-500 ml-1">*</span>
+                </label>
+                {examForm.event_id && (
+                  <button
+                    type="button"
+                    onClick={() => fetchRegistrations(examForm.event_id, examForm.title)}
+                    className="text-xs text-tomato-500 font-bold hover:underline bg-tomato-50 px-2 py-0.5 rounded-md"
+                  >
+                    View Registrations
+                  </button>
+                )}
+              </div>
               <select
                 required
                 value={examForm.event_id}
@@ -1455,7 +1495,7 @@ export default function TeacherDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                  Duration (Minutes)
+                  Duration (Minutes) <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                   type="number"
@@ -1471,7 +1511,7 @@ export default function TeacherDashboard() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                  Exam Password (Secret Code)
+                  Exam Password (Secret Code) <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                   type="text"
@@ -1505,7 +1545,7 @@ export default function TeacherDashboard() {
           </p>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Exam Password
+              Exam Password <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1719,7 +1759,7 @@ export default function TeacherDashboard() {
         <form onSubmit={handleSaveQuestion} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase font-mono">
-              Question Text
+              Question Text <span className="text-red-500 ml-1">*</span>
             </label>
             <textarea
               required
@@ -1737,7 +1777,7 @@ export default function TeacherDashboard() {
 
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase font-mono">
-              Marks for this question
+              Marks for this question <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="number"
@@ -1760,7 +1800,7 @@ export default function TeacherDashboard() {
                 {["a", "b", "c", "d"].map((opt) => (
                   <div key={opt}>
                     <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">
-                      Option {opt}
+                      Option {opt} <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -1780,7 +1820,7 @@ export default function TeacherDashboard() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                  Correct Option
+                  Correct Option <span className="text-red-500 ml-1">*</span>
                 </label>
                 <select
                   required
@@ -1943,6 +1983,83 @@ export default function TeacherDashboard() {
           </div>
         </div>
       )}
+
+      {/* Modal: Confirm Stop Exam */}
+      {isStopExamModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col animate-scale-up">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+              <div>
+                <h3 className="font-extrabold text-lg text-dark-900">
+                  Stop this exam?
+                </h3>
+              </div>
+            </div>
+            <div className="p-6 bg-white">
+              <p className="text-sm text-gray-600">
+                Students will no longer be able to enter.
+              </p>
+            </div>
+            <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsStopExamModalOpen(false);
+                  setExamToStopId(null);
+                }}
+                className="px-5 py-2 rounded-xl font-bold text-gray-500 hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmStopLive}
+                className="px-5 py-2 rounded-xl font-bold bg-tomato-500 text-white hover:bg-tomato-600 shadow-lg shadow-tomato-500/30 transition-all"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Registrations Modal */}
+      <Modal 
+        isOpen={isRegistrationsModalOpen} 
+        onClose={() => setIsRegistrationsModalOpen(false)} 
+        title={`Registrations: ${selectedEventTitle}`} 
+        maxWidth="max-w-4xl"
+      >
+        <div className="overflow-x-auto">
+          {registrationsLoading ? (
+            <div className="text-center py-10 text-gray-500 font-medium">Loading registrations...</div>
+          ) : selectedEventRegistrations.length === 0 ? (
+            <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-xl border border-dashed border-gray-200">No registrations found.</div>
+          ) : (
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider sm:pl-6">Name</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {selectedEventRegistrations.map((reg) => (
+                      <tr key={reg._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-dark-900 sm:pl-6">{reg.name}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{reg.email}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{reg.phone || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+
     </div>
   );
 }

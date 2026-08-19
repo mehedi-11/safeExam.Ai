@@ -153,7 +153,7 @@ export default function Register() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {role === 'student' && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID <span className="text-red-500 ml-1">*</span></label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                       <UserSquare size={18} />
@@ -172,7 +172,7 @@ export default function Register() {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name <span className="text-red-500 ml-1">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                     <UserSquare size={18} />
@@ -190,7 +190,7 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                     <Mail size={18} />
@@ -208,7 +208,7 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password <span className="text-red-500 ml-1">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                     <KeyRound size={18} />
@@ -248,7 +248,7 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 text-center">Enter OTP</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 text-center">Enter OTP <span className="text-red-500 ml-1">*</span></label>
                 <input
                   type="text"
                   maxLength="6"

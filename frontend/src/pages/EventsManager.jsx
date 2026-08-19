@@ -13,6 +13,11 @@ const EventsManager = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
   
+  const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
+  const [selectedEventRegistrations, setSelectedEventRegistrations] = useState([]);
+  const [registrationsLoading, setRegistrationsLoading] = useState(false);
+  const [selectedEventTitle, setSelectedEventTitle] = useState("");
+  
   const [formData, setFormData] = useState({ 
     title: '', 
     description: '', 
@@ -35,6 +40,22 @@ const EventsManager = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRegistrations = async (eventId, eventTitle) => {
+    setSelectedEventTitle(eventTitle);
+    setIsRegistrationsModalOpen(true);
+    setRegistrationsLoading(true);
+    try {
+      const res = await api.get(`/events/${eventId}/registrations`);
+      setSelectedEventRegistrations(res.data);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to fetch registrations');
+      setSelectedEventRegistrations([]);
+    } finally {
+      setRegistrationsLoading(false);
     }
   };
 
@@ -152,10 +173,13 @@ const EventsManager = () => {
   const filteredEvents = events.filter((evt) => {
     const matchesSearch = evt.title.toLowerCase().includes(searchQuery.toLowerCase());
 
+    const expired = evt.end_date && new Date() > new Date(evt.end_date);
+    const isActive = evt.status === 'live' && !expired;
+
     let matchesFilter = false;
     if (eventFilter === "all") matchesFilter = true;
-    else if (eventFilter === "live") matchesFilter = evt.status === 'live';
-    else if (eventFilter === "closed") matchesFilter = evt.status === 'closed' || evt.status === 'draft';
+    else if (eventFilter === "live") matchesFilter = isActive;
+    else if (eventFilter === "closed") matchesFilter = !isActive;
 
     return matchesSearch && matchesFilter;
   });
@@ -252,7 +276,11 @@ const EventsManager = () => {
                 </td>
               </tr>
             ) : (
-              filteredEvents.map((evt) => (
+              filteredEvents.map((evt) => {
+                const expired = evt.end_date && new Date() > new Date(evt.end_date);
+                const isActive = evt.status === 'live' && !expired;
+
+                return (
                 <tr
                   key={evt._id}
                   className="border-b border-gray-100 hover:bg-gray-50/50"
@@ -281,28 +309,39 @@ const EventsManager = () => {
                     )}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <span className="inline-flex items-center justify-center px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-100">
+                    <button 
+                      onClick={() => fetchRegistrations(evt._id, evt.title)}
+                      className="inline-flex items-center justify-center px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="View Registrations"
+                      disabled={!evt.registration_count}
+                    >
                       {evt.registration_count || 0}
-                    </span>
+                    </button>
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center">
                       <button
-                        onClick={() => handleToggleStatus(evt)}
+                        onClick={() => {
+                          if (expired) {
+                            alert("Cannot activate an expired event. Please update the end date first.");
+                            return;
+                          }
+                          handleToggleStatus(evt);
+                        }}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                          evt.status === 'live' ? 'bg-tomato-500' : 'bg-gray-300'
-                        }`}
-                        title={`Toggle to ${evt.status === 'live' ? 'Inactive' : 'Active'}`}
+                          isActive ? 'bg-tomato-500' : 'bg-gray-300'
+                        } ${expired ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={expired ? 'Event has expired' : `Toggle to ${isActive ? 'Inactive' : 'Active'}`}
                       >
                         <span className="sr-only">Toggle status</span>
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            evt.status === 'live' ? 'translate-x-6' : 'translate-x-1'
+                            isActive ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
                       </button>
-                      <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${evt.status === 'live' ? 'text-tomato-600' : 'text-gray-500'}`}>
-                        {evt.status === 'live' ? 'Active' : 'Inactive'}
+                      <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${isActive ? 'text-tomato-600' : 'text-gray-500'}`}>
+                        {expired ? 'Expired' : isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                   </td>
@@ -323,7 +362,7 @@ const EventsManager = () => {
                     </button>
                   </td>
                 </tr>
-              ))
+              )})
             )}
           </tbody>
         </table>
@@ -332,7 +371,7 @@ const EventsManager = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingEventId ? "Edit Event" : "Create Event"} maxWidth="max-w-[70%]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Title</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Title <span className="text-red-500 ml-1">*</span></label>
             <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
           </div>
           <div>
@@ -341,11 +380,11 @@ const EventsManager = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Start Date & Time</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Start Date & Time <span className="text-red-500 ml-1">*</span></label>
               <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">End Date</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">End Date <span className="text-red-500 ml-1">*</span></label>
               <input type="date" required value={formData.end_date} onChange={e => setFormData({...formData, end_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
             </div>
           </div>
@@ -381,6 +420,45 @@ const EventsManager = () => {
           </div>
           <button type="submit" className="tomato-btn w-full py-2.5 mt-2">{editingEventId ? "Update Event" : "Save Event"}</button>
         </form>
+      </Modal>
+
+      {/* Registrations Modal */}
+      <Modal 
+        isOpen={isRegistrationsModalOpen} 
+        onClose={() => setIsRegistrationsModalOpen(false)} 
+        title={`Registrations: ${selectedEventTitle}`} 
+        maxWidth="max-w-4xl"
+      >
+        <div className="overflow-x-auto">
+          {registrationsLoading ? (
+            <div className="text-center py-10 text-gray-500 font-medium">Loading registrations...</div>
+          ) : selectedEventRegistrations.length === 0 ? (
+            <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-xl border border-dashed border-gray-200">No registrations found.</div>
+          ) : (
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider sm:pl-6">Name</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {selectedEventRegistrations.map((reg) => (
+                      <tr key={reg._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-dark-900 sm:pl-6">{reg.name}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{reg.email}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{reg.phone || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );

@@ -174,6 +174,19 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleGenerateMockData = async () => {
+    if (!window.confirm("Are you sure you want to generate 10 mock events and 10 mock exams?")) return;
+    setLoading(true);
+    try {
+      const res = await api.post("/admin/generate-mock-data");
+      triggerSuccess(res.data.message);
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to generate mock data");
+      setLoading(false);
+    }
+  };
+
   // Helper flash success message
   const triggerSuccess = (msg) => {
     setSuccess(msg);
@@ -547,6 +560,21 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="hidden lg:flex items-center gap-3">
+            <button
+              onClick={handleGenerateMockData}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            >
+              <Activity size={14} />
+              <span>Generate Mock Data</span>
+            </button>
+            <button
+              onClick={fetchData}
+              className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+            >
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+              <span>Reload Data</span>
+            </button>
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -1368,7 +1396,7 @@ export default function AdminDashboard() {
         <form onSubmit={handleAddAdmin} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Full Name
+              Full Name <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1382,7 +1410,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Email Address
+              Email Address <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
@@ -1396,7 +1424,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Password
+              Password <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="relative">
               <input
@@ -1431,7 +1459,7 @@ export default function AdminDashboard() {
         <form onSubmit={handleAddStudent} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Student ID
+              Student ID <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1445,7 +1473,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Full Name
+              Full Name <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1459,7 +1487,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Email Address
+              Email Address <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
@@ -1473,7 +1501,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Password
+              Password <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="relative">
               <input
@@ -1511,7 +1539,7 @@ export default function AdminDashboard() {
         <form onSubmit={handleAddTeacher} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Full Name
+              Full Name <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1525,7 +1553,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Email Address
+              Email Address <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
@@ -1539,7 +1567,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Password
+              Password <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="relative">
               <input

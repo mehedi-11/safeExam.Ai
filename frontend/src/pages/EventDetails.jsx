@@ -159,7 +159,7 @@ const EventDetails = () => {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
@@ -171,7 +171,7 @@ const EventDetails = () => {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Email Address</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Email Address <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
@@ -187,7 +187,7 @@ const EventDetails = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="tel" 
               required 

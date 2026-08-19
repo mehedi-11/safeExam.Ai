@@ -73,8 +73,29 @@ app.listen(PORT, () => {
       if (stoppedCount > 0) {
         console.log(`[Auto-Stop] Stopped ${stoppedCount} exam(s) that exceeded their duration.`);
       }
+
+      // Auto-start Event Exams
+      const offlineEventExams = await Exam.find({ is_live: false, event_id: { $exists: true, $ne: null } }).populate('event_id');
+      let startedCount = 0;
+      
+      for (const exam of offlineEventExams) {
+        if (exam.event_id && exam.event_id.end_date) {
+          const eventEndTime = new Date(exam.event_id.end_date);
+          if (now >= eventEndTime) {
+            exam.is_live = true;
+            exam.exam_date = now; // Start the exam duration from now
+            await exam.save();
+            startedCount++;
+          }
+        }
+      }
+
+      if (startedCount > 0) {
+        console.log(`[Auto-Start] Started ${startedCount} event exam(s) because their events ended.`);
+      }
+
     } catch (err) {
-      console.error('[Auto-Stop] Error checking exams:', err.message);
+      console.error('[Auto-Job] Error checking exams:', err.message);
     }
   }, 60000); // Check every 60 seconds
 });

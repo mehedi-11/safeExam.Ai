@@ -24,7 +24,17 @@ const StudentEvents = () => {
   const fetchEvents = async () => {
     try {
       const res = await api.get('/events');
-      setEvents(res.data);
+      const sortedEvents = res.data.sort((a, b) => {
+        const now = new Date();
+        const aEnded = a.end_date && new Date(a.end_date) < now;
+        const bEnded = b.end_date && new Date(b.end_date) < now;
+        if (aEnded === bEnded) {
+          // If both are live or both are ended, sort by event_date descending (optional, but good practice)
+          return new Date(b.event_date) - new Date(a.event_date);
+        }
+        return aEnded ? 1 : -1;
+      });
+      setEvents(sortedEvents);
     } catch (err) {
       console.error(err);
     } finally {
@@ -136,7 +146,7 @@ const StudentEvents = () => {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
@@ -148,7 +158,7 @@ const StudentEvents = () => {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Email Address</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Email Address <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
@@ -164,7 +174,7 @@ const StudentEvents = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="tel" 
               required 

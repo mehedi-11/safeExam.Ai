@@ -41,6 +41,8 @@ router.delete('/students/:id', adminController.deleteStudent);
 router.get('/student-exams/:studentId', adminController.getStudentExamsDetails);
 
 
+// router.post('/generate-mock-data', adminController.generateMockData);
+
 router.get('/settings', adminController.getSettings);
 router.put('/settings', adminController.updateSettings);
 router.get('/analytics', adminController.getAnalytics);

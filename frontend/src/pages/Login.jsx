@@ -222,7 +222,7 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {role === 'student' ? (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID <span className="text-red-500 ml-1">*</span></label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                       <UserSquare size={18} />
@@ -240,7 +240,7 @@ export default function Login() {
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                       <Mail size={18} />
@@ -260,7 +260,7 @@ export default function Login() {
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Password</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Password <span className="text-red-500 ml-1">*</span></label>
                   <button type="button" onClick={() => { setResetMode(true); setError(''); setSuccess(''); }} className="text-xs font-semibold text-tomato-500 hover:text-tomato-600 smooth-transition">
                     Forgot Password?
                   </button>
@@ -301,7 +301,7 @@ export default function Login() {
               {resetStep === 1 && (
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                    {role === 'student' ? 'Enter Student ID' : 'Enter Email Address'}
+                    {role === 'student' ? 'Enter Student ID' : 'Enter Email Address'} <span className="text-red-500 ml-1">*</span>
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
@@ -321,7 +321,7 @@ export default function Login() {
 
               {resetStep === 2 && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Enter 6-Digit OTP</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Enter 6-Digit OTP <span className="text-red-500 ml-1">*</span></label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                       <Lock size={18} />
@@ -341,7 +341,7 @@ export default function Login() {
 
               {resetStep === 3 && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">New Password</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">New Password <span className="text-red-500 ml-1">*</span></label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                       <KeyRound size={18} />

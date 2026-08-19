@@ -4,6 +4,7 @@ const Student = require('../models/Student');
 const Exam = require('../models/Exam');
 const AdminNotification = require('../models/AdminNotification');
 const SystemSetting = require('../models/SystemSetting');
+const Event = require('../models/Event');
 const StudentExam = require('../models/StudentExam');
 const ProctoringLog = require('../models/ProctoringLog');
 const bcrypt = require('bcryptjs');

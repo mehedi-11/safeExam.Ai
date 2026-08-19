@@ -747,7 +747,7 @@ export default function StudentDashboard() {
                 
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Current Password</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Current Password <span className="text-red-500 ml-1">*</span></label>
                     <div className="relative">
                       <input 
                         type={showOldPassword ? "text" : "password"} required placeholder="••••••••"
@@ -765,7 +765,7 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">New Password</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">New Password <span className="text-red-500 ml-1">*</span></label>
                     <div className="relative">
                       <input 
                         type={showNewPassword ? "text" : "password"} required placeholder="••••••••"
