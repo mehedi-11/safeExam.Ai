@@ -119,6 +119,7 @@ exports.getExams = async (req, res) => {
           exam_status: se.status,
           demerit_points: se.demerit_points,
           block_until: se.block_until,
+          results_published: se.results_published || false,
           attempts: se.attempts || 1,
           latest_attempt_time: se.started_at
         });

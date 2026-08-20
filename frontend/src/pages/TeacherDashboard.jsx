@@ -19,7 +19,7 @@ import {
   LogOut,
   Edit,
   Play,
-  ShieldAlert,
+  ShieldAlert, ShieldCheck,
   FileText,
   Activity,
   Users,
@@ -985,6 +985,15 @@ export default function TeacherDashboard() {
                             )}
                           </td>
                           <td className="py-3 px-4 text-right space-x-2">
+                            {exam.is_live && (
+                              <button
+                                onClick={() => navigate(`/teacher/exam/${exam.id}/proctor`)}
+                                className="px-3 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-xs font-bold transition-colors"
+                                title="Proctor Exam"
+                              >
+                                <ShieldCheck size={14} className="inline mr-1" /> Proctor
+                              </button>
+                            )}
                             {exam.event_id ? (
                               <span className="text-xs text-gray-400 italic">Auto-starts</span>
                             ) : exam.is_live ? (

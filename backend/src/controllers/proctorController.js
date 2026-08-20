@@ -42,20 +42,55 @@ exports.logIncident = async (req, res) => {
 
   try {
     const student = await Student.findOne({ id: studentId });
-    const exam = await Exam.findById(examId);
+    const exam = await Exam.findById(examId).populate('event_id');
     
-    const studentName = student ? student.name : 'Unknown Student';
+    const studentName = student ? student.name : (req.body.studentName || 'Unknown Student');
     const examTitle = exam ? exam.title : 'Unknown Exam';
 
     const logTimestamp = new Date().toISOString();
     const logLine = `[${logTimestamp}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) engaged in cheating: ${activityType}. Details: ${details || 'None'}. Demerit Points Added: +${demeritPoints}\n`;
     
     fs.appendFile(logFilePath, logLine, (err) => {
-      if (err) console.error('Error writing to cheating log file:', err);
+      if (err) console.error('Error writing to master cheating log file:', err);
     });
+
+    // Individual Student Log File Logic
+    try {
+      const courseName = exam && exam.get('course_name') ? exam.get('course_name') : 'Unknown_Course';
+      const courseCode = exam && exam.get('course_code') ? exam.get('course_code') : 'Unknown_Code';
+
+      let folderType = 'exam';
+      let parentName = examTitle;
+
+      if (exam && exam.event_id) {
+        folderType = 'event';
+        parentName = exam.event_id.title || 'Unknown_Event';
+      }
+
+      const safeParentName = parentName.replace(/[^a-z0-9]/gi, '_');
+      const safeExamTitle = examTitle.replace(/[^a-z0-9]/gi, '_');
+      const safeStudentName = studentName.replace(/[^a-z0-9]/gi, '_');
+      const safeCourseName = courseName.replace(/[^a-z0-9]/gi, '_');
+      const safeCourseCode = courseCode.replace(/[^a-z0-9]/gi, '_');
+
+      const baseProctoringPath = path.join(__dirname, '../../proctoring');
+      const folderPath = path.join(baseProctoringPath, folderType, safeParentName);
+      
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+      }
+
+      const fileName = `${safeExamTitle}-${safeCourseName}-${safeCourseCode}-${safeStudentName}-${studentId}.txt`;
+      const studentLogFilePath = path.join(folderPath, fileName);
+
+      fs.appendFileSync(studentLogFilePath, logLine);
+    } catch (err) {
+      console.error('Error writing to student specific log file:', err);
+    }
 
     const newLog = new ProctoringLog({
       student_id: studentId,
+      student_name: studentName,
       exam_id: examId,
       activity_type: activityType,
       details: details || '',

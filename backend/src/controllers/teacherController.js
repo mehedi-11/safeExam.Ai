@@ -78,7 +78,19 @@ exports.getExams = async (req, res) => {
       { $match: { teacher_id: new (require('mongoose').Types.ObjectId)(req.user.id) } },
       { $lookup: { from: 'examquestions', localField: '_id', foreignField: 'exam_id', as: 'questions' } },
       { $lookup: { from: 'studentexams', localField: '_id', foreignField: 'exam_id', as: 'submissions' } },
-      { $addFields: { questions_count: { $size: "$questions" }, submissions_count: { $size: "$submissions" } } },
+      { $addFields: { 
+          questions_count: { $size: "$questions" }, 
+          submissions_count: { $size: "$submissions" },
+          live_students_count: {
+            $size: {
+              $filter: {
+                input: "$submissions",
+                as: "sub",
+                cond: { $in: ["$$sub.status", ["started", "in_progress", "blocked"]] }
+              }
+            }
+          }
+      } },
       { $project: { questions: 0, submissions: 0 } },
       { $sort: { exam_date: -1 } }
     ]);
@@ -394,14 +406,17 @@ exports.reorderQuestions = async (req, res) => {
 // --- EXAM RESULTS & GRADING ---
 
 exports.togglePublishResults = async (req, res) => {
-  const { id } = req.params;
+  const { examId, studentId } = req.params;
   const { results_published } = req.body;
   try {
-    const exam = await Exam.findOne({ _id: id, teacher_id: req.user.id });
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
     if (!exam) return res.status(404).json({ message: 'Exam not found' });
 
-    await Exam.collection.updateOne({ _id: exam._id }, { $set: { results_published: results_published ? true : false } });
-    return res.json({ message: 'Exam results publish status updated successfully' });
+    const studentExam = await StudentExam.findOne({ exam_id: examId, student_id: studentId });
+    if (!studentExam) return res.status(404).json({ message: 'Student exam record not found' });
+
+    await StudentExam.collection.updateOne({ _id: studentExam._id }, { $set: { results_published: results_published ? true : false } });
+    return res.json({ message: 'Student results publish status updated successfully' });
   } catch (error) {
     console.error('Error toggling publish status:', error);
     return res.status(500).json({ message: 'Server error updating publish status' });
@@ -609,5 +624,83 @@ exports.downloadExamLogs = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error downloading logs' });
+  }
+};
+
+exports.getLiveProctoringLogs = async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const logs = await ProctoringLog.find({ exam_id: examId })
+      .sort({ timestamp: -1 })
+      .limit(100);
+    
+    // Format to match requirements: time - student name - student id - feed
+    const formattedLogs = logs.map(log => {
+      const time = new Date(log.timestamp).toLocaleTimeString();
+      const studentName = log.student_name || 'Unknown';
+      const studentId = log.student_id || 'Unknown';
+      
+      let feedText = log.activity_type;
+      if (log.details) {
+        feedText += ': ' + log.details;
+      }
+
+      return `[${time}] - ${studentName} - ${studentId} - ${feedText}`;
+    });
+
+    res.json({ logs: formattedLogs });
+  } catch (error) {
+    console.error('Error fetching live proctoring logs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getLiveExamStats = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    const statsPipeline = [
+      { $match: { exam_id: new (require('mongoose').Types.ObjectId)(examId) } },
+      { 
+        $lookup: {
+          from: 'students',
+          localField: 'student_id',
+          foreignField: 'id',
+          as: 'student_info'
+        }
+      },
+      {
+        $unwind: { path: '$student_info', preserveNullAndEmptyArrays: true }
+      },
+      {
+        $project: {
+          _id: 1,
+          student_id: 1,
+          status: 1,
+          started_at: 1,
+          completed_at: 1,
+          demerit_points: 1,
+          student_name: { $ifNull: ['$student_info.name', 'Unknown'] }
+        }
+      },
+      { $sort: { started_at: -1 } }
+    ];
+
+    const submissions = await StudentExam.aggregate(statsPipeline);
+
+    const totalJoined = submissions.length;
+    const totalSubmitted = submissions.filter(s => s.status === 'completed' || s.status === 'finished').length;
+    const totalInExam = submissions.filter(s => ['started', 'in_progress', 'blocked'].includes(s.status)).length;
+
+    res.json({
+      totalJoined,
+      totalSubmitted,
+      totalInExam,
+      students: submissions
+    });
+
+  } catch (error) {
+    console.error('Error fetching live exam stats:', error);
+    res.status(500).json({ message: 'Server error fetching live stats' });
   }
 };

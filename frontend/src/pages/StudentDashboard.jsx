@@ -196,6 +196,7 @@ export default function StudentDashboard() {
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'exams', label: 'My Exams', icon: FileText },
               { id: 'events', label: 'Events', icon: Calendar },
+              { id: 'results', label: 'My Results', icon: CheckCircle2 },
               { id: 'profile', label: 'Student Profile', icon: Settings }
             ].map(tab => (
               <button
@@ -295,7 +296,7 @@ export default function StudentDashboard() {
           {/* TAB: DASHBOARD */}
           {activeTab === 'dashboard' && (() => {
             const liveExamsCount = exams.filter(e => e.is_live && e.exam_status !== 'completed').length;
-            const completedExams = exams.filter(e => e.exam_status === 'completed' && e.score !== null && !isNaN(e.score));
+            const completedExams = exams.filter(e => e.exam_status === 'completed' && e.score !== null && !isNaN(e.score) && e.results_published);
             const completedCount = completedExams.length;
             const avgPercentage = completedCount > 0 
               ? (completedExams.reduce((sum, e) => {
@@ -486,6 +487,9 @@ export default function StudentDashboard() {
                 <div className="flex items-center gap-3 w-full xl:w-auto">
                   <input
                     type="text"
+                    name="search_dummy"
+                    autoComplete="off"
+                    data-lpignore="true"
                     placeholder="Search by university, course name or code..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -811,6 +815,8 @@ export default function StudentDashboard() {
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Enter Exam Password</label>
               <input 
                 type="password" 
+                name="exam_password_dummy"
+                autoComplete="new-password"
                 value={examPasswordInput}
                 onChange={e => setExamPasswordInput(e.target.value)}
                 placeholder="Required for live exams"

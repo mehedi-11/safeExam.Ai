@@ -263,6 +263,7 @@ exports.studentLogin = async (req, res) => {
   if (!studentId || !password) {
     return res.status(400).json({ message: 'StudentID and password are required' });
   }
+  const passwordStr = String(password);
 
   try {
     const rateLimit = await checkRateLimit(studentId, 'student');
@@ -283,7 +284,7 @@ exports.studentLogin = async (req, res) => {
       return res.status(403).json({ message: 'Your account has been suspended. Contact support.' });
     }
 
-    const isMatch = await bcrypt.compare(password, student.password);
+    const isMatch = await bcrypt.compare(passwordStr, student.password || '');
     if (!isMatch) {
       const suspendStatus = await handleFailedLogin(studentId, 'student');
       if (suspendStatus === 'suspended') {

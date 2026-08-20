@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const proctoringLogSchema = new mongoose.Schema({
   student_id: { type: String, ref: 'Student' },
+  student_name: { type: String },
   exam_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Exam' },
   activity_type: { type: String, required: true },
   details: { type: String },

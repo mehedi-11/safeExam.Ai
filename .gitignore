@@ -34,3 +34,5 @@ agent/models/
 agent/__pycache__/
 
 agent/weights/
+
+backend/proctoring/

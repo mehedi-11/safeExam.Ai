@@ -54,7 +54,7 @@ router.post('/exams/:id/live', teacherController.toggleExamLive);
 
 // Exam Results & Grading
 router.get('/exams/:id/results', teacherController.getExamResults);
-router.put('/exams/:id/publish', teacherController.togglePublishResults);
+router.put('/exams/:examId/students/:studentId/publish', teacherController.togglePublishResults);
 router.get('/exams/:examId/students/:studentId/answers', teacherController.getStudentAnswersheet);
 router.get('/exams/:examId/students/:studentId/logs', teacherController.downloadStudentLog);
 router.post('/exams/:examId/students/:studentId/grade/manual', teacherController.manualGradeAnswersheet);
@@ -72,5 +72,7 @@ router.get('/exams/:examId/logs/download', teacherController.downloadExamLogs);
 
 // Proctoring
 router.get('/proctoring-logs', teacherController.getProctoringLogs);
+router.get('/exams/:examId/live-logs', teacherController.getLiveProctoringLogs);
+router.get('/exams/:examId/live-stats', teacherController.getLiveExamStats);
 
 module.exports = router;

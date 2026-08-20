@@ -9,6 +9,13 @@ const examSchema = new mongoose.Schema({
   total_marks: { type: Number, required: true },
   exam_password: { type: String },
   is_live: { type: Boolean, default: false },
+  results_published: { type: Boolean, default: false },
+  course_name: { type: String },
+  course_code: { type: String },
+  university_name: { type: String },
+  max_attempts: { type: Number, default: 1 },
+  must_on_camera: { type: Boolean, default: true },
+  must_on_microphone: { type: Boolean, default: true },
   created_at: { type: Date, default: Date.now }
 });
 module.exports = mongoose.model('Exam', examSchema);

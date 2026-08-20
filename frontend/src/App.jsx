@@ -7,6 +7,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import ExamInterface from './pages/ExamInterface';
 import EventDetails from './pages/EventDetails';
+import TeacherProctoring from './pages/TeacherProctoring';
 
 // Protected Route Guard
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -79,6 +80,16 @@ function App() {
           element={
             <ProtectedRoute allowedRole="student">
               <EventDetails />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Teacher Proctoring */}
+        <Route 
+          path="/teacher/exam/:examId/proctor" 
+          element={
+            <ProtectedRoute allowedRole="teacher">
+              <TeacherProctoring />
             </ProtectedRoute>
           } 
         />

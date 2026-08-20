@@ -5,6 +5,8 @@ import {
   Camera, ShieldAlert, AlertTriangle, Play, HelpCircle, 
   CheckSquare, ArrowLeft, Clock, ShieldCheck, Terminal
 } from 'lucide-react';
+import '@tensorflow/tfjs';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
 export default function ExamInterface() {
   const { examId } = useParams();
@@ -19,8 +21,10 @@ export default function ExamInterface() {
   // Webcam stream
   const videoRef = useRef(null);
   const streamRef = useRef(null);
-  const wsRef = useRef(null);
   const canvasRef = useRef(null);
+  const modelRef = useRef(null);
+  const suspiciousTimersRef = useRef({});
+  const isOutOfScreenRef = useRef(false);
 
   // Exam state
   const [questions, setQuestions] = useState([]);
@@ -33,6 +37,7 @@ export default function ExamInterface() {
   const [webcamReady, setWebcamReady] = useState(false);
   const [examTitle, setExamTitle] = useState('');
   const [examDetails, setExamDetails] = useState(null);
+  const [modelReady, setModelReady] = useState(false);
   
   // UI State
   const [loading, setLoading] = useState(false);
@@ -147,7 +152,6 @@ export default function ExamInterface() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('unload', handleUnload);
     window.addEventListener('offline', handleOffline);
-    window.addEventListener('unload', handleUnload);
 
     return () => {
       clearInterval(timer);
@@ -212,7 +216,7 @@ export default function ExamInterface() {
 
       // Fetch exams catalog for duration and title
       const examsRes = await api.get('/student/exams');
-      const activeExam = examsRes.data.find(e => e.id === parseInt(examId));
+      const activeExam = examsRes.data.find(e => String(e.id) === String(examId));
       if (activeExam) {
         setExamTitle(activeExam.title);
         setExamDetails(activeExam);
@@ -273,67 +277,143 @@ export default function ExamInterface() {
     }
   };
 
-  // Connect to AI WebSocket when exam starts
+  // Load TFJS COCO-SSD Model
   useEffect(() => {
-    if (!examStarted || !webcamReady || !examDetails) return;
-
-    const queryParams = new URLSearchParams({
-      exam_name: examDetails.title || 'Unknown_Exam',
-      university_name: examDetails.university_name || 'Unknown_University',
-      course_name: examDetails.course_name || 'Unknown_Course',
-      course_code: examDetails.course_code || '',
-      student_name: user.name || 'Unknown_Student'
-    }).toString();
-
-    wsRef.current = new WebSocket(`ws://localhost:8000/ws/proctor/${examId}/${user.id}?${queryParams}`);
-    
-    wsRef.current.onopen = () => {
-      console.log('Connected to AI Proctoring Server');
-    };
-
-    wsRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.frame) {
-        setProcessedFrame(data.frame);
-      }
-      if (data.status === 'warning') {
-        const items = data.items.map(i => i.item).join(', ');
-        logCheating('AI Detection', `YOLOv8 detected: ${items}`);
-        const timestamp = new Date().toLocaleTimeString();
-        setShowLogFeed(prev => [`[${timestamp}] Detected: ${items}`, ...prev].slice(0, 5));
+    const loadModel = async () => {
+      try {
+        const model = await cocoSsd.load();
+        modelRef.current = model;
+        setModelReady(true);
+        console.log("Client-side TFJS Model loaded (Mocking YOLOv8)");
+      } catch (err) {
+        console.error("Error loading TFJS model", err);
       }
     };
+    loadModel();
+  }, []);
 
-    wsRef.current.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
+  // Client-side AI Detection Loop (Replacing WebSocket)
+  useEffect(() => {
+    if (!examStarted || !webcamReady || !examDetails || !modelReady) return;
 
     let frameInterval;
     
-    // Start capturing after 20 seconds (20000ms delay)
+    // Start capturing after 5 seconds delay to let user settle
     const startDelay = setTimeout(() => {
-      // Frame capture loop (15 FPS)
-      frameInterval = setInterval(() => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && videoRef.current) {
-          const canvas = canvasRef.current;
-          if (canvas) {
-            const context = canvas.getContext('2d');
-            context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-            const base64Frame = canvas.toDataURL('image/jpeg', 0.5); // 0.5 quality
-            wsRef.current.send(base64Frame);
+      console.log('Started local AI Proctoring (Mock YOLOv8) Loop');
+      
+      // Frame capture and prediction loop (every 1.5s to save CPU)
+      frameInterval = setInterval(async () => {
+        if (modelRef.current && videoRef.current && videoRef.current.readyState === 4) {
+          try {
+            const predictions = await modelRef.current.detect(videoRef.current);
+            
+            // Draw on canvas to create processedFrame base64
+            const canvas = canvasRef.current;
+            if (canvas) {
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+              
+              let detectedItems = new Set();
+
+              predictions.forEach(prediction => {
+                // Scale coordinates
+                const [x, y, width, height] = prediction.bbox;
+                const scaleX = canvas.width / videoRef.current.videoWidth;
+                const scaleY = canvas.height / videoRef.current.videoHeight;
+                
+                // Only draw box if it's a relevant object or person
+                if (['cell phone', 'book', 'laptop', 'person'].includes(prediction.class)) {
+                  ctx.strokeStyle = '#ef4444'; // tomato/red
+                  ctx.lineWidth = 2;
+                  ctx.strokeRect(x * scaleX, y * scaleY, width * scaleX, height * scaleY);
+                  ctx.fillStyle = '#ef4444';
+                  ctx.font = '12px Arial';
+                  ctx.fillText(`${prediction.class} (${Math.round(prediction.score*100)}%)`, x * scaleX, (y * scaleY) > 12 ? (y * scaleY) - 5 : 12);
+                }
+
+                if (['cell phone', 'book', 'laptop'].includes(prediction.class)) {
+                  detectedItems.add(prediction.class);
+                }
+              });
+
+              // Check for multiple people or no people
+              const persons = predictions.filter(p => p.class === 'person');
+              if (persons.length > 1) {
+                detectedItems.add('multiple persons');
+              } else if (persons.length === 0) {
+                detectedItems.add('no person visible');
+              }
+
+              const now = Date.now();
+              const timers = suspiciousTimersRef.current;
+              let itemsToLog = [];
+
+              // Check items and update timers (5 second rule)
+              detectedItems.forEach(item => {
+                if (!timers[item]) {
+                  timers[item] = now; // Start tracking
+                } else if (now - timers[item] > 5000) {
+                  // Has been present for >5 seconds
+                  if (item !== 'no person visible') {
+                    itemsToLog.push(item);
+                    timers[item] = now; // Reset timer so it logs again in 5s if still held
+                  }
+                }
+              });
+
+              // Clear timers for items no longer detected
+              Object.keys(timers).forEach(item => {
+                if (!detectedItems.has(item)) {
+                  delete timers[item];
+                }
+              });
+
+              // Special handling for out of screen returning
+              if (detectedItems.has('no person visible')) {
+                if (!isOutOfScreenRef.current && timers['no person visible'] && now - timers['no person visible'] > 5000) {
+                  isOutOfScreenRef.current = true;
+                  itemsToLog.push('student have left the screen');
+                }
+              } else {
+                if (isOutOfScreenRef.current) {
+                  isOutOfScreenRef.current = false;
+                  // Log instantly when returned
+                  itemsToLog.push('student back to the screen');
+                }
+              }
+
+              const base64Frame = canvas.toDataURL('image/jpeg', 0.6);
+              setProcessedFrame(base64Frame);
+
+              if (itemsToLog.length > 0) {
+                const uniqueItems = [...new Set(itemsToLog)].join(', ');
+                
+                // Add to local UI feed immediately
+                const timestamp = new Date().toLocaleTimeString();
+                setShowLogFeed(prev => {
+                  const msg = `[${timestamp}] Detected: ${uniqueItems}`;
+                  if (prev.length === 0 || !prev[0].includes(uniqueItems)) {
+                    // Trigger actual backend log/deduction only if new message
+                    logCheating('AI Detection', `YOLOv8 detected: ${uniqueItems}`);
+                    return [msg, ...prev].slice(0, 5);
+                  }
+                  return prev;
+                });
+              }
+            }
+          } catch (err) {
+            console.warn("Detection error", err);
           }
         }
-      }, 66); // ~15 FPS
-    }, 20000);
+      }, 1500); // 1.5 FPS
+    }, 5000);
 
     return () => {
       clearTimeout(startDelay);
       if (frameInterval) clearInterval(frameInterval);
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
     };
-  }, [examStarted, examDetails, webcamReady]);
+  }, [examStarted, examDetails, webcamReady, modelReady]);
 
   // Log a cheating event (Actual copy/paste or Simulated YOLOv8)
   const logCheating = async (activityType, details) => {
@@ -343,8 +423,9 @@ export default function ExamInterface() {
 
     try {
       const res = await api.post('/proctor/log-incident', {
-        examId: parseInt(examId),
+        examId: examId,
         studentId: user.id,
+        studentName: user.name,
         activityType,
         details
       });
@@ -591,13 +672,13 @@ export default function ExamInterface() {
                 autoPlay 
                 playsInline 
                 muted 
-                className={`w-full h-full object-cover ${processedFrame ? 'hidden' : ''}`}
+                className="w-full h-full object-cover"
               />
               {processedFrame && (
                 <img 
                   src={processedFrame} 
                   alt="AI Labeled Frame" 
-                  className="w-full h-full object-cover" 
+                  className="absolute inset-0 w-full h-full object-cover z-10" 
                 />
               )}
               <canvas ref={canvasRef} width="320" height="240" style={{ display: 'none' }} />
