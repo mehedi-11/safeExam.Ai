@@ -4,9 +4,7 @@ backend/node_modules/
 frontend/node_modules/
 
 # Environment files
-.env
-backend/.env
-frontend/.env
+# .env excluded for easy cloud deployment
 
 # Production builds
 dist/
