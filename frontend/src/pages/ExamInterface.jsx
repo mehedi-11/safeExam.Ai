@@ -674,13 +674,7 @@ export default function ExamInterface() {
                 muted 
                 className="w-full h-full object-cover"
               />
-              {processedFrame && (
-                <img 
-                  src={processedFrame} 
-                  alt="AI Labeled Frame" 
-                  className="absolute inset-0 w-full h-full object-cover z-10" 
-                />
-              )}
+
               <canvas ref={canvasRef} width="320" height="240" style={{ display: 'none' }} />
               {!streamRef.current && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
