@@ -111,10 +111,10 @@ export default function TeacherProctoring() {
         </div>
 
         {/* Two-Column Layout */}
-        <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-hidden min-h-0">
+        <div className="flex flex-row gap-4 flex-1 overflow-hidden min-h-0">
           
           {/* Right Column: AI Log Feed (40%) */}
-          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-full lg:w-[70%] overflow-hidden">
+          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-[70%] overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0">
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                 <Camera size={14} className="text-tomato-500" />
@@ -178,7 +178,7 @@ export default function TeacherProctoring() {
                 </table>
               </div>
 {/* Left Column: Student Table (60%) */}
-          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-full lg:w-[30%] overflow-hidden">
+          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-[30%] overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0">
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                 <Users size={14} className="text-tomato-500" />
