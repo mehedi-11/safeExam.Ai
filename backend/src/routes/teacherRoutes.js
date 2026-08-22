@@ -37,8 +37,8 @@ const upload = multer({
   }
 });
 
-// Protect all routes here with Teacher check
-router.use(verifyToken, authorizeRoles('teacher'));
+// Protect all routes here with Teacher and Admin check
+router.use(verifyToken, authorizeRoles('teacher', 'admin'));
 
 // Profile management
 router.get('/profile', teacherController.getProfile);

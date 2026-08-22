@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   MoreVertical,
   Calendar,
+  Camera,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import Papa from "papaparse";
@@ -47,6 +48,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [activeTab, setActiveTab] = useState("overview");
+  const [proctoringSearchQuery, setProctoringSearchQuery] = useState("");
   const [activeUserTab, setActiveUserTab] = useState("teachers");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -472,6 +474,7 @@ export default function AdminDashboard() {
               { id: "overview", label: "Dashboard", icon: LayoutDashboard },
               { id: "users", label: "Manage Users", icon: Users },
               { id: "exams", label: "All Exams", icon: FileText },
+                { id: "proctoring", label: "Proctoring", icon: Camera },
               { id: "events", label: "Events", icon: Calendar },
               { id: "settings", label: "Admin Profile", icon: Settings },
             ].map((tab) => {
@@ -1196,7 +1199,157 @@ export default function AdminDashboard() {
             </div>
           )}
 
+
+          {/* TAB: PROCTORING */}
+          {activeTab === "proctoring" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div className="flex items-center gap-6">
+                  <h3 className="text-lg font-bold text-dark-900">
+                    Proctoring & Logs
+                  </h3>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search exams..."
+                      value={proctoringSearchQuery}
+                      onChange={(e) => setProctoringSearchQuery(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">Exam Title</th>
+                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">Course & University</th>
+                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">Date & Time</th>
+                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-center">Status</th>
+                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                  </thead>
+                    <tbody className="text-sm">
+                      {(() => {
+                        const sq = proctoringSearchQuery.toLowerCase();
+                        const filteredExams = allExams
+                          .slice()
+                          .sort((a, b) => (b._id || b.id).localeCompare((a._id || a.id)))
+                          .filter((exam) => {
+                            const matchesSearch =
+                              (exam.title && exam.title.toLowerCase().includes(sq)) ||
+                              (exam.university_name && exam.university_name.toLowerCase().includes(sq)) ||
+                              (exam.course_name && exam.course_name.toLowerCase().includes(sq)) ||
+                              (exam.course_code && exam.course_code.toLowerCase().includes(sq));
+
+                            return matchesSearch;
+                          });
+
+                        if (filteredExams.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan="5" className="py-12 text-center text-gray-400">
+                                <div className="flex flex-col items-center justify-center space-y-3">
+                                  <FileText size={32} className="opacity-20" />
+                                  <p>No exams found</p>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return filteredExams.map((exam) => {
+                          const examDate = new Date(exam.exam_date);
+                          const durationMs = (exam.duration_minutes + 5) * 60000;
+                          const expireTime = new Date(examDate.getTime() + durationMs);
+                          const now = new Date();
+
+                          const isLive = now >= examDate && now <= expireTime;
+                          const isEnded = now > expireTime;
+                          const eId = exam._id || exam.id;
+
+                          return (
+                            <tr key={eId} className="border-b border-gray-100 hover:bg-gray-50/50">
+                              <td className="py-3 px-4 font-bold text-sm text-dark-900">
+                                {exam.title}
+                                {exam.event_id && (
+                                  <span className="inline-block mt-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-bold">Event Exam</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-xs text-gray-600">
+                                {exam.course_name} {exam.course_code ? `(${exam.course_code})` : ''}
+                                <br />
+                                <span className="text-gray-400">{exam.university_name}</span>
+                              </td>
+                              <td className="py-3 px-4 text-xs text-gray-600">
+                                <div>{examDate.toLocaleDateString()}</div>
+                                <div>{examDate.toLocaleTimeString()}</div>
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                {isLive ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-600 border border-green-100 w-max">
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                    Live Now
+                                  </span>
+                                ) : isEnded ? (
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200 w-max">
+                                    Ended
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100 w-max">
+                                    Upcoming
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right space-x-2">
+                                <div className="flex items-center justify-end gap-2">
+                                  {isLive && (
+                                    <button
+                                      onClick={() => navigate(`/admin/proctoring/${eId}`)}
+                                      className="px-3 py-1.5 text-xs font-bold text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1.5"
+                                    >
+                                      <Camera size={14} />
+                                      View Live
+                                    </button>
+                                  )}
+                                  
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => downloadProctoringData(eId, 'logs')}
+                                      title="Download Incident Logs"
+                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-500 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
+                                    >
+                                      <Download size={14} />
+                                      <span className="text-[11px] font-bold">Logs</span>
+                                    </button>
+                                    <button
+                                      onClick={() => downloadProctoringData(eId, 'roster')}
+                                      title="Download Student Roster"
+                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-blue-500 bg-white border border-gray-200 rounded-lg hover:border-blue-200 transition-colors"
+                                    >
+                                      <Users size={14} />
+                                      <span className="text-[11px] font-bold">Roster</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+          )}
+
           {/* TAB: SETTINGS (Admin Profile) */}
+
           {activeTab === "settings" && (
             <div className="max-w-2xl animate-fade-in space-y-6">
               <h4 className="font-bold text-dark-900 mb-4">

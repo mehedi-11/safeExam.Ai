@@ -53,8 +53,12 @@ export default function TeacherProctoring() {
       <div className="bg-white border-b border-gray-150 p-4 px-6 flex justify-between items-center shadow-sm z-10 flex-shrink-0">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate("/dashboard/teacher")}
+            onClick={() => {
+              const role = localStorage.getItem("role");
+              navigate(role === "admin" ? "/dashboard/admin" : "/dashboard/teacher");
+            }}
             className="inline-flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-tomato-500 smooth-transition"
+            title="Back to Dashboard"
           >
             <ArrowLeft size={14} />
             <span>Back to Dashboard</span>
@@ -62,7 +66,6 @@ export default function TeacherProctoring() {
           <div className="h-6 w-px bg-gray-200 mx-2"></div>
           <div>
             <h1 className="text-lg font-bold text-dark-900 flex items-center gap-2 leading-tight">
-              <Camera size={18} className="text-tomato-500" />
               Live Proctoring Console
             </h1>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -113,7 +116,7 @@ export default function TeacherProctoring() {
         {/* Two-Column Layout */}
         <div className="flex flex-row gap-4 flex-1 overflow-hidden min-h-0">
           
-          {/* Left Column: Student Table (60%) */}
+          {/* Left Column: Student Table (30%) */}
           <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-[30%] order-2 overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0">
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
@@ -133,12 +136,12 @@ export default function TeacherProctoring() {
                   </tr>
                 </thead>
                 <tbody className="text-xs">
-                  {stats.students.length === 0 ? (
+                  {stats.students && stats.students.length === 0 ? (
                     <tr>
                       <td colSpan="4" className="py-8 text-center text-gray-400">No students have joined yet.</td>
                     </tr>
                   ) : (
-                    stats.students.map((student, idx) => (
+                    [...(stats.students || [])].sort((a, b) => new Date(a.started_at) - new Date(b.started_at)).map((student, idx) => (
                       <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50/50">
                         <td className="py-2.5 px-4">
                           <div className="font-bold text-dark-900">{student.student_name}</div>
@@ -171,11 +174,11 @@ export default function TeacherProctoring() {
             </div>
           </div>
 
-          {/* Right Column: AI Log Feed (40%) */}
+          {/* Right Column: AI Log Feed (70%) */}
           <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-[70%] order-1 overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0">
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                <Camera size={14} className="text-tomato-500" />
+                <ShieldAlert size={14} className="text-tomato-500" />
                 <span>AI Incident Log Feed</span>
               </h4>
             </div>

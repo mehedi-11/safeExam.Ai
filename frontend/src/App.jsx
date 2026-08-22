@@ -86,9 +86,19 @@ function App() {
 
         {/* Teacher Proctoring */}
         <Route 
-          path="/teacher/exam/:examId/proctor" 
+          path="/teacher/proctoring/:examId" 
           element={
             <ProtectedRoute allowedRole="teacher">
+              <TeacherProctoring />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Admin Proctoring */}
+        <Route 
+          path="/admin/proctoring/:examId" 
+          element={
+            <ProtectedRoute allowedRole="admin">
               <TeacherProctoring />
             </ProtectedRoute>
           } 
