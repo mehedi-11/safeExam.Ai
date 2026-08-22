@@ -111,74 +111,10 @@ export default function TeacherProctoring() {
         </div>
 
         {/* Two-Column Layout */}
-        <div className="flex flex-row gap-4 flex-1 overflow-hidden min-h-0">
+        <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-hidden min-h-0">
           
-          {/* Right Column: AI Log Feed (40%) */}
-          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-[70%] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex-shrink-0">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                <Camera size={14} className="text-tomato-500" />
-                <span>AI Incident Log Feed</span>
-              </h4>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-gray-50/80 sticky top-0 z-10 backdrop-blur-sm">
-                    <tr>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-150">Time</th>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-150">Student</th>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-150">Incident Detail</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-xs">
-                    {loadingLogs && logs.length === 0 ? (
-                      <tr>
-                        <td colSpan="3" className="py-8 text-center text-gray-400">
-                          <div className="flex flex-col items-center justify-center space-y-3">
-                            <RefreshCw className="animate-spin text-tomato-500" size={24} />
-                            <p>Connecting to live feed...</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : logs.length === 0 ? (
-                      <tr>
-                        <td colSpan="3" className="py-8 text-center text-gray-400">
-                          <div className="flex flex-col items-center justify-center space-y-2">
-                            <ShieldAlert size={32} className="opacity-20" />
-                            <p>No suspicious activity detected yet</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      logs.map((logStr, idx) => {
-                        const regex = /^\[(.*?)\]\s*-\s*(.*?)\s*-\s*(.*?)\s*-\s*(.*)$/;
-                        const match = logStr.match(regex);
-                        let time = '-', name = 'System', id = '-', incident = logStr;
-                        if (match) {
-                          time = match[1];
-                          name = match[2];
-                          id = match[3];
-                          incident = match[4];
-                        }
-                        return (
-                          <tr key={idx} className="border-b border-gray-100 hover:bg-red-50/30 transition-colors">
-                            <td className="py-3 px-4 font-mono text-gray-500 whitespace-nowrap">{time}</td>
-                            <td className="py-3 px-4">
-                              <div className="font-bold text-dark-900">{name}</div>
-                              <div className="text-gray-400 font-mono text-[10px]">{id}</div>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-red-600 font-medium bg-red-50 px-2 py-1 rounded-md">{incident}</span>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-{/* Left Column: Student Table (60%) */}
-          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col w-[30%] overflow-hidden">
+          {/* Left Column: Student Table (60%) */}
+          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col flex-[3] overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0">
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                 <Users size={14} className="text-tomato-500" />
@@ -235,7 +171,72 @@ export default function TeacherProctoring() {
             </div>
           </div>
 
-                    </div>
+          {/* Right Column: AI Log Feed (40%) */}
+          <div className="bg-white border border-gray-150 rounded-xl shadow-sm flex flex-col flex-[2] overflow-hidden">
+            <div className="p-4 border-b border-gray-100 flex-shrink-0">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                <Camera size={14} className="text-tomato-500" />
+                <span>AI Incident Log Feed</span>
+              </h4>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-gray-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <tr>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-150">Time</th>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-150">Student</th>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-150">Incident Detail</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-xs">
+                    {loadingLogs && logs.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" className="py-8 text-center text-gray-400">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <RefreshCw className="animate-spin text-tomato-500" size={24} />
+                            <p>Connecting to live feed...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : logs.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" className="py-8 text-center text-gray-400">
+                          <div className="flex flex-col items-center justify-center space-y-2">
+                            <ShieldAlert size={32} className="opacity-20" />
+                            <p>No suspicious activity detected yet</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      logs.slice().reverse().map((logStr, idx) => {
+                        const regex = /^\[(.*?)\]\s*-\s*(.*?)\s*-\s*(.*?)\s*-\s*(.*)$/;
+                        const match = logStr.match(regex);
+                        let time = '-', name = 'System', id = '-', incident = logStr;
+                        if (match) {
+                          time = match[1];
+                          name = match[2];
+                          id = match[3];
+                          incident = match[4];
+                        }
+                        return (
+                          <tr key={idx} className="border-b border-gray-100 hover:bg-red-50/30 transition-colors">
+                            <td className="py-3 px-4 font-mono text-gray-500 whitespace-nowrap">{time}</td>
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-dark-900">{name}</div>
+                              <div className="text-gray-400 font-mono text-[10px]">{id}</div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-red-600 font-medium bg-red-50 px-2 py-1 rounded-md">{incident}</span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+          </div>
           
         </div>
       </div>
