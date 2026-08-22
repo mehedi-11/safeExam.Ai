@@ -23,6 +23,7 @@ import {
   FileText,
   Activity,
   Users,
+  X,
   Settings,
   Key,
   Eye,
@@ -515,7 +516,7 @@ export default function TeacherDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-30 shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />

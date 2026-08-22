@@ -377,7 +377,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-30 shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <LayoutDashboard size={16} />
@@ -568,13 +568,7 @@ export default function AdminDashboard() {
               <Activity size={14} />
               <span>Generate Mock Data</span>
             </button>
-            <button
-              onClick={fetchData}
-              className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-sm"
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-              <span>Reload Data</span>
-            </button>
+            
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -1334,6 +1328,10 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+        </div>
+        {/* Footer */}
+        <div className="mt-auto text-center text-gray-400 text-xs py-4 border-t border-gray-200">
+          Developed by MD Mehedi Hasan (232004048) and MST Onamika Jannat Ara (232005048) for the final Project
         </div>
       </div>
 

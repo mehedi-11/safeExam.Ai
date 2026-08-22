@@ -5,7 +5,7 @@ import StudentEvents from './StudentEvents';
 import { 
   Calendar, BookOpen, KeyRound, CheckCircle2, ShieldAlert, 
   Hourglass, Play, RefreshCw, GraduationCap,
-  Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings
+  Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings, X
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -156,7 +156,7 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-35 shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
@@ -178,16 +178,24 @@ export default function StudentDashboard() {
         {/* Logo and Menu Links */}
         <div>
           {/* Brand Logo Header */}
-          <div className="p-6 border-b border-gray-150 hidden lg:flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
-              <BookOpen className="w-6 h-6" />
+          <div className="p-6 border-b border-gray-150 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="font-extrabold text-lg tracking-tight text-black">
+                  S-Exam<span className="text-tomato-500">.ai</span>
+                </span>
+                <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">Student Portal</span>
+              </div>
             </div>
-            <div>
-              <span className="font-extrabold text-lg tracking-tight text-black">
-                S-Exam<span className="text-tomato-500">.ai</span>
-              </span>
-              <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">Student Portal</span>
-            </div>
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden p-1.5 text-gray-400 hover:text-dark-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           {/* Navigation Links */}
@@ -269,10 +277,7 @@ export default function StudentDashboard() {
             <h1 className="text-3xl font-bold text-dark-900">Student Portal</h1>
             <p className="text-gray-400 text-sm">Welcome back, {profile.name}! Track exams and course enrollment statuses.</p>
           </div>
-          <button onClick={fetchData} className="tomato-btn-outline py-2 text-xs flex items-center gap-1.5">
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh Portal</span>
-          </button>
+          
         </div>
 
         {/* Status Alerts */}
@@ -794,6 +799,11 @@ export default function StudentDashboard() {
             </div>
           )}
 
+        </div>
+        
+        {/* Footer */}
+        <div className="mt-auto text-center text-gray-400 text-xs py-4 border-t border-gray-200">
+          Developed by MD Mehedi Hasan (232004048) and MST Onamika Jannat Ara (232005048) for the final Project
         </div>
       </div>
 
