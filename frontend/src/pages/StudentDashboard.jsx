@@ -269,7 +269,7 @@ export default function StudentDashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-grow flex-1 min-w-0 p-6 md:p-10 max-h-screen overflow-y-auto">
+      <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
         
         {/* Header Summary */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -802,7 +802,7 @@ export default function StudentDashboard() {
         </div>
         
         {/* Footer */}
-        <div className="mt-auto text-center text-gray-400 text-xs py-4 border-t border-gray-200">
+        <div className="mt-auto text-center text-gray-400 text-xs py-4 pb-24 lg:pb-4 border-t border-gray-200">
           Developed by MD Mehedi Hasan (232004048) and MST Onamika Jannat Ara (232005048) for the final Project
         </div>
       </div>
@@ -847,6 +847,44 @@ export default function StudentDashboard() {
           </div>
         </div>
       )}
+
+
+      {/* Mobile Bottom Navigation Bar */}
+      {(() => {
+        const mobileTabs = [
+          { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
+          { id: 'exams', label: 'Exams', icon: FileText },
+          { id: 'events', label: 'Events', icon: Calendar },
+          { id: 'results', label: 'Results', icon: CheckCircle2 },
+          { id: 'profile', label: 'Profile', icon: Settings }
+        ];
+        const activeIdx = mobileTabs.findIndex(t => t.id === activeTab);
+        const currentIndex = activeIdx !== -1 ? activeIdx : 0;
+        const tabWidth = 100 / mobileTabs.length;
+
+        return (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
+            {/* Animated Top Line */}
+            <div 
+              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              style={{
+                width: '32px',
+                left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
+              }}
+            />
+            {mobileTabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-500' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
+                <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }

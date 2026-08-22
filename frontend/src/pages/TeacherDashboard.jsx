@@ -637,7 +637,7 @@ export default function TeacherDashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-grow flex-1 min-w-0 p-6 md:p-10 max-h-screen overflow-y-auto">
+      <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
         {/* Header Summary */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="w-full flex flex-col gap-6">
@@ -2221,6 +2221,44 @@ export default function TeacherDashboard() {
         </div>
       </Modal>
 
+
+      {/* Mobile Bottom Navigation Bar */}
+      {(() => {
+        const mobileTabs = [
+          { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
+          { id: 'add_exam', label: 'Exams', icon: FileText },
+          { id: 'exam_results', label: 'Results', icon: Award },
+          { id: 'proctoring', label: 'Proctoring', icon: Camera },
+          { id: 'events', label: 'Events', icon: Calendar },
+          { id: 'profile', label: 'Profile', icon: Settings }
+        ];
+        const activeIdx = mobileTabs.findIndex(t => t.id === activeTab);
+        const currentIndex = activeIdx !== -1 ? activeIdx : 0;
+        const tabWidth = 100 / mobileTabs.length;
+
+        return (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
+            {/* Animated Top Line */}
+            <div 
+              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              style={{
+                width: '32px',
+                left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
+              }}
+            />
+            {mobileTabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-500' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
+                <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }
