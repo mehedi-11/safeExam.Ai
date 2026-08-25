@@ -3,6 +3,10 @@ const EventRegistration = require('../models/EventRegistration');
 
 exports.createEvent = async (req, res) => {
   try {
+    if (req.user && req.user.role === 'admin') {
+      return res.status(403).json({ message: 'Admins are not allowed to create events.' });
+    }
+
     const { title, description, event_date, end_date, image } = req.body;
     
     if (!title || !description || !event_date || !end_date) {
@@ -16,7 +20,7 @@ exports.createEvent = async (req, res) => {
       end_date,
       image: image || '',
       status: 'live',
-      created_by_model: req.user.role === 'admin' ? 'Admin' : 'Teacher',
+      created_by_model: 'Teacher',
       created_by: req.user.id
     });
 
@@ -31,8 +35,10 @@ exports.createEvent = async (req, res) => {
 exports.getEvents = async (req, res) => {
   try {
     let events = [];
-    if (req.user.role === 'admin' || req.user.role === 'teacher') {
+    if (req.user.role === 'admin') {
       events = await Event.find().sort({ created_at: -1 }).lean();
+    } else if (req.user.role === 'teacher') {
+      events = await Event.find({ created_by: req.user.id }).sort({ created_at: -1 }).lean();
     } else if (req.user.role === 'student') {
       events = await Event.find({ status: 'live' }).sort({ event_date: 1 }).lean();
     }
@@ -58,6 +64,10 @@ exports.makeEventLive = async (req, res) => {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
     
+    if (req.user.role === 'teacher' && event.created_by.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized: You can only manage your own events' });
+    }
+
     event.status = 'live';
     await event.save();
     return res.json({ message: 'Event is now live', event });
@@ -128,6 +138,14 @@ exports.getEventRegistrations = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
       return res.status(403).json({ message: 'Unauthorized' });
     }
+    
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+    
+    if (req.user.role === 'teacher' && event.created_by.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized: You can only view your own events' });
+    }
+
     const regs = await EventRegistration.find({ event_id: req.params.id }).populate('student_id', 'name email id');
     return res.json(regs);
   } catch (err) {
@@ -146,12 +164,20 @@ exports.updateEvent = async (req, res) => {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    if (title) event.title = title;
-    if (description) event.description = description;
-    if (event_date) event.event_date = event_date;
-    if (end_date) event.end_date = end_date;
-    if (image !== undefined) event.image = image;
-    if (status) event.status = status;
+    if (req.user.role === 'teacher' && event.created_by.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized: You can only update your own events' });
+    }
+
+    if (req.user.role === 'admin') {
+      if (status) event.status = status;
+    } else {
+      if (title) event.title = title;
+      if (description) event.description = description;
+      if (event_date) event.event_date = event_date;
+      if (end_date) event.end_date = end_date;
+      if (image !== undefined) event.image = image;
+      if (status) event.status = status;
+    }
 
     await event.save();
     return res.json({ message: 'Event updated successfully', event });
@@ -167,8 +193,14 @@ exports.deleteEvent = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized' });
     }
     
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    if (req.user.role === 'teacher' && event.created_by.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized: You can only delete your own events' });
+    }
+    
+    await Event.findByIdAndDelete(req.params.id);
 
     // Optional: Delete associated registrations? 
     await EventRegistration.deleteMany({ event_id: req.params.id });

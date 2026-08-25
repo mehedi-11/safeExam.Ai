@@ -21,23 +21,25 @@ exports.logIncident = async (req, res) => {
     return res.status(400).json({ message: 'examId, studentId, and activityType are required' });
   }
 
-  let demeritPoints = 1;
-  let isInstantBlock = false;
+  let demeritPoints = req.body.overrideDemerits !== undefined ? req.body.overrideDemerits : 1;
+  let isInstantBlock = req.body.forceSubmit === true;
   
-  if (activityType === 'watching phone' || activityType === 'taking photo') {
-    demeritPoints = 2;
-  } else if (activityType === 'talking') {
-    demeritPoints = 1;
-  } else if (['shortcut copy', 'manual copy', 'pasting answer', 'Tab Switching', 'Window Blur', 'Clipboard Activity', 'Shortcut Activity'].includes(activityType)) {
-    demeritPoints = 1;
-  } else if (activityType === 'AI Detection') {
-    demeritPoints = 0;
-    const lowerDetails = (details || '').toLowerCase();
-    
-    if (lowerDetails.includes('multiple persons detected')) demeritPoints += 1;
-    if (lowerDetails.includes('cell phone')) isInstantBlock = true;
-    if (/\bbook\b/.test(lowerDetails)) demeritPoints += 1;
-    if (/\bnotebook\b/.test(lowerDetails)) demeritPoints += 1;
+  if (req.body.overrideDemerits === undefined) {
+    if (activityType === 'watching phone' || activityType === 'taking photo') {
+      demeritPoints = 2;
+    } else if (activityType === 'talking') {
+      demeritPoints = 1;
+    } else if (['shortcut copy', 'manual copy', 'pasting answer', 'Tab Switching', 'Window Blur', 'Clipboard Activity', 'Shortcut Activity', 'Exit Attempt'].includes(activityType)) {
+      demeritPoints = 1;
+    } else if (activityType === 'AI Detection') {
+      demeritPoints = 0;
+      const lowerDetails = (details || '').toLowerCase();
+      
+      if (lowerDetails.includes('multiple persons detected')) demeritPoints += 1;
+      if (lowerDetails.includes('cell phone')) isInstantBlock = true;
+      if (/\bbook\b/.test(lowerDetails)) demeritPoints += 1;
+      if (/\bnotebook\b/.test(lowerDetails)) demeritPoints += 1;
+    }
   }
 
   try {
@@ -107,10 +109,11 @@ exports.logIncident = async (req, res) => {
       let newBlockUntil = currentAttempt.block_until ? new Date(currentAttempt.block_until) : null;
       const now = new Date();
 
-      if (isInstantBlock) {
+      if (isInstantBlock || newDemerits >= 20) {
         newStatus = 'completed';
         newBlockUntil = null;
-        const blockMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) used a MOBILE PHONE. INSTANT BLOCK AND AUTO-SUBMIT.\n`;
+        const blockReason = isInstantBlock ? 'INSTANT BLOCK AND AUTO-SUBMIT' : 'EXCEEDED 20 DEMERIT POINTS. AUTO-SUBMIT';
+        const blockMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) - ${blockReason}.\n`;
         fs.appendFile(logFilePath, blockMsg, (err) => {
           if (err) console.error('Error writing block status to log file:', err);
         });
@@ -121,24 +124,6 @@ exports.logIncident = async (req, res) => {
         currentAttempt.completed_at = new Date();
         await currentAttempt.save();
       } else {
-        if (newDemerits >= 5) {
-          if (newBlockUntil && newBlockUntil > now) {
-            newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 2);
-            const extensionMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) performed additional cheating during block. Extending block by 2 minutes. New end time: ${newBlockUntil.toISOString()}\n`;
-            fs.appendFile(logFilePath, extensionMsg, (err) => {
-              if (err) console.error('Error writing block extension to log file:', err);
-            });
-          } else {
-            newBlockUntil = new Date();
-            newBlockUntil.setMinutes(newBlockUntil.getMinutes() + 5);
-            newStatus = 'blocked';
-            const blockMsg = `[${new Date().toISOString()}] Exam: "${examTitle}" (ID: ${examId}) | Student: ${studentName} (${studentId}) exceeded 5 demerit points. Student BLOCKED from exam for 5 minutes (until ${newBlockUntil.toISOString()}).\n`;
-            fs.appendFile(logFilePath, blockMsg, (err) => {
-              if (err) console.error('Error writing block status to log file:', err);
-            });
-          }
-        }
-
         currentAttempt.demerit_points = newDemerits;
         currentAttempt.status = newStatus;
         currentAttempt.block_until = newBlockUntil;

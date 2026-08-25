@@ -45,6 +45,10 @@ export default function ExamInterface() {
   const [limitReached, setLimitReached] = useState(false);
   const [showLogFeed, setShowLogFeed] = useState([]); // Local log stream on exam screen
   const [processedFrame, setProcessedFrame] = useState(null); // Annotated image from backend
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  
+  const tabHideTimeRef = useRef(null);
+  const blurTimeRef = useRef(null);
 
   // API setup centralized in axiosConfig
   // 1. Initial Exam Check & Webcam access
@@ -69,30 +73,52 @@ export default function ExamInterface() {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'v' || e.key.toLowerCase() === 'x')) {
         e.preventDefault();
-        logCheating('Shortcut Activity', 'Student attempted Ctrl+C/V/X shortcut.');
+        logCheating('Shortcut Activity', 'Student attempted Ctrl+C/V/X shortcut.', 1, false);
       }
     };
 
     // Detect Tab Switching
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        logCheating('Tab Switching', 'Student switched to another tab or minimized the window.');
+        tabHideTimeRef.current = Date.now();
+      } else {
+        if (tabHideTimeRef.current) {
+          const duration = Date.now() - tabHideTimeRef.current;
+          if (duration > 10000) {
+            logCheating('Tab Switching', `Tab hidden for ${Math.round(duration/1000)}s`, 0, true);
+          } else {
+            logCheating('Tab Switching', 'Student switched to another tab briefly.', 1, false);
+          }
+          tabHideTimeRef.current = null;
+        }
       }
     };
 
     // Detect clicking outside the window
     const handleWindowBlur = () => {
-      logCheating('Window Blur', 'Student clicked outside the exam window or lost focus.');
+      blurTimeRef.current = Date.now();
+    };
+
+    const handleWindowFocus = () => {
+      if (blurTimeRef.current) {
+        const duration = Date.now() - blurTimeRef.current;
+        if (duration > 5000) {
+          logCheating('Window Blur', `Window blurred for ${Math.round(duration/1000)}s`, 1, false);
+        }
+        blurTimeRef.current = null;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('focus', handleWindowFocus);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('focus', handleWindowFocus);
     };
   }, [examStarted, isBlocked]);
 
@@ -126,7 +152,7 @@ export default function ExamInterface() {
     const handleBeforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = ''; // Required for Chrome to show the warning
-      logCheating('Exit Attempt', 'Student tried to close or refresh the exam page early.');
+      logCheating('Exit Attempt', 'Student tried to close or refresh the exam page early.', 0, true);
     };
 
     const handleUnload = () => {
@@ -231,7 +257,7 @@ export default function ExamInterface() {
         await loadQuestions();
       }
 
-      setExamStarted(true);
+      setShowRulesModal(true);
     } catch (err) {
       if (err.response?.data?.limit_reached) {
         setLimitReached(true);
@@ -241,6 +267,11 @@ export default function ExamInterface() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const startExamSession = () => {
+    setShowRulesModal(false);
+    setExamStarted(true);
   };
 
   const loadQuestions = async () => {
@@ -356,30 +387,47 @@ export default function ExamInterface() {
                 } else if (now - timers[item] > 5000) {
                   // Has been present for >5 seconds
                   if (item !== 'no person visible') {
-                    itemsToLog.push(item);
-                    timers[item] = now; // Reset timer so it logs again in 5s if still held
+                    if (item === 'cell phone') {
+                      logCheating('AI Detection', 'Cell phone detected for > 5s', 0, true);
+                    } else if (item === 'book' || item === 'laptop' || item === 'multiple persons') {
+                      logCheating('AI Detection', `${item} detected for > 5s`, 2, false);
+                    }
+                    timers[item] = now; // Reset timer so it triggers again if held
                   }
                 }
               });
 
               // Clear timers for items no longer detected
               Object.keys(timers).forEach(item => {
-                if (!detectedItems.has(item)) {
+                if (item !== 'no person visible' && !detectedItems.has(item)) {
                   delete timers[item];
                 }
               });
 
               // Special handling for out of screen returning
               if (detectedItems.has('no person visible')) {
-                if (!isOutOfScreenRef.current && timers['no person visible'] && now - timers['no person visible'] > 5000) {
-                  isOutOfScreenRef.current = true;
-                  itemsToLog.push('student have left the screen');
+                if (!timers['no person visible']) {
+                  timers['no person visible'] = now;
+                } else {
+                  const outDuration = now - timers['no person visible'];
+                  if (outDuration > 10000 && !isOutOfScreenRef.current) {
+                    isOutOfScreenRef.current = true;
+                    logCheating('AI Detection', 'Student left the screen for > 10s', 0, true);
+                  } else if (outDuration > 5000 && !isOutOfScreenRef.current) {
+                    isOutOfScreenRef.current = true;
+                    // Optional: log "left screen" event locally
+                  }
                 }
               } else {
                 if (isOutOfScreenRef.current) {
+                  const outDuration = now - timers['no person visible'];
                   isOutOfScreenRef.current = false;
-                  // Log instantly when returned
-                  itemsToLog.push('student back to the screen');
+                  if (outDuration <= 10000) {
+                    logCheating('AI Detection', 'Student back to screen (away <10s)', 1, false);
+                  }
+                  delete timers['no person visible'];
+                } else {
+                  delete timers['no person visible'];
                 }
               }
 
@@ -387,19 +435,7 @@ export default function ExamInterface() {
               setProcessedFrame(base64Frame);
 
               if (itemsToLog.length > 0) {
-                const uniqueItems = [...new Set(itemsToLog)].join(', ');
-                
-                // Add to local UI feed immediately
-                const timestamp = new Date().toLocaleTimeString();
-                setShowLogFeed(prev => {
-                  const msg = `[${timestamp}] Detected: ${uniqueItems}`;
-                  if (prev.length === 0 || !prev[0].includes(uniqueItems)) {
-                    // Trigger actual backend log/deduction only if new message
-                    logCheating('AI Detection', `YOLOv8 detected: ${uniqueItems}`);
-                    return [msg, ...prev].slice(0, 5);
-                  }
-                  return prev;
-                });
+                // UI feed fallback
               }
             }
           } catch (err) {
@@ -416,10 +452,10 @@ export default function ExamInterface() {
   }, [examStarted, examDetails, webcamReady, modelReady]);
 
   // Log a cheating event (Actual copy/paste or Simulated YOLOv8)
-  const logCheating = async (activityType, details) => {
+  const logCheating = async (activityType, details, overrideDemerits = undefined, forceSubmit = false) => {
     // Add to local console feed
     const now = new Date().toLocaleTimeString();
-    setShowLogFeed(prev => [`[${now}] Triggered: ${activityType}`, ...prev.slice(0, 4)]);
+    setShowLogFeed(prev => [`[${now}] Triggered: ${activityType} - ${details}`, ...prev.slice(0, 4)]);
 
     try {
       const res = await api.post('/proctor/log-incident', {
@@ -427,20 +463,17 @@ export default function ExamInterface() {
         studentId: user.id,
         studentName: user.name,
         activityType,
-        details
+        details,
+        overrideDemerits,
+        forceSubmit
       });
 
       setDemerits(res.data.demerit_points);
 
       // Handle locking on the fly
       if (res.data.status === 'completed') {
-        alert('A prohibited item (Mobile Phone) was detected! Your exam has been instantly blocked and auto-submitted.');
+        alert('A critical violation was detected! Your exam has been instantly auto-submitted.');
         navigate('/dashboard/student');
-      } else if (res.data.status === 'blocked' || (res.data.block_until && new Date(res.data.block_until) > new Date())) {
-        setIsBlocked(true);
-        const diff = Math.ceil((new Date(res.data.block_until) - new Date()) / 1000);
-        setBlockTimeLeft(diff);
-        setQuestions([]); // Hide active questions immediately
       }
     } catch (err) {
       console.error('Error reporting proctor alert:', err);
@@ -464,7 +497,7 @@ export default function ExamInterface() {
 
   const handleClipboard = (e) => {
     e.preventDefault();
-    logCheating('Clipboard Activity', 'Student attempted to use copy/cut/paste on the exam page');
+    logCheating('Clipboard Activity', 'Student attempted to use copy/cut/paste on the exam page', 1, false);
   };
 
   // Helper formatting seconds -> MM:SS
@@ -504,48 +537,33 @@ export default function ExamInterface() {
       onCut={handleClipboard}
       onPaste={handleClipboard}
     >
-      {/* Block Lock Overlay Screen */}
-      {isBlocked && (
-        <div className="fixed inset-0 z-50 bg-dark-900/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 select-none animate-fade-in">
-          <div className="w-20 h-20 rounded-full bg-tomato-500/10 border border-tomato-500/40 text-tomato-500 flex items-center justify-center mb-6 animate-pulse">
-            <ShieldAlert size={44} />
-          </div>
-          
-          <h1 className="text-3xl font-extrabold text-white tracking-tight leading-none mb-3">
-            EXAM TEMPORARILY BLOCKED
-          </h1>
-          
-          <p className="text-gray-400 text-sm max-w-lg mb-8 leading-relaxed">
-            Your examination workspace has been locked due to multiple suspicious activities detected by the AI proctor. 
-            All response fields are disabled. Attempting further cheating actions during lock extends the block duration.
-          </p>
-
-          <div className="bg-dark-850 border border-tomato-500/20 px-8 py-5 rounded-2xl mb-4">
-            <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold block mb-1">Block Countdown</span>
-            <span className="font-mono text-4xl font-extrabold text-tomato-500 tracking-wide">
-              {formatTime(blockTimeLeft)}
-            </span>
-          </div>
-
-          <div className="text-xs text-gray-500">
-            Current Demerit Suspicion Score: <span className="text-red-500 font-bold">{demerits} / 5</span>
-          </div>
-          
-          {/* Simulation panel during block (so they can test extending it) */}
-          <div className="mt-12 bg-dark-850 p-4 border border-gray-800 rounded-xl max-w-sm w-full">
-            <p className="text-[10px] text-gray-400 font-mono uppercase tracking-wider mb-2 text-left">Trigger Block Extension (+2m)</p>
-            <div className="flex gap-2">
+      {/* Rules Modal */}
+      {showRulesModal && (
+        <div className="fixed inset-0 z-50 bg-dark-900/95 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative">
+            <h2 className="text-2xl font-black text-dark-900 mb-4 border-b pb-4">Exam Rules & Proctoring Policies</h2>
+            <div className="space-y-4 text-sm text-gray-700 max-h-[60vh] overflow-y-auto pr-4">
+              <p className="font-semibold text-tomato-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 20 points will result in automatic submission.</p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li><span className="font-bold">Copy/Paste/Cut (Shortcut):</span> 1 demerit point.</li>
+                <li><span className="font-bold">Tab Switching / Minimize:</span> 1 demerit point. If away for >10s, auto-submit.</li>
+                <li><span className="font-bold">Window Focus Lost (Blur):</span> 1 demerit point if blurred for >5s.</li>
+                <li><span className="font-bold">Exit Attempt (Page Refresh/Close):</span> Auto-submit immediately.</li>
+                <li><span className="font-bold">Network Disconnect (Offline):</span> Auto-submit immediately.</li>
+                <li><span className="font-bold">Mobile Phone Detected (>5s):</span> Auto-submit immediately.</li>
+                <li><span className="font-bold">Book Detected (>5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Laptop Detected (>5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Multiple Persons Detected (>5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Left Screen (>5s):</span> If away >10s, auto-submit.</li>
+                <li><span className="font-bold">Returned to Screen (<10s):</span> 1 demerit point.</li>
+              </ul>
+            </div>
+            <div className="mt-8 flex justify-end">
               <button 
-                onClick={() => logCheating('talking', 'Simulated talking detection during block')}
-                className="bg-red-950/40 border border-red-900/60 hover:bg-red-900/40 text-red-400 text-[10px] font-bold py-1.5 px-3 rounded-lg flex-1 smooth-transition"
+                onClick={startExamSession}
+                className="bg-tomato-500 hover:bg-tomato-600 text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg"
               >
-                Simulate Talking
-              </button>
-              <button 
-                onClick={() => logCheating('watching phone', 'Simulated phone watch during block')}
-                className="bg-red-950/40 border border-red-900/60 hover:bg-red-900/40 text-red-400 text-[10px] font-bold py-1.5 px-3 rounded-lg flex-1 smooth-transition"
-              >
-                Simulate Phone
+                I Understand, Start Exam
               </button>
             </div>
           </div>
@@ -693,28 +711,28 @@ export default function ExamInterface() {
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold text-gray-500">Demerit Suspicion Points</span>
               <span className={`px-2 py-0.5 rounded text-xs font-extrabold ${
-                demerits >= 4 ? 'bg-red-100 text-red-700' :
-                demerits >= 2 ? 'bg-yellow-100 text-yellow-700' :
+                demerits >= 15 ? 'bg-red-100 text-red-700' :
+                demerits >= 10 ? 'bg-yellow-100 text-yellow-700' :
                 'bg-green-150 text-green-700'
               }`}>
-                {demerits} / 5
+                {demerits} / 20
               </span>
             </div>
             {/* Demerit bar graph */}
             <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden flex">
-              {[1, 2, 3, 4, 5].map(tick => (
+              {Array.from({ length: 20 }, (_, i) => i + 1).map(tick => (
                 <div 
                   key={tick}
                   className={`flex-1 border-r border-white last:border-0 ${
                     demerits >= tick 
-                      ? tick >= 4 ? 'bg-red-500' : tick >= 2 ? 'bg-yellow-500' : 'bg-green-500' 
+                      ? tick >= 15 ? 'bg-red-500' : tick >= 10 ? 'bg-yellow-500' : 'bg-green-500' 
                       : 'bg-gray-100'
                   }`}
                 />
               ))}
             </div>
             <p className="text-[10px] text-gray-400 mt-3 leading-normal">
-              Accumulating 5 demerit points locks the exam panel for 5 minutes. Reaching 20 points auto-submits the exam. Real-time copy & pasting checked.
+              Reaching 20 points auto-submits the exam.
             </p>
           </div>
 
