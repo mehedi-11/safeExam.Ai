@@ -636,7 +636,7 @@ export default function AdminDashboard() {
           {/* TAB: EVENTS */}
           {activeTab === "events" && (
             <div className="animate-fade-in">
-              <EventsManager />
+              <EventsManager isAdmin={true} />
             </div>
           )}
 

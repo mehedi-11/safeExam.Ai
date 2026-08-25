@@ -5,7 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 import api from '../api/axiosConfig';
 import Modal from '../components/Modal';
 
-const EventsManager = () => {
+const EventsManager = ({ isAdmin = false }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -231,13 +231,15 @@ const EventsManager = () => {
               size={16}
             />
           </div>
-          <button
-            onClick={openCreateModal}
-            className="tomato-btn py-2 text-xs flex items-center gap-1"
-          >
-            <Plus size={14} />
-            <span>Create Event</span>
-          </button>
+          {!isAdmin && (
+            <button
+              onClick={openCreateModal}
+              className="tomato-btn py-2 text-xs flex items-center gap-1"
+            >
+              <Plus size={14} />
+              <span>Create Event</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -346,13 +348,15 @@ const EventsManager = () => {
                     </div>
                   </td>
                   <td className="py-3 px-4 text-right space-x-2">
-                    <button
-                      onClick={() => openEditModal(evt)}
-                      className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Edit Event"
-                    >
-                      <Edit size={16} />
-                    </button>
+                    {!isAdmin && (
+                      <button
+                        onClick={() => openEditModal(evt)}
+                        className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit Event"
+                      >
+                        <Edit size={16} />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(evt._id)}
                       className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
