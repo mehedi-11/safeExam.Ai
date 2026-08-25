@@ -546,16 +546,16 @@ export default function ExamInterface() {
               <p className="font-semibold text-tomato-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 20 points will result in automatic submission.</p>
               <ul className="list-disc pl-5 space-y-2">
                 <li><span className="font-bold">Copy/Paste/Cut (Shortcut):</span> 1 demerit point.</li>
-                <li><span className="font-bold">Tab Switching / Minimize:</span> 1 demerit point. If away for >10s, auto-submit.</li>
-                <li><span className="font-bold">Window Focus Lost (Blur):</span> 1 demerit point if blurred for >5s.</li>
+                <li><span className="font-bold">Tab Switching / Minimize:</span> 1 demerit point. If away for &gt;10s, auto-submit.</li>
+                <li><span className="font-bold">Window Focus Lost (Blur):</span> 1 demerit point if blurred for &gt;5s.</li>
                 <li><span className="font-bold">Exit Attempt (Page Refresh/Close):</span> Auto-submit immediately.</li>
                 <li><span className="font-bold">Network Disconnect (Offline):</span> Auto-submit immediately.</li>
-                <li><span className="font-bold">Mobile Phone Detected (>5s):</span> Auto-submit immediately.</li>
-                <li><span className="font-bold">Book Detected (>5s):</span> 2 demerit points.</li>
-                <li><span className="font-bold">Laptop Detected (>5s):</span> 2 demerit points.</li>
-                <li><span className="font-bold">Multiple Persons Detected (>5s):</span> 2 demerit points.</li>
-                <li><span className="font-bold">Left Screen (>5s):</span> If away >10s, auto-submit.</li>
-                <li><span className="font-bold">Returned to Screen (<10s):</span> 1 demerit point.</li>
+                <li><span className="font-bold">Mobile Phone Detected (&gt;5s):</span> Auto-submit immediately.</li>
+                <li><span className="font-bold">Book Detected (&gt;5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Laptop Detected (&gt;5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Multiple Persons Detected (&gt;5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Left Screen (&gt;5s):</span> If away &gt;10s, auto-submit.</li>
+                <li><span className="font-bold">Returned to Screen (&lt;10s):</span> 1 demerit point.</li>
               </ul>
             </div>
             <div className="mt-8 flex justify-end">
