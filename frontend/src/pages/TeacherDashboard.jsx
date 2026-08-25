@@ -514,6 +514,45 @@ export default function TeacherDashboard() {
     }
   };
 
+  const downloadProctoringData = async (examId, type) => {
+    try {
+      if (type === 'logs') {
+        const response = await api.get(`/teacher/exams/${examId}/logs/download`, { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `exam_${examId}_logs.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } else if (type === 'roster') {
+        const res = await api.get(`/teacher/exams/${examId}/students`);
+        const students = res.data;
+        if (!students || students.length === 0) {
+          setError("No students found for this exam.");
+          return;
+        }
+        
+        let csvContent = "Student ID,Name,Email,Score,Status\n";
+        students.forEach(student => {
+          csvContent += `"${student.student_id || ''}","${student.name || ''}","${student.email || ''}","${student.score || 0}","${student.status || ''}"\n`;
+        });
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `exam_${examId}_roster.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    } catch (err) {
+      console.error(err);
+      setError(`Failed to download ${type}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {/* Mobile Header */}
