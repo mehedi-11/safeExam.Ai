@@ -423,6 +423,25 @@ exports.togglePublishResults = async (req, res) => {
   }
 };
 
+exports.toggleExamPublishResults = async (req, res) => {
+  const { examId } = req.params;
+  const { results_published } = req.body;
+  try {
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(404).json({ message: 'Exam not found' });
+
+    exam.results_published = results_published ? true : false;
+    await exam.save();
+
+    await StudentExam.updateMany({ exam_id: examId }, { $set: { results_published: results_published ? true : false } });
+    
+    return res.json({ message: 'Exam publish status updated successfully' });
+  } catch (error) {
+    console.error('Error toggling exam publish status:', error);
+    return res.status(500).json({ message: 'Server error updating exam publish status' });
+  }
+};
+
 exports.getExamResults = async (req, res) => {
   const { id } = req.params;
   try {

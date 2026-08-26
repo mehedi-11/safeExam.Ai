@@ -1202,9 +1202,9 @@ export default function TeacherDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {examResults.map((res) => (
+                        {examResults.map((res, index) => (
                           <tr
-                            key={res.attempt_id || res.student_id}
+                            key={res.attempt_id || res.student_id || index}
                             className="border-b border-gray-100 hover:bg-gray-50/50"
                           >
                             <td className="py-3 px-4">
@@ -1245,17 +1245,7 @@ export default function TeacherDashboard() {
                               )}
                             </td>
                             <td className="py-3 px-4 text-right space-x-2">
-                              <button
-                                onClick={() =>
-                                  window.open(
-                                    `${API_BASE_URL}/api/teacher/exams/${selectedResultExamId}/students/${res.student_id}/logs`,
-                                    "_blank",
-                                  )
-                                }
-                                className="px-3 py-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg text-[11px] font-bold transition-colors"
-                              >
-                                Download Log
-                              </button>
+                              
                               <button
                                 onClick={() =>
                                   handleViewAnswers(res.student_id, res.name)

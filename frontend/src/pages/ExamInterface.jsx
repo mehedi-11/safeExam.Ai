@@ -343,7 +343,7 @@ export default function ExamInterface() {
             const canvas = canvasRef.current;
             if (canvas) {
               const ctx = canvas.getContext('2d');
-              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
               
               let detectedItems = new Set();
 
@@ -693,7 +693,7 @@ export default function ExamInterface() {
                 className="w-full h-full object-cover"
               />
 
-              <canvas ref={canvasRef} width="320" height="240" style={{ display: 'none' }} />
+              <canvas ref={canvasRef} width="320" height="240" className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />
               {!streamRef.current && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                   <div className="w-10 h-10 rounded-full bg-tomato-50 text-tomato-500 flex items-center justify-center mb-2 animate-bounce">
