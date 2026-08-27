@@ -34,6 +34,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import Modal from "../components/Modal";
+import Loader from "../components/Loader";
 import EventsManager from "./EventsManager";
 
 export default function TeacherDashboard() {
@@ -555,6 +556,8 @@ export default function TeacherDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      {loading && <Loader />}
+
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">

@@ -7,6 +7,7 @@ import {
   Hourglass, Play, RefreshCw, GraduationCap,
   Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings, X
 } from 'lucide-react';
+import Loader from '../components/Loader';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -155,6 +156,8 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      {loading && <Loader />}
+
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">

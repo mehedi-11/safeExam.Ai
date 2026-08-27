@@ -45,6 +45,7 @@ import {
 } from "recharts";
 import EventsManager from "./EventsManager";
 import ModelTest from "../components/ModelTest";
+import Loader from "../components/Loader";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -419,6 +420,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      {loading && <Loader />}
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
