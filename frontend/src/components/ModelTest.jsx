@@ -134,7 +134,7 @@ export default function ModelTest() {
         <div>
           <h2 className="text-2xl font-black text-dark-900 tracking-tight">AI Model Tester</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Test the COCO-SSD object detection model in real-time.
+            Test the YOLOv11 object detection model in real-time.
           </p>
         </div>
         
