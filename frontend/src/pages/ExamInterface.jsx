@@ -291,7 +291,7 @@ export default function ExamInterface() {
 
   const startWebcam = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true });
       streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -337,7 +337,7 @@ export default function ExamInterface() {
       frameInterval = setInterval(async () => {
         if (modelRef.current && videoRef.current && videoRef.current.readyState === 4) {
           try {
-            const predictions = await modelRef.current.detect(videoRef.current);
+            const predictions = await modelRef.current.detect(videoRef.current, 50, 0.25);
             
             // Draw on canvas to create processedFrame base64
             const canvas = canvasRef.current;
