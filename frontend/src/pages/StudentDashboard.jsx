@@ -318,20 +318,43 @@ export default function StudentDashboard() {
             let suggestionColor = "text-blue-700";
             let suggestionBg = "bg-blue-50 border-blue-200";
 
+            // Subject-wise grouping
+            const subjectStats = {};
+            completedExams.forEach(e => {
+              const subject = e.course_name || e.course_code || 'General';
+              if (!subjectStats[subject]) {
+                subjectStats[subject] = { totalPercentage: 0, count: 0 };
+              }
+              const maxMarks = e.total_marks || 100;
+              const percentage = (Number(e.score) / maxMarks) * 100;
+              subjectStats[subject].totalPercentage += percentage;
+              subjectStats[subject].count += 1;
+            });
+
+            const subjectAverages = Object.entries(subjectStats).map(([subject, stats]) => ({
+              subject,
+              average: (stats.totalPercentage / stats.count).toFixed(1)
+            })).sort((a, b) => b.average - a.average);
+
+            let strongSubjects = [];
+            let weakSubjects = [];
+            
+            subjectAverages.forEach(s => {
+              if (s.average >= 75) strongSubjects.push(s.subject);
+              else if (s.average < 50) weakSubjects.push(s.subject);
+            });
+
             if (completedCount > 0) {
               if (avgPercentage >= 80) {
-                suggestionTitle = "Excellent Performance!";
-                suggestionText = "You have an outstanding average score. Keep up the great work and consider taking advanced courses to challenge yourself further.";
+                suggestionTitle = "Excellent Overall Performance!";
                 suggestionColor = "text-green-700";
                 suggestionBg = "bg-green-50 border-green-200";
               } else if (avgPercentage >= 50) {
                 suggestionTitle = "Good, but can improve!";
-                suggestionText = "You are doing well, but there's room for improvement. Focus on your weaker topics and review past mistakes to boost your score.";
-                suggestionColor = "text-yellow-700";
-                suggestionBg = "bg-yellow-50 border-yellow-200";
+                suggestionColor = "text-blue-700";
+                suggestionBg = "bg-blue-50 border-blue-200";
               } else {
                 suggestionTitle = "Needs Attention!";
-                suggestionText = "Your average score is quite low. We strongly suggest revising core concepts before attempting more exams. Don't hesitate to ask your instructors for help.";
                 suggestionColor = "text-red-700";
                 suggestionBg = "bg-red-50 border-red-200";
               }
@@ -367,21 +390,62 @@ export default function StudentDashboard() {
                       <GraduationCap size={24} />
                     </div>
                     <div>
-                      <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Average %</p>
+                      <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Overall Average</p>
                       <h4 className="text-2xl font-black text-dark-900">{avgPercentage}%</h4>
                     </div>
                   </div>
                 </div>
 
-                <div className={`p-6 rounded-2xl border ${suggestionBg} flex items-start gap-4 mt-8 shadow-sm`}>
-                  <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-sm`}>
-                    <ShieldAlert size={20} className={suggestionColor} />
+                <div className={`p-6 rounded-2xl border ${suggestionBg} mt-8 shadow-sm transition-colors duration-300`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-sm`}>
+                      <ShieldAlert size={20} className={suggestionColor} />
+                    </div>
+                    <div>
+                      <h4 className={`text-sm font-bold ${suggestionColor} uppercase tracking-wider`}>Subject Insights & Suggestions</h4>
+                      <h5 className={`font-black ${suggestionColor}`}>{suggestionTitle}</h5>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className={`text-sm font-bold ${suggestionColor} mb-1 uppercase tracking-wider`}>Insight & Suggestion</h4>
-                    <h5 className={`font-black ${suggestionColor} mb-2`}>{suggestionTitle}</h5>
+                  
+                  {subjectAverages.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="text-sm opacity-90 leading-relaxed font-medium space-y-2">
+                        {strongSubjects.length > 0 && (
+                          <div className="p-3 bg-green-100/50 rounded-xl border border-green-200 text-green-800">
+                            <strong className="font-extrabold block mb-1">🚀 Doing Great In:</strong> 
+                            {strongSubjects.join(', ')} 
+                            <p className="text-xs mt-1 font-normal opacity-80">Keep up the great work in these subjects! You have a solid grasp of the material.</p>
+                          </div>
+                        )}
+                        {weakSubjects.length > 0 && (
+                          <div className="p-3 bg-red-100/50 rounded-xl border border-red-200 text-red-800">
+                            <strong className="font-extrabold block mb-1">⚠️ Needs Improvement In:</strong> 
+                            {weakSubjects.join(', ')}
+                            <p className="text-xs mt-1 font-normal opacity-80">Try to review core concepts, practice more, and ask your teachers for help in these areas.</p>
+                          </div>
+                        )}
+                        {weakSubjects.length === 0 && strongSubjects.length === 0 && (
+                          <div className="p-3 bg-blue-100/50 rounded-xl border border-blue-200 text-blue-800">
+                            <strong className="font-extrabold block mb-1">📈 Steady Progress:</strong> 
+                            Your performance is average across subjects. Push a little harder to reach top scores!
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
+                        {subjectAverages.map(s => (
+                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-sm flex items-center gap-1.5 hover:border-tomato-500 transition-colors">
+                            <span className="truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
+                            <span className={`px-1.5 py-0.5 rounded-md ${s.average >= 75 ? 'bg-green-100 text-green-700' : s.average < 50 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                              {s.average}%
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
                     <p className={`text-sm ${suggestionColor} opacity-90 leading-relaxed font-medium`}>{suggestionText}</p>
-                  </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">

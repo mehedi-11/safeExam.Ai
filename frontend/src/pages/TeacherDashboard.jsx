@@ -1051,9 +1051,14 @@ export default function TeacherDashboard() {
                             ) : (
                               <button
                                 onClick={() => {
-                                  setExamForm({ id: exam.id });
-                                  setLiveForm({ password: "" });
-                                  setIsLiveModalOpen(true);
+                                  if (!exam.questions_count || exam.questions_count === 0) {
+                                    setExamForm({ id: exam.id });
+                                    setIsNoQuestionsModalOpen(true);
+                                  } else {
+                                    setExamForm({ id: exam.id });
+                                    setLiveForm({ password: "" });
+                                    setIsLiveModalOpen(true);
+                                  }
                                 }}
                                 className="px-3 py-1.5 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-xs font-bold flex inline-flex items-center gap-1 transition-colors"
                               >
