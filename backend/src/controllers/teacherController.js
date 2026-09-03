@@ -27,14 +27,21 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { name } = req.body;
+  const { name, email } = req.body;
   const profile_image = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
     if (!name) return res.status(400).json({ message: 'Name is required' });
+    if (!email) return res.status(400).json({ message: 'Email is required' });
 
-    const updateData = { name };
+    const updateData = { name, email };
     if (profile_image) updateData.profile_image = profile_image;
+
+    // Check if email is already taken by another teacher
+    const existingTeacher = await Teacher.findOne({ email, _id: { $ne: req.user.id } });
+    if (existingTeacher) {
+      return res.status(400).json({ message: 'Email is already in use.' });
+    }
 
     const teacher = await Teacher.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('id name email profile_image joining_date status');
     if (!teacher) return res.status(404).json({ message: 'Teacher not found' });

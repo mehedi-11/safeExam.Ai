@@ -121,6 +121,84 @@ export default function TeacherDashboard() {
     option_b: "",
     option_c: "",
     option_d: "",
+  const [proctoringSearchQuery, setProctoringSearchQuery] = useState("");
+  const [examFilter, setExamFilter] = useState("all");
+  const [examCategoryFilter, setExamCategoryFilter] = useState("academic");
+
+  const [exams, setExams] = useState([]);
+  const [eventsList, setEventsList] = useState([]);
+  const [proctoringLogs, setProctoringLogs] = useState([]);
+  const [rawLogs, setRawLogs] = useState("");
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    profile_image: "",
+    joining_date: "",
+  });
+
+  // Question Management State
+  const [selectedExamId, setSelectedExamId] = useState("");
+  const [questions, setQuestions] = useState([]);
+
+  // Results State
+  const [selectedResultExamId, setSelectedResultExamId] = useState("");
+  const [examResults, setExamResults] = useState([]);
+  const [selectedStudentForAnswers, setSelectedStudentForAnswers] =
+    useState(null);
+  const [studentAnswers, setStudentAnswers] = useState([]);
+  const [manualGrades, setManualGrades] = useState({});
+
+  // Proctor Logs State
+  const [selectedLogExamId, setSelectedLogExamId] = useState("");
+  const [examStudents, setExamStudents] = useState([]);
+
+  // UI State
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Modals
+  const [isExamModalOpen, setIsExamModalOpen] = useState(false);
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [isManageQuestionsModalOpen, setIsManageQuestionsModalOpen] =
+    useState(false);
+  const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
+  const [isAnswersModalOpen, setIsAnswersModalOpen] = useState(false);
+  const [isNoQuestionsModalOpen, setIsNoQuestionsModalOpen] = useState(false);
+  const [isStopExamModalOpen, setIsStopExamModalOpen] = useState(false);
+  const [examToStopId, setExamToStopId] = useState(null);
+  
+  const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
+  const [selectedEventRegistrations, setSelectedEventRegistrations] = useState([]);
+  const [registrationsLoading, setRegistrationsLoading] = useState(false);
+  const [selectedEventTitle, setSelectedEventTitle] = useState("");
+
+  // Forms
+  const [examForm, setExamForm] = useState({
+    id: null,
+    title: "",
+    exam_date: "",
+    duration_minutes: "",
+    must_on_camera: true,
+    must_on_microphone: true,
+    course_name: "",
+    course_code: "",
+    university_name: "",
+    max_attempts: 1,
+    event_id: "",
+    exam_password: "",
+  });
+  const [isEditingExam, setIsEditingExam] = useState(false);
+
+  const [questionTab, setQuestionTab] = useState("MCQ");
+  const [questionForm, setQuestionForm] = useState({
+    id: null,
+    question_text: "",
+    marks: 1,
+    option_a: "",
+    option_b: "",
+    option_c: "",
+    option_d: "",
     correct_option: "A",
   });
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
@@ -129,6 +207,7 @@ export default function TeacherDashboard() {
 
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
 
   // Password Change State
   const [pwData, setPwData] = useState({ oldPassword: "", newPassword: "" });
@@ -162,6 +241,7 @@ export default function TeacherDashboard() {
       setExams(eRes.data);
       setProfile(pRes.data);
       setProfileName(pRes.data.name);
+      setProfileEmail(pRes.data.email);
       setEventsList(evRes.data || []);
 
       await fetchProctoringData();
@@ -238,6 +318,7 @@ export default function TeacherDashboard() {
     setError("");
     const formData = new FormData();
     formData.append("name", profileName);
+    formData.append("email", profileEmail);
     if (profileImageFile) {
       formData.append("profile_image", profileImageFile);
     }
@@ -1101,7 +1182,6 @@ export default function TeacherDashboard() {
                                 setIsManageQuestionsModalOpen(true);
                               }}
                               className="p-1.5 text-purple-500 hover:bg-purple-50 rounded-lg transition-colors"
-                              title="Manage Questions"
                             >
                               <FileQuestion size={16} />
                             </button>
@@ -1425,29 +1505,6 @@ export default function TeacherDashboard() {
             </div>
           )}
 
-          {activeTab === "profile" && (
-            <div className="max-w-md animate-fade-in space-y-6">
-              <h3 className="text-lg font-bold text-dark-900">
-                Manage Instructor Profile
-              </h3>
-
-              <form onSubmit={handleProfileSubmit} className="space-y-4 pt-2">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                    Display Name <span className="text-red-500 ml-1">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                    Profile Picture Image
                   </label>
                   <input
                     type="file"
