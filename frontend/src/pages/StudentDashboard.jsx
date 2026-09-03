@@ -4,7 +4,7 @@ import api, { API_BASE_URL } from '../api/axiosConfig';
 import StudentEvents from './StudentEvents';
 import { 
   Calendar, BookOpen, KeyRound, CheckCircle2, ShieldAlert, 
-  Hourglass, Play, RefreshCw, GraduationCap,
+  Hourglass, Play, RefreshCw, GraduationCap, Clock,
   Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings, X
 } from 'lucide-react';
 import Loader from '../components/Loader';

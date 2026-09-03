@@ -1373,17 +1373,13 @@ export default function TeacherDashboard() {
                               </td>
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-600 border border-green-100 w-max">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-600 border border-green-100 w-max uppercase tracking-wider">
                                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                                    Live Now
-                                  </span>
-                                ) : isEnded ? (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200 w-max">
-                                    Ended
+                                    Online
                                   </span>
                                 ) : (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100 w-max">
-                                    Upcoming
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200 w-max uppercase tracking-wider">
+                                    Offline
                                   </span>
                                 )}
                               </td>
