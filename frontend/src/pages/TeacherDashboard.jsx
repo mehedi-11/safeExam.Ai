@@ -1350,8 +1350,8 @@ export default function TeacherDashboard() {
                           const expireTime = new Date(examDate.getTime() + durationMs);
                           const now = new Date();
 
-                          const isLive = now >= examDate && now <= expireTime;
-                          const isEnded = now > expireTime;
+                          const isLive = exam.is_live === true;
+                          const isEnded = !isLive && now > expireTime;
                           const eId = exam._id || exam.id;
 
                           return (
