@@ -15,7 +15,7 @@ const { sendExamPasswordEmail } = require('../utils/sendEmail');
 
 exports.getProfile = async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.user.id).select('id name email profile_image joining_date status');
+    const teacher = await Teacher.findById(req.user.id).select('id name email profile_image dob university address years_of_experience joining_date status');
     if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
     const response = teacher.toObject();
     response.id = response._id;
@@ -27,7 +27,7 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, dob, university, address, years_of_experience } = req.body;
   const profile_image = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
@@ -35,6 +35,11 @@ exports.updateProfile = async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email is required' });
 
     const updateData = { name, email };
+    if (dob) updateData.dob = dob;
+    if (university) updateData.university = university;
+    if (address) updateData.address = address;
+    if (years_of_experience) updateData.years_of_experience = years_of_experience;
+    
     if (profile_image) updateData.profile_image = profile_image;
 
     // Check if email is already taken by another teacher
@@ -43,11 +48,12 @@ exports.updateProfile = async (req, res) => {
       return res.status(400).json({ message: 'Email is already in use.' });
     }
 
-    const teacher = await Teacher.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('id name email profile_image joining_date status');
+    const teacher = await Teacher.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('id name email profile_image dob university address years_of_experience joining_date status');
     if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
     
     const response = teacher.toObject();
     response.id = response._id;
+    response.role = 'teacher';
     return res.json({ message: 'Profile updated successfully', user: response });
   } catch (error) {
     console.error(error);

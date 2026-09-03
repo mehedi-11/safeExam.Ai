@@ -23,6 +23,7 @@ import {
   FileText,
   Activity,
   Users,
+  User,
   X,
   Settings,
   Key,
@@ -121,84 +122,6 @@ export default function TeacherDashboard() {
     option_b: "",
     option_c: "",
     option_d: "",
-  const [proctoringSearchQuery, setProctoringSearchQuery] = useState("");
-  const [examFilter, setExamFilter] = useState("all");
-  const [examCategoryFilter, setExamCategoryFilter] = useState("academic");
-
-  const [exams, setExams] = useState([]);
-  const [eventsList, setEventsList] = useState([]);
-  const [proctoringLogs, setProctoringLogs] = useState([]);
-  const [rawLogs, setRawLogs] = useState("");
-  const [profile, setProfile] = useState({
-    name: "",
-    email: "",
-    profile_image: "",
-    joining_date: "",
-  });
-
-  // Question Management State
-  const [selectedExamId, setSelectedExamId] = useState("");
-  const [questions, setQuestions] = useState([]);
-
-  // Results State
-  const [selectedResultExamId, setSelectedResultExamId] = useState("");
-  const [examResults, setExamResults] = useState([]);
-  const [selectedStudentForAnswers, setSelectedStudentForAnswers] =
-    useState(null);
-  const [studentAnswers, setStudentAnswers] = useState([]);
-  const [manualGrades, setManualGrades] = useState({});
-
-  // Proctor Logs State
-  const [selectedLogExamId, setSelectedLogExamId] = useState("");
-  const [examStudents, setExamStudents] = useState([]);
-
-  // UI State
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  // Modals
-  const [isExamModalOpen, setIsExamModalOpen] = useState(false);
-  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
-  const [isManageQuestionsModalOpen, setIsManageQuestionsModalOpen] =
-    useState(false);
-  const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
-  const [isAnswersModalOpen, setIsAnswersModalOpen] = useState(false);
-  const [isNoQuestionsModalOpen, setIsNoQuestionsModalOpen] = useState(false);
-  const [isStopExamModalOpen, setIsStopExamModalOpen] = useState(false);
-  const [examToStopId, setExamToStopId] = useState(null);
-  
-  const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
-  const [selectedEventRegistrations, setSelectedEventRegistrations] = useState([]);
-  const [registrationsLoading, setRegistrationsLoading] = useState(false);
-  const [selectedEventTitle, setSelectedEventTitle] = useState("");
-
-  // Forms
-  const [examForm, setExamForm] = useState({
-    id: null,
-    title: "",
-    exam_date: "",
-    duration_minutes: "",
-    must_on_camera: true,
-    must_on_microphone: true,
-    course_name: "",
-    course_code: "",
-    university_name: "",
-    max_attempts: 1,
-    event_id: "",
-    exam_password: "",
-  });
-  const [isEditingExam, setIsEditingExam] = useState(false);
-
-  const [questionTab, setQuestionTab] = useState("MCQ");
-  const [questionForm, setQuestionForm] = useState({
-    id: null,
-    question_text: "",
-    marks: 1,
-    option_a: "",
-    option_b: "",
-    option_c: "",
-    option_d: "",
     correct_option: "A",
   });
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
@@ -208,6 +131,11 @@ export default function TeacherDashboard() {
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileName, setProfileName] = useState("");
   const [profileEmail, setProfileEmail] = useState("");
+  const [profileDob, setProfileDob] = useState("");
+  const [profileUniversity, setProfileUniversity] = useState("");
+  const [profileAddress, setProfileAddress] = useState("");
+  const [profileYearsOfExperience, setProfileYearsOfExperience] = useState("");
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Password Change State
   const [pwData, setPwData] = useState({ oldPassword: "", newPassword: "" });
@@ -242,6 +170,10 @@ export default function TeacherDashboard() {
       setProfile(pRes.data);
       setProfileName(pRes.data.name);
       setProfileEmail(pRes.data.email);
+      setProfileDob(pRes.data.dob ? new Date(pRes.data.dob).toISOString().split('T')[0] : "");
+      setProfileUniversity(pRes.data.university || "");
+      setProfileAddress(pRes.data.address || "");
+      setProfileYearsOfExperience(pRes.data.years_of_experience || "");
       setEventsList(evRes.data || []);
 
       await fetchProctoringData();
@@ -319,6 +251,10 @@ export default function TeacherDashboard() {
     const formData = new FormData();
     formData.append("name", profileName);
     formData.append("email", profileEmail);
+    formData.append("dob", profileDob);
+    formData.append("university", profileUniversity);
+    formData.append("address", profileAddress);
+    formData.append("years_of_experience", profileYearsOfExperience);
     if (profileImageFile) {
       formData.append("profile_image", profileImageFile);
     }
@@ -330,6 +266,7 @@ export default function TeacherDashboard() {
       triggerSuccess("Profile updated successfully");
       setProfile(res.data.user);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+      setIsProfileModalOpen(false);
     } catch (err) {
       setError("Error updating profile details.");
     }
@@ -1182,6 +1119,7 @@ export default function TeacherDashboard() {
                                 setIsManageQuestionsModalOpen(true);
                               }}
                               className="p-1.5 text-purple-500 hover:bg-purple-50 rounded-lg transition-colors"
+                              title="Manage Questions"
                             >
                               <FileQuestion size={16} />
                             </button>
@@ -1505,19 +1443,66 @@ export default function TeacherDashboard() {
             </div>
           )}
 
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProfileImageFile(e.target.files[0])}
-                    className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-tomato-50 file:text-tomato-700 hover:file:bg-tomato-100 smooth-transition"
-                  />
+          {activeTab === "profile" && (
+            <div className="max-w-3xl animate-fade-in space-y-6">
+              <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">Instructor Profile</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsProfileModalOpen(true)}
+                    className="px-4 py-2 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 text-sm font-semibold rounded-lg transition"
+                  >
+                    Edit Profile
+                  </button>
                 </div>
 
-                <button type="submit" className="tomato-btn py-3 w-full mt-4">
-                  Save Changes
-                </button>
-              </form>
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="flex-shrink-0">
+                    <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg flex items-center justify-center">
+                      {profile.profile_image ? (
+                        <img src={"http://localhost:5000" + profile.profile_image} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <User className="w-12 h-12" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase font-semibold">Display Name</p>
+                      <p className="text-lg font-medium text-gray-900">{profileName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase font-semibold">Email</p>
+                      <p className="text-lg font-medium text-gray-900">{profileEmail || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase font-semibold">Date of Birth</p>
+                      <p className="text-lg font-medium text-gray-900">
+                        {profileDob ? new Date(profileDob).toLocaleDateString() : "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase font-semibold">University</p>
+                      <p className="text-lg font-medium text-gray-900">{profileUniversity || "Not provided"}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-500 uppercase font-semibold">Address</p>
+                      <p className="text-lg font-medium text-gray-900">{profileAddress || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase font-semibold">Experience</p>
+                      <p className="text-lg font-medium text-gray-900">
+                        {profileYearsOfExperience ? `${profileYearsOfExperience} Years` : "Not provided"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
 
               <div className="border-t border-gray-150 pt-6">
                 <h4 className="font-bold text-sm text-dark-900 mb-4 flex items-center gap-1.5">
@@ -1528,7 +1513,8 @@ export default function TeacherDashboard() {
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      Current Password <span className="text-red-500 ml-1">*</span>
+                      Current Password
+ <span className="text-red-500 ml-1">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1556,7 +1542,8 @@ export default function TeacherDashboard() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      New Password <span className="text-red-500 ml-1">*</span>
+                      New Password
+ <span className="text-red-500 ml-1">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1596,6 +1583,118 @@ export default function TeacherDashboard() {
       </div>
 
       {/* POPUP MODALS */}
+              {/* Profile Edit Modal */}
+              {isProfileModalOpen && (
+                <div className="modal-backdrop">
+                  <div className="modal-content max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                      <h2 className="text-xl font-bold text-gray-800">Edit Profile</h2>
+                      <button type="button" onClick={() => setIsProfileModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition">
+                        <X className="w-5 h-5 text-gray-500" />
+                      </button>
+                    </div>
+                    
+                    <div className="p-6">
+                      <form onSubmit={handleProfileSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                              Display Name <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={profileName}
+                              onChange={(e) => setProfileName(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                              Email <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="email"
+                              required
+                              value={profileEmail}
+                              onChange={(e) => setProfileEmail(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                              Date of Birth
+                            </label>
+                            <input
+                              type="date"
+                              value={profileDob}
+                              onChange={(e) => setProfileDob(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                              Years of Experience
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={profileYearsOfExperience}
+                              onChange={(e) => setProfileYearsOfExperience(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            University / Institution
+                          </label>
+                          <input
+                            type="text"
+                            value={profileUniversity}
+                            onChange={(e) => setProfileUniversity(e.target.value)}
+                            placeholder="e.g. Dhaka University"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            Address
+                          </label>
+                          <textarea
+                            rows="2"
+                            value={profileAddress}
+                            onChange={(e) => setProfileAddress(e.target.value)}
+                            placeholder="Full address"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                          ></textarea>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            Profile Picture Image
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setProfileImageFile(e.target.files[0])}
+                            className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-tomato-50 file:text-tomato-700 hover:file:bg-tomato-100 smooth-transition"
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 smooth-transition shadow-sm"
+                        >
+                          Save Changes
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
 
       {/* Modal: Schedule / Edit Exam */}
       <Modal
@@ -1607,7 +1706,8 @@ export default function TeacherDashboard() {
           <form onSubmit={handleSaveExam} className="space-y-4">
             <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Exam Title <span className="text-red-500 ml-1">*</span>
+              Exam Title
+ <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -1623,7 +1723,8 @@ export default function TeacherDashboard() {
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                Duration (Minutes) <span className="text-red-500 ml-1">*</span>
+                Duration (Minutes)
+ <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 type="number"
@@ -1683,7 +1784,8 @@ export default function TeacherDashboard() {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                Max Attempts <span className="text-red-500 ml-1">*</span>
+                Max Attempts
+ <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 type="number"
@@ -1712,7 +1814,8 @@ export default function TeacherDashboard() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-xs font-bold text-gray-700 uppercase">
-                  Select Event <span className="text-red-500 ml-1">*</span>
+                  Select Event
+ <span className="text-red-500 ml-1">*</span>
                 </label>
                 {examForm.event_id && (
                   <button
@@ -1746,7 +1849,8 @@ export default function TeacherDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                  Duration (Minutes) <span className="text-red-500 ml-1">*</span>
+                  Duration (Minutes)
+ <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                   type="number"
@@ -1762,7 +1866,8 @@ export default function TeacherDashboard() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                  Exam Password (Secret Code) <span className="text-red-500 ml-1">*</span>
+                  Exam Password (Secret Code)
+ <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
                   type="text"
@@ -1796,7 +1901,8 @@ export default function TeacherDashboard() {
           </p>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-              Exam Password <span className="text-red-500 ml-1">*</span>
+              Exam Password
+ <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -2010,7 +2116,8 @@ export default function TeacherDashboard() {
         <form onSubmit={handleSaveQuestion} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase font-mono">
-              Question Text <span className="text-red-500 ml-1">*</span>
+              Question Text
+ <span className="text-red-500 ml-1">*</span>
             </label>
             <textarea
               required
@@ -2028,7 +2135,8 @@ export default function TeacherDashboard() {
 
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase font-mono">
-              Marks for this question <span className="text-red-500 ml-1">*</span>
+              Marks for this question
+ <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="number"
@@ -2051,7 +2159,8 @@ export default function TeacherDashboard() {
                 {["a", "b", "c", "d"].map((opt) => (
                   <div key={opt}>
                     <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">
-                      Option {opt} <span className="text-red-500 ml-1">*</span>
+                      Option {opt}
+ <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -2071,7 +2180,8 @@ export default function TeacherDashboard() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                  Correct Option <span className="text-red-500 ml-1">*</span>
+                  Correct Option
+ <span className="text-red-500 ml-1">*</span>
                 </label>
                 <select
                   required
