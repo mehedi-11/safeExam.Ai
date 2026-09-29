@@ -6,6 +6,25 @@ export default {
   ],
   theme: {
     extend: {
+      borderRadius: {
+        'none': '0px',
+        'sm': '0px',
+        DEFAULT: '0px', 
+        'md': '0px',
+        'lg': '0px',
+        'xl': '0px',
+        '2xl': '0px',
+        '3xl': '0px',
+        'full': '50%', // Icons/Avatars 50%
+      },
+      boxShadow: {
+        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        DEFAULT: '0 1px 2px 0 rgb(0 0 0 / 0.05)', // Flatter shadows
+        'md': '0 2px 4px -1px rgb(0 0 0 / 0.05)',
+        'lg': '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+        'xl': '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+        '2xl': '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+      },
       colors: {
         tomato: {
           50: '#fff5f2',

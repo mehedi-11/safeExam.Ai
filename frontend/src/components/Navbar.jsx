@@ -38,7 +38,7 @@ export default function Navbar() {
     <nav className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-40 px-6 py-4 flex justify-between items-center relative">
       <div className="w-[250px]">
         <Link to="/" className="flex items-center gap-2 group w-fit">
-          <span className="w-9 h-9 rounded-xl bg-tomato-500 flex items-center justify-center text-white font-bold text-lg group-hover:scale-105 smooth-transition shadow-md shadow-tomato-200">
+          <span className="w-9 h-9 rounded-full bg-tomato-500 flex items-center justify-center text-white font-bold text-lg group-hover:scale-105 smooth-transition shadow-md shadow-tomato-200">
             S
           </span>
           <span className="font-bold text-xl tracking-tight text-dark-900">

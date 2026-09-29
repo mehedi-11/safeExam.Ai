@@ -161,7 +161,7 @@ export default function StudentDashboard() {
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
           </div>
           <span className="font-extrabold text-md text-black">S-Exam<span className="text-tomato-500">.ai</span></span>
@@ -175,19 +175,19 @@ export default function StudentDashboard() {
       </div>
 
       {/* Sidebar Navigation */}
-      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-150 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
+      <div className={`fixed inset-y-0 left-0 bg-dark-900 border-r border-dark-800 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Logo and Menu Links */}
         <div>
           {/* Brand Logo Header */}
-          <div className="p-6 border-b border-gray-150 flex items-center justify-between">
+          <div className="p-6 border-b border-dark-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-extrabold text-lg tracking-tight text-black">
+                <span className="font-extrabold text-lg tracking-tight text-white">
                   S-Exam<span className="text-tomato-500">.ai</span>
                 </span>
                 <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">Student Portal</span>
@@ -195,7 +195,7 @@ export default function StudentDashboard() {
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-1.5 text-gray-400 hover:text-dark-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="lg:hidden p-1.5 text-gray-400 hover:text-white hover:bg-dark-800 rounded-lg transition-colors"
             >
               <X size={20} />
             </button>
@@ -220,7 +220,7 @@ export default function StudentDashboard() {
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id 
                     ? 'bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in'
-                    : 'text-gray-500 hover:text-dark-900 hover:bg-gray-100/60'
+                    : 'text-gray-400 hover:text-white hover:bg-dark-800/60'
                 }`}
               >
                 <tab.icon size={18} />
@@ -231,7 +231,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-gray-150 space-y-4">
+        <div className="p-4 border-t border-dark-800 space-y-4">
           <div className="flex items-center gap-3 px-2">
             {profile.profile_image ? (
               <img 
@@ -246,7 +246,7 @@ export default function StudentDashboard() {
               </div>
             )}
             <div className="min-w-0">
-              <span className="font-bold text-xs text-dark-900 block truncate">{profile.name || 'Student'}</span>
+              <span className="font-bold text-xs text-white block truncate">{profile.name || 'Student'}</span>
               <span className="text-[10px] text-gray-400 font-semibold block truncate">ID: {profile.id}</span>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function StudentDashboard() {
               localStorage.clear();
               navigate('/');
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-600 rounded-xl text-xs font-bold text-gray-650 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dark-700 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -274,14 +274,7 @@ export default function StudentDashboard() {
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
         
-        {/* Header Summary */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-dark-900">Student Portal</h1>
-            <p className="text-gray-400 text-sm">Welcome back, {profile.name}! Track exams and course enrollment statuses.</p>
-          </div>
-          
-        </div>
+        {/* Header Summary Removed */}
 
         {/* Status Alerts */}
         {success && (
@@ -366,7 +359,7 @@ export default function StudentDashboard() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-tomato-100 text-tomato-500 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-tomato-100 text-tomato-500 rounded-full flex items-center justify-center shrink-0">
                       <Play size={24} />
                     </div>
                     <div>
@@ -376,7 +369,7 @@ export default function StudentDashboard() {
                   </div>
                   
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 text-green-500 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-green-100 text-green-500 rounded-full flex items-center justify-center shrink-0">
                       <CheckCircle2 size={24} />
                     </div>
                     <div>
@@ -386,7 +379,7 @@ export default function StudentDashboard() {
                   </div>
                   
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center shrink-0">
                       <GraduationCap size={24} />
                     </div>
                     <div>
@@ -497,7 +490,7 @@ export default function StudentDashboard() {
                         <div className="space-y-3">
                           {upcoming.map(exam => (
                             <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-sm">
-                              <div className="bg-blue-50 border border-blue-100 w-12 h-12 rounded-lg flex flex-col items-center justify-center shrink-0">
+                              <div className="bg-blue-50 border border-blue-100 w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0">
                                 <span className="text-[10px] font-bold text-blue-500 uppercase">{new Date(exam.exam_date).toLocaleString('default', { month: 'short' })}</span>
                                 <span className="text-lg font-black text-blue-700 leading-none">{new Date(exam.exam_date).getDate()}</span>
                               </div>
@@ -557,16 +550,19 @@ export default function StudentDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 w-full xl:w-auto">
-                  <input
-                    type="text"
-                    name="search_dummy"
-                    autoComplete="off"
-                    data-lpignore="true"
-                    placeholder="Search by university, course name or code..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full sm:w-80 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
-                  />
+                  <div className="relative w-full sm:w-80">
+                    <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                    <input
+                      type="text"
+                      name="search_dummy"
+                      autoComplete="off"
+                      data-lpignore="true"
+                      placeholder="Search by university, course name or code..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 bg-gray-50 hover:bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                    />
+                  </div>
                   <div className="flex items-center bg-gray-100 p-1 rounded-xl">
                     <button
                       onClick={() => setViewMode('grid')}

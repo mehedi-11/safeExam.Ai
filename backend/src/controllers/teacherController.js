@@ -607,7 +607,8 @@ exports.getProctoringLogs = async (req, res) => {
 exports.getExamStudents = async (req, res) => {
   const { examId } = req.params;
   try {
-    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    const query = req.user.role === 'admin' ? { _id: examId } : { _id: examId, teacher_id: req.user.id };
+    const exam = await Exam.findOne(query);
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
     const students = await StudentExam.aggregate([
@@ -628,7 +629,8 @@ exports.getExamStudents = async (req, res) => {
 exports.downloadExamLogs = async (req, res) => {
   const { examId } = req.params;
   try {
-    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    const query = req.user.role === 'admin' ? { _id: examId } : { _id: examId, teacher_id: req.user.id };
+    const exam = await Exam.findOne(query);
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
     const logs = await ProctoringLog.aggregate([

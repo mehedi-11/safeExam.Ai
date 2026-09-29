@@ -579,7 +579,7 @@ export default function TeacherDashboard() {
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
           </div>
           <span className="font-extrabold text-md text-black">
@@ -596,19 +596,19 @@ export default function TeacherDashboard() {
 
       {/* Sidebar Navigation */}
       <div
-        className={`fixed inset-y-0 left-0 bg-white border-r border-gray-150 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
+        className={`fixed inset-y-0 left-0 bg-dark-900 border-r border-dark-800 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo and Menu Links */}
         <div>
           {/* Brand Logo Header */}
-          <div className="p-6 border-b border-gray-150 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+          <div className="p-6 border-b border-dark-800 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <span className="font-extrabold text-lg tracking-tight text-black">
+              <span className="font-extrabold text-lg tracking-tight text-white">
                 S-Exam<span className="text-tomato-500">.ai</span>
               </span>
               <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">
@@ -637,7 +637,7 @@ export default function TeacherDashboard() {
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id
                     ? "bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
-                    : "text-gray-500 hover:text-dark-900 hover:bg-gray-100/60"
+                    : "text-gray-400 hover:text-white hover:bg-dark-800/60"
                 }`}
               >
                 <tab.icon size={18} />
@@ -648,7 +648,7 @@ export default function TeacherDashboard() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-gray-150 space-y-4">
+        <div className="p-4 border-t border-dark-800 space-y-4">
           <div className="flex items-center gap-3 px-2">
             {profile.profile_image ? (
               <img
@@ -667,7 +667,7 @@ export default function TeacherDashboard() {
               </div>
             )}
             <div className="min-w-0">
-              <span className="font-bold text-xs text-dark-900 block truncate">
+              <span className="font-bold text-xs text-white block truncate">
                 {profile.name || "Instructor"}
               </span>
               <span className="text-[10px] text-gray-400 font-semibold block truncate">
@@ -680,7 +680,7 @@ export default function TeacherDashboard() {
               localStorage.clear();
               navigate("/");
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-600 rounded-xl text-xs font-bold text-gray-650 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dark-700 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -698,27 +698,10 @@ export default function TeacherDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
-        {/* Header Summary */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div className="w-full flex flex-col gap-6">
-            <div className="flex justify-between items-start w-full">
-              <div>
-                <h1 className="text-3xl font-bold text-dark-900">
-                  Teacher Console
-                </h1>
-                <p className="text-gray-400 text-sm">
-                  Schedule tests, write questions, and monitor real-time integrity
-                  logs.
-                </p>
-              </div>
-              <button
-                onClick={fetchData}
-                className="tomato-btn-outline py-2 text-xs flex items-center gap-1.5 shrink-0"
-              >
-                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-                <span>Reload data</span>
-              </button>
-            </div>
+        {/* Header Summary Removed */}
+        <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-4 mb-6">
+          <div className="w-full flex flex-col gap-4">
+
             
             {activeTab === 'add_exam' && (
               <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-sm">
@@ -762,7 +745,7 @@ export default function TeacherDashboard() {
               {/* Dashboard Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-500 flex items-center justify-center">
                     <FileText size={24} />
                   </div>
                   <div>
@@ -775,7 +758,7 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-green-50 text-green-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center">
                     <FileQuestion size={24} />
                   </div>
                   <div>
@@ -788,7 +771,7 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center">
                     <Activity size={24} />
                   </div>
                   <div>
@@ -810,7 +793,7 @@ export default function TeacherDashboard() {
                   onClick={() => setActiveTab("add_exam")}
                   className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-500 flex items-center justify-center shrink-0">
                     <Plus size={24} />
                   </div>
                   <div>
@@ -824,7 +807,7 @@ export default function TeacherDashboard() {
                   onClick={() => setActiveTab("exam_results")}
                   className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
                     <Award size={24} />
                   </div>
                   <div>
@@ -838,7 +821,7 @@ export default function TeacherDashboard() {
                   onClick={() => setActiveTab("logs")}
                   className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
                     <ShieldAlert size={24} />
                   </div>
                   <div>
@@ -899,16 +882,13 @@ export default function TeacherDashboard() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="relative">
+                    <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                     <input
                       type="text"
                       placeholder="Search exams..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
-                    />
-                    <Search
-                      className="absolute left-3 top-2.5 text-gray-400"
-                      size={16}
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
                     />
                   </div>
                   <button

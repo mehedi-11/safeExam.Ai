@@ -92,6 +92,7 @@ export default function AdminDashboard() {
   });
   const [studentSearch, setStudentSearch] = useState("");
   const [teacherSearch, setTeacherSearch] = useState("");
+  const [allExamsSearch, setAllExamsSearch] = useState("");
 
   // UI State
   const [loading, setLoading] = useState(false);
@@ -411,7 +412,7 @@ export default function AdminDashboard() {
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <LayoutDashboard size={16} />
           </div>
           <span className="font-extrabold text-md text-black">
@@ -472,18 +473,18 @@ export default function AdminDashboard() {
 
       {/* Sidebar Navigation */}
       <div
-        className={`fixed inset-y-0 left-0 bg-white border-r border-gray-150 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
+        className={`fixed inset-y-0 left-0 bg-dark-900 border-r border-dark-800 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div>
-          <div className="p-6 border-b border-gray-150 flex items-center justify-between">
+          <div className="p-6 border-b border-dark-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
                 <LayoutDashboard className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-extrabold text-lg tracking-tight text-black">
+                <span className="font-extrabold text-lg tracking-tight text-white">
                   S-Exam<span className="text-tomato-500">.ai</span>
                 </span>
                 <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">
@@ -493,7 +494,7 @@ export default function AdminDashboard() {
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-1.5 text-gray-400 hover:text-dark-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="lg:hidden p-1.5 text-gray-400 hover:text-white hover:bg-dark-800 rounded-lg transition-colors"
             >
               <X size={20} />
             </button>
@@ -524,7 +525,7 @@ export default function AdminDashboard() {
                   className={`w-full flex items-center justify-between px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                     activeTab === tab.id
                       ? "bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
-                      : "text-gray-500 hover:text-dark-900 hover:bg-gray-100/60"
+                      : "text-gray-400 hover:text-white hover:bg-dark-800/60"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -548,13 +549,13 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-150 space-y-4">
+        <div className="p-4 border-t border-dark-800 space-y-4">
           <div className="flex items-center gap-3 px-2">
             <div className="w-10 h-10 rounded-full bg-tomato-100 text-tomato-500 flex items-center justify-center border border-tomato-200 font-extrabold">
               {profile.name ? profile.name.charAt(0).toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <span className="font-bold text-xs text-dark-900 block truncate">
+              <span className="font-bold text-xs text-white block truncate">
                 {profile.name || "System Admin"}
               </span>
               <span className="text-[10px] text-gray-400 font-semibold block truncate">
@@ -567,7 +568,7 @@ export default function AdminDashboard() {
               localStorage.clear();
               navigate("/");
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-600 rounded-xl text-xs font-bold text-gray-650 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dark-700 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -584,60 +585,7 @@ export default function AdminDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-dark-900">
-              Admin Control Center
-            </h1>
-            <p className="text-gray-400 text-sm">
-              Oversee registrations, user accounts, and system status.
-            </p>
-          </div>
-          <div className="hidden lg:flex items-center gap-3">
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 relative transition-colors"
-              >
-                {isNotificationsOpen ? <X size={18} /> : <Bell size={18} />}
-                {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tomato-500 rounded-full"></span>
-                )}
-              </button>
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-150 rounded-xl shadow-xl z-50 overflow-hidden">
-                  <div className="p-3 border-b border-gray-150 flex justify-between items-center bg-gray-50">
-                    <span className="font-bold text-sm text-dark-900">Notifications</span>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await api.put("/admin/notifications/mark-read");
-                          fetchData();
-                        } catch (err) {}
-                      }}
-                      className="text-[10px] font-bold text-tomato-500 hover:underline"
-                    >
-                      Mark all read
-                    </button>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                    {notifications.slice(0, 10).map((n) => (
-                      <div
-                        key={n.id}
-                        className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-blue-50 text-dark-900 font-semibold"}`}
-                      >
-                        {n.message}
-                      </div>
-                    ))}
-                    {notifications.length === 0 && (
-                      <p className="text-xs text-gray-400 p-2 text-center">No notifications</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Header Summary Removed */}
 
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
@@ -665,10 +613,56 @@ export default function AdminDashboard() {
           {/* TAB: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-8 animate-fade-in">
-              <h3 className="text-lg font-bold text-dark-900 mb-4 flex items-center gap-2">
-                <LayoutDashboard size={18} className="text-tomato-500" />
-                <span>System Statistics</span>
-              </h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-dark-900 flex items-center gap-2">
+                  <LayoutDashboard size={18} className="text-tomato-500" />
+                  <span>System Statistics</span>
+                </h3>
+                <div className="hidden lg:flex items-center gap-3">
+                  <div className="relative" ref={notifRef}>
+                    <button
+                      onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                      className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 relative transition-colors"
+                    >
+                      {isNotificationsOpen ? <X size={18} /> : <Bell size={18} />}
+                      {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tomato-500 rounded-full"></span>
+                      )}
+                    </button>
+                    {isNotificationsOpen && (
+                      <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-150 rounded-xl shadow-xl z-50 overflow-hidden">
+                        <div className="p-3 border-b border-gray-150 flex justify-between items-center bg-gray-50">
+                          <span className="font-bold text-sm text-dark-900">Notifications</span>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await api.put("/admin/notifications/mark-read");
+                                fetchData();
+                              } catch (err) {}
+                            }}
+                            className="text-[10px] font-bold text-tomato-500 hover:underline"
+                          >
+                            Mark all read
+                          </button>
+                        </div>
+                        <div className="max-h-64 overflow-y-auto p-2 space-y-1">
+                          {notifications.slice(0, 10).map((n) => (
+                            <div
+                              key={n.id}
+                              className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-blue-50 text-dark-900 font-semibold"}`}
+                            >
+                              {n.message}
+                            </div>
+                          ))}
+                          {notifications.length === 0 && (
+                            <p className="text-xs text-gray-400 p-2 text-center">No notifications</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
@@ -982,7 +976,6 @@ export default function AdminDashboard() {
                           <th className="p-4">Student Info</th>
                           <th className="p-4">Email</th>
                           <th className="p-4 text-center">Exams Info</th>
-                          <th className="p-4">Status</th>
                           <th className="p-4 text-center">Actions</th>
                         </tr>
                       </thead>
@@ -1010,13 +1003,6 @@ export default function AdminDashboard() {
                               <td className="p-4 text-center">
                                 <div className="font-semibold text-dark-900">{student.totalExams || 0}</div>
                                 <div className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
-                              </td>
-                              <td className="p-4">
-                                <span
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${student.status === "approved" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}
-                                >
-                                  {student.status}
-                                </span>
                               </td>
                               <td className="p-4 flex justify-center gap-2">
                                 <button
@@ -1136,7 +1122,6 @@ export default function AdminDashboard() {
                         <tr className="bg-gray-50 border-b border-gray-150 text-gray-500 font-bold uppercase tracking-wider">
                           <th className="p-4">Teacher Info</th>
                           <th className="p-4 text-center">Exams Info</th>
-                          <th className="p-4">Status</th>
                           <th className="p-4">Joined Date</th>
                           <th className="p-4 text-center">Actions</th>
                         </tr>
@@ -1168,13 +1153,6 @@ export default function AdminDashboard() {
                               <td className="p-4 text-center">
                                 <div className="font-semibold text-dark-900">{tExams.length} <span className="text-gray-400 font-normal mx-1">/</span> {completedCount}</div>
                                 <div className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
-                              </td>
-                              <td className="p-4">
-                                <span
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${teacher.status === "approved" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}
-                                >
-                                  {teacher.status}
-                                </span>
                               </td>
                               <td className="p-4">
                                 {new Date(
@@ -1464,9 +1442,16 @@ export default function AdminDashboard() {
                   <FileText size={18} className="text-tomato-500" />
                   <span>All Exams</span>
                 </h3>
-                <button onClick={() => fetchData()} className="text-sm font-bold text-tomato-500 hover:underline flex items-center gap-1">
-                  <RefreshCw size={14} /> Refresh
-                </button>
+                <div className="relative">
+                  <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    placeholder="Search by Title or Teacher..."
+                    value={allExamsSearch}
+                    onChange={(e) => setAllExamsSearch(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
+                  />
+                </div>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
@@ -1481,27 +1466,35 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {allExams.length > 0 ? (
-                        allExams.map((exam) => (
-                          <tr key={exam.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 font-semibold text-dark-900">{exam.title}</td>
-                            <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
-                            <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
-                            <td className="px-6 py-4">{exam.duration_minutes} mins</td>
-                            <td className="px-6 py-4 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${exam.is_live ? "bg-green-100 text-green-700 border border-green-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
-                                {exam.is_live ? "Live" : "Not Live"}
-                              </span>
+                      {(() => {
+                        const filteredExams = allExams.filter(exam => {
+                          const query = allExamsSearch.toLowerCase();
+                          const titleMatch = exam.title?.toLowerCase().includes(query);
+                          const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
+                          return titleMatch || teacherMatch;
+                        });
+                        return filteredExams.length > 0 ? (
+                          filteredExams.map((exam) => (
+                            <tr key={exam.id || exam._id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4 font-semibold text-dark-900">{exam.title}</td>
+                              <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
+                              <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
+                              <td className="px-6 py-4">{exam.duration_minutes} mins</td>
+                              <td className="px-6 py-4 text-center">
+                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${exam.is_live ? "bg-green-100 text-green-700 border border-green-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                  {exam.is_live ? "Live" : "Not Live"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                              No exams found.
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
-                            No exams found.
-                          </td>
-                        </tr>
-                      )}
+                        );
+                      })()}
                     </tbody>
                   </table>
                 </div>
