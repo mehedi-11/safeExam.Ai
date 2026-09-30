@@ -355,7 +355,7 @@ export default function ExamInterface() {
                 
                 // Only draw box if it's a relevant object or person
                 if (['cell phone', 'book', 'laptop', 'person'].includes(prediction.class)) {
-                  ctx.strokeStyle = '#ef4444'; // tomato/red
+                  ctx.strokeStyle = '#ef4444'; // rose/red
                   ctx.lineWidth = 2;
                   ctx.strokeRect(x * scaleX, y * scaleY, width * scaleX, height * scaleY);
                   ctx.fillStyle = '#ef4444';
@@ -543,7 +543,7 @@ export default function ExamInterface() {
           <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative">
             <h2 className="text-2xl font-black text-dark-900 mb-4 border-b pb-4">Exam Rules & Proctoring Policies</h2>
             <div className="space-y-4 text-sm text-gray-700 max-h-[60vh] overflow-y-auto pr-4">
-              <p className="font-semibold text-tomato-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 20 points will result in automatic submission.</p>
+              <p className="font-semibold text-rose-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 20 points will result in automatic submission.</p>
               <ul className="list-disc pl-5 space-y-2">
                 <li><span className="font-bold">Copy/Paste/Cut (Shortcut):</span> 1 demerit point.</li>
                 <li><span className="font-bold">Tab Switching / Minimize:</span> 1 demerit point. If away for &gt;10s, auto-submit.</li>
@@ -561,7 +561,7 @@ export default function ExamInterface() {
             <div className="mt-8 flex justify-end">
               <button 
                 onClick={startExamSession}
-                className="bg-tomato-500 hover:bg-tomato-600 text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg"
+                className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg"
               >
                 I Understand, Start Exam
               </button>
@@ -580,7 +580,7 @@ export default function ExamInterface() {
             <div>
               <button 
                 onClick={() => { if(window.confirm('Abandon exam? Your progress will not be submitted.')) navigate('/dashboard/student'); }} 
-                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-tomato-500 mb-2 smooth-transition"
+                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-rose-500 mb-2 smooth-transition"
               >
                 <ArrowLeft size={13} />
                 <span>Exit Exam Portal</span>
@@ -590,10 +590,10 @@ export default function ExamInterface() {
             </div>
 
             {/* Timer widget */}
-            <div className="flex items-center gap-3 bg-tomato-50 text-tomato-650 py-2.5 px-4 rounded-xl border border-tomato-100 font-semibold shadow-sm">
+            <div className="flex items-center gap-3 bg-rose-50 text-rose-650 py-2.5 px-4 rounded-xl border border-rose-100 font-semibold shadow-sm">
               <Clock size={18} className="animate-pulse" />
               <div className="text-left font-mono">
-                <span className="text-[10px] block uppercase text-tomato-500 font-bold leading-3">Time Left</span>
+                <span className="text-[10px] block uppercase text-rose-500 font-bold leading-3">Time Left</span>
                 <span className="text-lg font-bold">{formatTime(timeLeft)}</span>
               </div>
             </div>
@@ -624,7 +624,7 @@ export default function ExamInterface() {
                         value={answers[q.id] || ''}
                         onChange={(e) => handleOptionChange(q.id, e.target.value)}
                         placeholder="Type your answer here..."
-                        className="w-full h-32 p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-tomato-500 text-sm resize-none"
+                        className="w-full h-32 p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-rose-500 text-sm resize-none"
                       ></textarea>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -641,13 +641,13 @@ export default function ExamInterface() {
                               onClick={() => handleOptionChange(q.id, opt.key)}
                               className={`flex items-center gap-3 p-3.5 border rounded-xl cursor-pointer smooth-transition ${
                                 isSelected 
-                                  ? 'border-tomato-500 bg-tomato-50/15 font-semibold text-tomato-800' 
-                                  : 'border-gray-100 hover:border-tomato-200 hover:bg-gray-50/50 text-gray-650'
+                                  ? 'border-rose-500 bg-rose-50/15 font-semibold text-rose-800' 
+                                  : 'border-gray-100 hover:border-rose-200 hover:bg-gray-50/50 text-gray-650'
                               }`}
                             >
                               <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-extrabold border ${
                                 isSelected 
-                                  ? 'bg-tomato-500 border-tomato-500 text-white' 
+                                  ? 'bg-rose-500 border-rose-500 text-white' 
                                   : 'bg-gray-50 border-gray-200 text-gray-500'
                               }`}>
                                 {opt.key}
@@ -665,7 +665,7 @@ export default function ExamInterface() {
               {!isBlocked && questions.length > 0 && (
                 <button 
                   onClick={() => handleSubmitExam(false)}
-                  className="tomato-btn w-full py-3.5 text-sm flex items-center justify-center gap-2"
+                  className="rose-btn w-full py-3.5 text-sm flex items-center justify-center gap-2"
                 >
                   <CheckSquare size={18} />
                   <span>Submit Exam Assessment</span>
@@ -681,7 +681,7 @@ export default function ExamInterface() {
           {/* Live webcam component */}
           <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm flex flex-col items-center">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5 self-start">
-              <Camera size={14} className="text-tomato-500" />
+              <Camera size={14} className="text-rose-500" />
               <span>Camera Monitor Preview</span>
             </h4>
             <div className="w-full aspect-[4/3] bg-dark-900 rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
@@ -696,7 +696,7 @@ export default function ExamInterface() {
               <canvas ref={canvasRef} width="320" height="240" className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />
               {!streamRef.current && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                  <div className="w-10 h-10 rounded-full bg-tomato-50 text-tomato-500 flex items-center justify-center mb-2 animate-bounce">
+                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mb-2 animate-bounce">
                     <ShieldAlert size={20} />
                   </div>
                   <span className="text-[10px] font-bold text-gray-400">Webcam Inactive / Denied</span>
@@ -713,7 +713,7 @@ export default function ExamInterface() {
               <span className={`px-2 py-0.5 rounded text-xs font-extrabold ${
                 demerits >= 15 ? 'bg-red-100 text-red-700' :
                 demerits >= 10 ? 'bg-yellow-100 text-yellow-700' :
-                'bg-green-150 text-green-700'
+                'bg-rose-150 text-rose-700'
               }`}>
                 {demerits} / 20
               </span>
@@ -725,7 +725,7 @@ export default function ExamInterface() {
                   key={tick}
                   className={`flex-1 border-r border-white last:border-0 ${
                     demerits >= tick 
-                      ? tick >= 15 ? 'bg-red-500' : tick >= 10 ? 'bg-yellow-500' : 'bg-green-500' 
+                      ? tick >= 15 ? 'bg-red-500' : tick >= 10 ? 'bg-yellow-500' : 'bg-rose-500' 
                       : 'bg-gray-100'
                   }`}
                 />
@@ -740,12 +740,12 @@ export default function ExamInterface() {
           {/* Live AI Detection Logs */}
           <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5">
-              <Terminal size={14} className="text-tomato-500" />
+              <Terminal size={14} className="text-rose-500" />
               <span>YOLOv8 AI Log Feed</span>
             </h4>
             <div className="bg-dark-900 rounded-xl p-3 h-32 overflow-y-auto">
               {showLogFeed.length > 0 ? (
-                <div className="font-mono text-[9px] text-tomato-300 space-y-1.5">
+                <div className="font-mono text-[9px] text-rose-300 space-y-1.5">
                   {showLogFeed.map((log, idx) => (
                     <div key={idx} className="truncate">{log}</div>
                   ))}

@@ -9,7 +9,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-white text-dark-900 font-sans antialiased selection:bg-tomato-100 selection:text-tomato-700 overflow-x-hidden;
+    @apply bg-white text-dark-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-700 overflow-x-hidden;
   }
 }
 
@@ -20,15 +20,15 @@
   }
 
   .card-hover {
-    @apply border border-gray-200 rounded-none bg-white shadow-sm hover:shadow-md hover:border-tomato-300 smooth-transition;
+    @apply border border-gray-200 rounded-none bg-white shadow-sm hover:shadow-md hover:border-rose-300 smooth-transition;
   }
 
-  .tomato-btn {
-    @apply bg-tomato-500 hover:bg-tomato-600 text-white font-medium py-2 px-5 rounded-none shadow-sm hover:shadow smooth-transition inline-flex items-center justify-center gap-2;
+  .rose-btn {
+    @apply bg-rose-500 hover:bg-rose-600 text-white font-medium py-2 px-5 rounded-none shadow-sm hover:shadow smooth-transition inline-flex items-center justify-center gap-2;
   }
 
-  .tomato-btn-outline {
-    @apply border border-tomato-500 text-tomato-600 hover:bg-tomato-50 hover:text-tomato-700 font-medium py-2 px-5 rounded-none smooth-transition inline-flex items-center justify-center gap-2;
+  .rose-btn-outline {
+    @apply border border-rose-500 text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-medium py-2 px-5 rounded-none smooth-transition inline-flex items-center justify-center gap-2;
   }
 
   .modal-backdrop {
@@ -68,7 +68,7 @@
   @apply bg-gray-50;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full hover:bg-tomato-300 transition-colors;
+  @apply bg-gray-300 rounded-full hover:bg-rose-300 transition-colors;
 }
 
 /* Custom Quill Editor Height */

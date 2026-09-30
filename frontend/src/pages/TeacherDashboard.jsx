@@ -26,6 +26,7 @@ import {
   User,
   X,
   Settings,
+  MapPin,
   Key,
   Eye,
   EyeOff,
@@ -194,18 +195,16 @@ export default function TeacherDashboard() {
     try {
       const [lRes, rRes] = await Promise.all([
         api.get("/teacher/proctoring-logs").catch((err) => {
-          console.error("Logs error:", err);
           return { data: [] };
         }),
         api.get("/proctor/raw-logs").catch((err) => {
-          console.error("Raw logs error:", err);
           return { data: { logs: "Error loading raw logs." } };
         }),
       ]);
       setProctoringLogs(lRes.data || []);
       setRawLogs(rRes.data?.logs || "");
     } catch (err) {
-      console.error("Error fetching real-time proctor logs:", err);
+      // Silently ignore polling errors to prevent console spam
     }
   };
 
@@ -573,17 +572,17 @@ export default function TeacherDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {loading && <Loader />}
 
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
           </div>
           <span className="font-extrabold text-md text-black">
-            S-Exam<span className="text-tomato-500">.ai</span>
+            SExam<span className="text-rose-500">.AI</span>
           </span>
         </div>
         <button
@@ -596,20 +595,20 @@ export default function TeacherDashboard() {
 
       {/* Sidebar Navigation */}
       <div
-        className={`fixed inset-y-0 left-0 bg-dark-900 border-r border-dark-800 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
+        className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo and Menu Links */}
         <div>
           {/* Brand Logo Header */}
-          <div className="p-6 border-b border-dark-800 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+          <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <span className="font-extrabold text-lg tracking-tight text-white">
-                S-Exam<span className="text-tomato-500">.ai</span>
+              <span className="font-extrabold text-lg tracking-tight text-dark-900">
+                SExam<span className="text-rose-500">.AI</span>
               </span>
               <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">
                 Teacher Console
@@ -625,7 +624,7 @@ export default function TeacherDashboard() {
               { id: "exam_results", label: "Exam Results", icon: Award },
               { id: "events", label: "Events", icon: Calendar },
               { id: "proctoring", label: "Proctoring", icon: Camera },
-              { id: "profile", label: "Instructor Settings", icon: Settings },
+              { id: "profile", label: "My Profile", icon: User },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -636,8 +635,8 @@ export default function TeacherDashboard() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id
-                    ? "bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
-                    : "text-gray-400 hover:text-white hover:bg-dark-800/60"
+                    ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20 animate-fade-in"
+                    : "text-gray-500 hover:text-dark-900 hover:bg-gray-100"
                 }`}
               >
                 <tab.icon size={18} />
@@ -648,13 +647,13 @@ export default function TeacherDashboard() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-dark-800 space-y-4">
+        <div className="p-4 border-t border-gray-200 space-y-4">
           <div className="flex items-center gap-3 px-2">
             {profile.profile_image ? (
               <img
                 src={`${API_BASE_URL}${profile.profile_image}`}
                 alt="Teacher"
-                className="w-10 h-10 rounded-full object-cover border border-tomato-500 shadow-sm"
+                className="w-10 h-10 rounded-full object-cover border border-rose-500 shadow-sm"
                 onError={(e) => {
                   e.target.src =
                     "https://api.dicebear.com/7.x/initials/svg?seed=" +
@@ -662,12 +661,12 @@ export default function TeacherDashboard() {
                 }}
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-tomato-100 text-tomato-500 flex items-center justify-center border border-tomato-200 font-extrabold">
+              <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center border border-rose-200 font-extrabold">
                 {profile.name ? profile.name.charAt(0).toUpperCase() : "T"}
               </div>
             )}
             <div className="min-w-0">
-              <span className="font-bold text-xs text-white block truncate">
+              <span className="font-bold text-xs text-dark-900 block truncate">
                 {profile.name || "Instructor"}
               </span>
               <span className="text-[10px] text-gray-400 font-semibold block truncate">
@@ -680,7 +679,7 @@ export default function TeacherDashboard() {
               localStorage.clear();
               navigate("/");
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dark-700 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-rose-500 hover:bg-rose-50/10 hover:text-rose-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -697,7 +696,7 @@ export default function TeacherDashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
+      <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
         {/* Header Summary Removed */}
         <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-4 mb-6">
           <div className="w-full flex flex-col gap-4">
@@ -707,13 +706,13 @@ export default function TeacherDashboard() {
               <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-sm">
                 <button
                   onClick={() => setExamCategoryFilter("academic")}
-                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-dark-900 scale-95"}`}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-rose-50 text-rose-600 shadow-sm scale-100" : "text-gray-500 hover:text-dark-900 scale-95"}`}
                 >
                   Academic Exams
                 </button>
                 <button
                   onClick={() => setExamCategoryFilter("event")}
-                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-dark-900 scale-95"}`}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-rose-50 text-rose-600 shadow-sm scale-100" : "text-gray-500 hover:text-dark-900 scale-95"}`}
                 >
                   Event Exams
                 </button>
@@ -724,7 +723,7 @@ export default function TeacherDashboard() {
 
         {/* Global Notifications */}
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <Check size={16} />
             <span>{success}</span>
           </div>
@@ -745,7 +744,7 @@ export default function TeacherDashboard() {
               {/* Dashboard Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
                     <FileText size={24} />
                   </div>
                   <div>
@@ -758,7 +757,7 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
                     <FileQuestion size={24} />
                   </div>
                   <div>
@@ -771,7 +770,7 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
                     <Activity size={24} />
                   </div>
                   <div>
@@ -791,9 +790,9 @@ export default function TeacherDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <button
                   onClick={() => setActiveTab("add_exam")}
-                  className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-rose-300 transition-colors text-left"
                 >
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
                     <Plus size={24} />
                   </div>
                   <div>
@@ -805,9 +804,9 @@ export default function TeacherDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab("exam_results")}
-                  className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-rose-300 transition-colors text-left"
                 >
-                  <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
                     <Award size={24} />
                   </div>
                   <div>
@@ -819,7 +818,7 @@ export default function TeacherDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab("logs")}
-                  className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-150 shadow-sm flex items-center gap-4 hover:border-rose-300 transition-colors text-left"
                 >
                   <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
                     <ShieldAlert size={24} />
@@ -845,50 +844,50 @@ export default function TeacherDashboard() {
           {/* TAB: ADD EXAM */}
           {activeTab === "add_exam" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="flex justify-between items-center flex-wrap gap-4">
-                <div className="flex items-center gap-6">
-                  <h3 className="text-lg font-bold text-dark-900">
+              <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full xl:w-auto">
+                  <h3 className="text-lg font-bold text-dark-900 whitespace-nowrap">
                     Manage Exams
                   </h3>
-                  <div className="flex bg-gray-100 p-1 rounded-lg w-max">
+                  <div className="flex flex-wrap bg-gray-100 p-1 rounded-lg w-full sm:w-max">
                     <button
                       onClick={() => setExamFilter("all")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${examFilter === "all" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "all" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
                     >
-                      All Exams
+                      All
                     </button>
                     <button
                       onClick={() => setExamFilter("live")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${examFilter === "live" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1 flex-1 sm:flex-none ${examFilter === "live" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
                     >
                       {examFilter === "live" && (
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
                       )}
                       Live
                     </button>
                     <button
                       onClick={() => setExamFilter("upcoming")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${examFilter === "upcoming" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "upcoming" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
                     >
                       Upcoming
                     </button>
                     <button
                       onClick={() => setExamFilter("ended")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${examFilter === "ended" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "ended" ? "bg-white text-dark-900 shadow-sm" : "text-gray-500 hover:text-dark-900"}`}
                     >
                       Ended
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
+                  <div className="relative w-full sm:w-auto">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                     <input
                       type="text"
                       placeholder="Search exams..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-500 w-full sm:w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
                     />
                   </div>
                   <button
@@ -911,7 +910,7 @@ export default function TeacherDashboard() {
                       setIsEditingExam(false);
                       setIsExamModalOpen(true);
                     }}
-                    className="tomato-btn py-2 text-xs flex items-center gap-1"
+                    className="rose-btn py-2 text-xs flex items-center justify-center gap-1 w-full sm:w-auto"
                   >
                     <Plus size={14} />
                     <span>Create Exam</span>
@@ -923,19 +922,22 @@ export default function TeacherDashboard() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                         Exam Title
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                         Course & University
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                         Date & Time
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest text-center">
+                        Duration
+                      </th>
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                         Status
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest text-right">
                         Actions
                       </th>
                     </tr>
@@ -1009,7 +1011,7 @@ export default function TeacherDashboard() {
                           <td className="py-3 px-4 text-xs text-gray-600">
                             {new Date(exam.exam_date).toLocaleString()}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-4 text-center">
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700">
                               <Clock size={12} className="text-gray-400" />
                               {exam.duration_minutes}m
@@ -1017,8 +1019,8 @@ export default function TeacherDashboard() {
                           </td>
                           <td className="py-3 px-4">
                             {exam.is_live ? (
-                              <span className="px-2.5 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full flex items-center gap-1 w-max">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                              <span className="px-2.5 py-1 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full flex items-center gap-1 w-max">
+                                <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
                                 LIVE
                               </span>
                             ) : (
@@ -1031,7 +1033,7 @@ export default function TeacherDashboard() {
                             {exam.is_live && (
                               <button
                                 onClick={() => navigate(`/teacher/proctoring/${exam.id}`)}
-                                className="px-3 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-xs font-bold transition-colors"
+                                className="px-3 py-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold transition-colors"
                                 title="Proctor Exam"
                               >
                                 <ShieldCheck size={14} className="inline mr-1" /> Proctor
@@ -1058,7 +1060,7 @@ export default function TeacherDashboard() {
                                     setIsLiveModalOpen(true);
                                   }
                                 }}
-                                className="px-3 py-1.5 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-xs font-bold flex inline-flex items-center gap-1 transition-colors"
+                                className="px-3 py-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold flex inline-flex items-center gap-1 transition-colors"
                               >
                                 <Play size={12} /> Make Live
                               </button>
@@ -1088,7 +1090,7 @@ export default function TeacherDashboard() {
                                 setIsEditingExam(true);
                                 setIsExamModalOpen(true);
                               }}
-                              className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                             >
                               <Edit size={16} />
                             </button>
@@ -1098,7 +1100,7 @@ export default function TeacherDashboard() {
                                 fetchQuestions(exam.id);
                                 setIsManageQuestionsModalOpen(true);
                               }}
-                              className="p-1.5 text-purple-500 hover:bg-purple-50 rounded-lg transition-colors"
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                               title="Manage Questions"
                             >
                               <FileQuestion size={16} />
@@ -1136,7 +1138,7 @@ export default function TeacherDashboard() {
                         setExamResults([]);
                       }
                     }}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors"
                   >
                     <option value="">-- Choose an Exam --</option>
                     {exams.map((e) => (
@@ -1163,7 +1165,7 @@ export default function TeacherDashboard() {
                       className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
                         isPublished 
                         ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
-                        : "bg-tomato-500 text-white shadow-md shadow-tomato-500/20 hover:bg-tomato-600"
+                        : "bg-rose-500 text-white shadow-md shadow-rose-500/20 hover:bg-rose-600"
                       }`}
                     >
                       {isPublished ? (
@@ -1190,19 +1192,19 @@ export default function TeacherDashboard() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-gray-200">
-                          <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                          <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                             Student
                           </th>
-                          <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                          <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                             Status
                           </th>
-                          <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                          <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                             Demerit Points
                           </th>
-                          <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">
+                          <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">
                             Marks
                           </th>
-                          <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">
+                          <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest text-right">
                             Actions
                           </th>
                         </tr>
@@ -1223,7 +1225,7 @@ export default function TeacherDashboard() {
                             </td>
                             <td className="py-3 px-4 text-xs">
                               {res.status === "completed" ? (
-                                <span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded-lg">
+                                <span className="text-rose-600 font-bold bg-rose-50 px-2 py-1 rounded-lg">
                                   Completed
                                 </span>
                               ) : (
@@ -1256,7 +1258,7 @@ export default function TeacherDashboard() {
                                 onClick={() =>
                                   handleViewAnswers(res.student_id, res.name)
                                 }
-                                className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[11px] font-bold transition-colors"
+                                className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-[11px] font-bold transition-colors"
                               >
                                 View Answersheet
                               </button>
@@ -1295,7 +1297,7 @@ export default function TeacherDashboard() {
                       placeholder="Search exams..."
                       value={proctoringSearchQuery}
                       onChange={(e) => setProctoringSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-500 w-64"
                     />
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                   </div>
@@ -1306,11 +1308,11 @@ export default function TeacherDashboard() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">Exam Title</th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">Course & University</th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest">Date & Time</th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-center">Status</th>
-                      <th className="py-3 px-4 font-bold text-xs text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">Exam Title</th>
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">Course & University</th>
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest">Date & Time</th>
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest text-center">Status</th>
+                      <th className="py-3 px-4 font-bold text-xs text-rose-800 uppercase tracking-widest text-right">Actions</th>
                     </tr>
                   </thead>
                     <tbody className="text-sm">
@@ -1357,7 +1359,7 @@ export default function TeacherDashboard() {
                               <td className="py-3 px-4 font-bold text-sm text-dark-900">
                                 {exam.title}
                                 {exam.event_id && (
-                                  <span className="inline-block mt-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-bold">Event Exam</span>
+                                  <span className="inline-block mt-1 px-2 py-0.5 bg-rose-50 text-rose-600 rounded text-[10px] font-bold">Event Exam</span>
                                 )}
                               </td>
                               <td className="py-3 px-4 text-xs text-gray-600">
@@ -1371,8 +1373,8 @@ export default function TeacherDashboard() {
                               </td>
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-600 border border-green-100 w-max uppercase tracking-wider">
-                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-600 border border-rose-100 w-max uppercase tracking-wider">
+                                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
                                     Online
                                   </span>
                                 ) : (
@@ -1386,7 +1388,7 @@ export default function TeacherDashboard() {
                                   {isLive && (
                                     <button
                                       onClick={() => navigate(`/teacher/proctoring/${eId}`)}
-                                      className="px-3 py-1.5 text-xs font-bold text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1.5"
+                                      className="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors flex items-center gap-1.5"
                                     >
                                       <Camera size={14} />
                                       View Live
@@ -1397,7 +1399,7 @@ export default function TeacherDashboard() {
                                     <button
                                       onClick={() => downloadProctoringData(eId, 'logs')}
                                       title="Download Incident Logs"
-                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-500 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
+                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-rose-500 bg-white border border-gray-200 rounded-lg hover:border-rose-200 transition-colors"
                                     >
                                       <Download size={14} />
                                       <span className="text-[11px] font-bold">Logs</span>
@@ -1405,7 +1407,7 @@ export default function TeacherDashboard() {
                                     <button
                                       onClick={() => downloadProctoringData(eId, 'roster')}
                                       title="Download Student Roster"
-                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-blue-500 bg-white border border-gray-200 rounded-lg hover:border-blue-200 transition-colors"
+                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-rose-500 bg-white border border-gray-200 rounded-lg hover:border-rose-200 transition-colors"
                                     >
                                       <Users size={14} />
                                       <span className="text-[11px] font-bold">Roster</span>
@@ -1424,69 +1426,111 @@ export default function TeacherDashboard() {
           )}
 
           {activeTab === "profile" && (
-            <div className="max-w-3xl animate-fade-in space-y-6">
-              <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 relative">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-800">Instructor Profile</h3>
-                  <button
-                    type="button"
-                    onClick={() => setIsProfileModalOpen(true)}
-                    className="px-4 py-2 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 text-sm font-semibold rounded-lg transition"
-                  >
-                    Edit Profile
-                  </button>
+            <div className="max-w-4xl mx-auto animate-fade-in space-y-8">
+              {/* Profile Card with Banner */}
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
+                
+                {/* Gradient Banner */}
+                <div className="h-40 w-full bg-gradient-to-r from-rose-500 via-rose-400 to-rose-600 relative">
+                  <div className="absolute top-4 right-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsProfileModalOpen(true)}
+                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                    >
+                      <Edit size={16} />
+                      Edit Profile
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-8">
-                  <div className="flex-shrink-0">
-                    <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg flex items-center justify-center">
-                      {profile.profile_image ? (
-                        <img src={"http://localhost:5000" + profile.profile_image} alt="Profile" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <User className="w-12 h-12" />
-                        </div>
-                      )}
+                {/* Profile Details Area */}
+                <div className="px-8 pb-10 relative">
+                  {/* Profile Picture (overlapping banner) */}
+                  <div className="absolute -top-16 left-8">
+                    <div className="w-32 h-32 rounded-full overflow-hidden bg-white p-1.5 shadow-xl">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
+                        {profile.profile_image ? (
+                          <img src={"http://localhost:5000" + profile.profile_image} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-rose-300 bg-rose-50">
+                            <User className="w-16 h-16" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase font-semibold">Display Name</p>
-                      <p className="text-lg font-medium text-gray-900">{profileName}</p>
+
+                  {/* Name and Designation */}
+                  <div className="pt-20">
+                    <h3 className="text-3xl font-black text-gray-900 tracking-tight">{profileName || "Instructor Name"}</h3>
+                    <p className="text-rose-600 font-bold mt-1 uppercase text-sm tracking-wider">Senior Instructor</p>
+                  </div>
+
+                  {/* Info Cards Grid */}
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Info Item */}
+                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-rose-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform">
+                        <Activity size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Email Address</p>
+                        <p className="text-sm font-semibold text-gray-900">{profileEmail || "Not provided"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase font-semibold">Email</p>
-                      <p className="text-lg font-medium text-gray-900">{profileEmail || "Not provided"}</p>
+                    {/* Info Item */}
+                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-rose-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform">
+                        <Calendar size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Date of Birth</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {profileDob ? new Date(profileDob).toLocaleDateString() : "Not provided"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase font-semibold">Date of Birth</p>
-                      <p className="text-lg font-medium text-gray-900">
-                        {profileDob ? new Date(profileDob).toLocaleDateString() : "Not provided"}
-                      </p>
+                    {/* Info Item */}
+                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-rose-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform">
+                        <BookOpen size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">University / Institution</p>
+                        <p className="text-sm font-semibold text-gray-900">{profileUniversity || "Not provided"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase font-semibold">University</p>
-                      <p className="text-lg font-medium text-gray-900">{profileUniversity || "Not provided"}</p>
+                    {/* Info Item */}
+                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-rose-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform">
+                        <Award size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Experience</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {profileYearsOfExperience ? `${profileYearsOfExperience} Years` : "Not provided"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="md:col-span-2">
-                      <p className="text-sm text-gray-500 uppercase font-semibold">Address</p>
-                      <p className="text-lg font-medium text-gray-900">{profileAddress || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase font-semibold">Experience</p>
-                      <p className="text-lg font-medium text-gray-900">
-                        {profileYearsOfExperience ? `${profileYearsOfExperience} Years` : "Not provided"}
-                      </p>
+                    {/* Full Width Address Item */}
+                    <div className="md:col-span-2 bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-rose-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform shrink-0">
+                        <MapPin size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Home Address</p>
+                        <p className="text-sm font-semibold text-gray-900">{profileAddress || "Not provided"}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-
-
-              <div className="border-t border-gray-150 pt-6">
-                <h4 className="font-bold text-sm text-dark-900 mb-4 flex items-center gap-1.5">
-                  <KeyRound size={16} className="text-tomato-500" />
+              {/* Password Section */}
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                <h4 className="font-bold text-sm text-dark-900 mb-6 flex items-center gap-1.5">
+                  <Key size={16} className="text-rose-500" />
                   <span>Update Password</span>
                 </h4>
 
@@ -1505,12 +1549,12 @@ export default function TeacherDashboard() {
                         onChange={(e) =>
                           setPwData({ ...pwData, oldPassword: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition font-mono"
                       />
                       <button
                         type="button"
                         onClick={() => setShowOldPassword(!showOldPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-tomato-500 smooth-transition"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-rose-500 smooth-transition"
                       >
                         {showOldPassword ? (
                           <EyeOff size={16} />
@@ -1534,12 +1578,12 @@ export default function TeacherDashboard() {
                         onChange={(e) =>
                           setPwData({ ...pwData, newPassword: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition font-mono"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-tomato-500 smooth-transition"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-rose-500 smooth-transition"
                       >
                         {showNewPassword ? (
                           <EyeOff size={16} />
@@ -1551,7 +1595,7 @@ export default function TeacherDashboard() {
                   </div>
                   <button
                     type="submit"
-                    className="tomato-btn w-full py-2.5 mt-2"
+                    className="rose-btn w-full py-2.5 mt-2"
                   >
                     Submit Password Change
                   </button>
@@ -1586,7 +1630,7 @@ export default function TeacherDashboard() {
                               required
                               value={profileName}
                               onChange={(e) => setProfileName(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
                             />
                           </div>
                           <div>
@@ -1598,7 +1642,7 @@ export default function TeacherDashboard() {
                               required
                               value={profileEmail}
                               onChange={(e) => setProfileEmail(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
                             />
                           </div>
                           <div>
@@ -1609,7 +1653,7 @@ export default function TeacherDashboard() {
                               type="date"
                               value={profileDob}
                               onChange={(e) => setProfileDob(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
                             />
                           </div>
                           <div>
@@ -1621,7 +1665,7 @@ export default function TeacherDashboard() {
                               min="0"
                               value={profileYearsOfExperience}
                               onChange={(e) => setProfileYearsOfExperience(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
                             />
                           </div>
                         </div>
@@ -1635,7 +1679,7 @@ export default function TeacherDashboard() {
                             value={profileUniversity}
                             onChange={(e) => setProfileUniversity(e.target.value)}
                             placeholder="e.g. Dhaka University"
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
                           />
                         </div>
 
@@ -1648,7 +1692,7 @@ export default function TeacherDashboard() {
                             value={profileAddress}
                             onChange={(e) => setProfileAddress(e.target.value)}
                             placeholder="Full address"
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
                           ></textarea>
                         </div>
 
@@ -1659,14 +1703,52 @@ export default function TeacherDashboard() {
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => setProfileImageFile(e.target.files[0])}
-                            className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-tomato-50 file:text-tomato-700 hover:file:bg-tomato-100 smooth-transition"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  const img = new Image();
+                                  img.onload = () => {
+                                    const canvas = document.createElement('canvas');
+                                    let width = img.width;
+                                    let height = img.height;
+                                    const max_size = 500;
+                                    if (width > height) {
+                                      if (width > max_size) {
+                                        height *= max_size / width;
+                                        width = max_size;
+                                      }
+                                    } else {
+                                      if (height > max_size) {
+                                        width *= max_size / height;
+                                        height = max_size;
+                                      }
+                                    }
+                                    canvas.width = width;
+                                    canvas.height = height;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(img, 0, 0, width, height);
+                                    canvas.toBlob((blob) => {
+                                      const compressedFile = new File([blob], file.name, {
+                                        type: 'image/jpeg',
+                                        lastModified: Date.now(),
+                                      });
+                                      setProfileImageFile(compressedFile);
+                                    }, 'image/jpeg', 0.6);
+                                  };
+                                  img.src = event.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 smooth-transition"
                           />
                         </div>
 
                         <button
                           type="submit"
-                          className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 smooth-transition shadow-sm"
+                          className="w-full py-2.5 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 smooth-transition shadow-sm"
                         >
                           Save Changes
                         </button>
@@ -1697,7 +1779,7 @@ export default function TeacherDashboard() {
               onChange={(e) =>
                 setExamForm({ ...examForm, title: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
             />
           </div>
           <div className="grid grid-cols-1 gap-4">
@@ -1715,7 +1797,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, duration_minutes: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
               />
             </div>
           </div>
@@ -1731,7 +1813,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, course_name: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
               />
             </div>
             <div>
@@ -1745,7 +1827,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, course_code: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
               />
             </div>
             <div>
@@ -1759,7 +1841,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, university_name: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
               />
             </div>
             <div>
@@ -1780,12 +1862,12 @@ export default function TeacherDashboard() {
                       e.target.value === "" ? "" : parseInt(e.target.value),
                   })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
               />
             </div>
           </div>
 
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
+          <button type="submit" className="rose-btn w-full py-2.5 mt-2">
             Save Exam
           </button>
         </form>
@@ -1801,7 +1883,7 @@ export default function TeacherDashboard() {
                   <button
                     type="button"
                     onClick={() => fetchRegistrations(examForm.event_id, examForm.title)}
-                    className="text-xs text-tomato-500 font-bold hover:underline bg-tomato-50 px-2 py-0.5 rounded-md"
+                    className="text-xs text-rose-500 font-bold hover:underline bg-rose-50 px-2 py-0.5 rounded-md"
                   >
                     View Registrations
                   </button>
@@ -1818,7 +1900,7 @@ export default function TeacherDashboard() {
                     title: selectedEvent ? selectedEvent.title : ""
                   });
                 }}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
               >
                 <option value="">-- Choose an Event --</option>
                 {eventsList.map(ev => (
@@ -1841,7 +1923,7 @@ export default function TeacherDashboard() {
                   onChange={(e) =>
                     setExamForm({ ...examForm, duration_minutes: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
                 />
               </div>
               <div>
@@ -1857,11 +1939,11 @@ export default function TeacherDashboard() {
                   onChange={(e) =>
                     setExamForm({ ...examForm, exam_password: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
                 />
               </div>
             </div>
-            <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
+            <button type="submit" className="rose-btn w-full py-2.5 mt-2">
               Create Event Exam
             </button>
           </form>
@@ -1890,12 +1972,12 @@ export default function TeacherDashboard() {
               placeholder="e.g. Secret123"
               value={liveForm.password}
               onChange={(e) => setLiveForm({ password: e.target.value })}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition font-mono"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition font-mono"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2.5 mt-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2"
+            className="w-full py-2.5 mt-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2"
           >
             <Play size={16} /> Start Live Exam Now
           </button>
@@ -1927,7 +2009,7 @@ export default function TeacherDashboard() {
               fetchQuestions(examForm.id);
               setIsManageQuestionsModalOpen(true);
             }}
-            className="w-full py-2.5 bg-tomato-500 hover:bg-tomato-600 text-white rounded-xl font-bold shadow-md transition-colors"
+            className="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold shadow-md transition-colors"
           >
             Go to Set Questions
           </button>
@@ -1972,7 +2054,7 @@ export default function TeacherDashboard() {
                 setIsEditingQuestion(false);
                 setIsQuestionModalOpen(true);
               }}
-              className="tomato-btn py-2 text-xs flex items-center gap-1 shrink-0"
+              className="rose-btn py-2 text-xs flex items-center gap-1 shrink-0"
             >
               <Plus size={14} />
               <span>Add Question</span>
@@ -2018,7 +2100,7 @@ export default function TeacherDashboard() {
                           setIsEditingQuestion(true);
                           setIsQuestionModalOpen(true);
                         }}
-                        className="text-blue-500 hover:text-blue-700"
+                        className="text-rose-500 hover:text-rose-700"
                       >
                         <Edit size={16} />
                       </button>
@@ -2034,7 +2116,7 @@ export default function TeacherDashboard() {
                       <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
                         {q.type}
                       </span>
-                      <span className="bg-tomato-50 text-tomato-600 border border-tomato-100 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
+                      <span className="bg-rose-50 text-rose-600 border border-rose-100 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
                         {q.marks} Mark(s)
                       </span>
                       <p className="font-bold text-sm text-dark-900 leading-tight">
@@ -2047,7 +2129,7 @@ export default function TeacherDashboard() {
                         {["A", "B", "C", "D"].map((opt) => (
                           <div
                             key={opt}
-                            className={`p-2 rounded-lg border ${q.correct_option === opt ? "bg-green-50 border-green-200 text-green-700 font-semibold" : "border-gray-100 text-gray-500"}`}
+                            className={`p-2 rounded-lg border ${q.correct_option === opt ? "bg-rose-50 border-rose-200 text-rose-700 font-semibold" : "border-gray-100 text-gray-500"}`}
                           >
                             {opt}) {q[`option_${opt.toLowerCase()}`]}
                           </div>
@@ -2109,7 +2191,7 @@ export default function TeacherDashboard() {
                   question_text: e.target.value,
                 })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 h-20 resize-none smooth-transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 h-20 resize-none smooth-transition"
             />
           </div>
 
@@ -2129,7 +2211,7 @@ export default function TeacherDashboard() {
                   marks: e.target.value === "" ? "" : parseInt(e.target.value),
                 })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
             />
           </div>
 
@@ -2153,7 +2235,7 @@ export default function TeacherDashboard() {
                           [`option_${opt}`]: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-tomato-500 smooth-transition"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-rose-500 smooth-transition"
                     />
                   </div>
                 ))}
@@ -2172,7 +2254,7 @@ export default function TeacherDashboard() {
                       correct_option: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
                 >
                   <option value="A">Option A</option>
                   <option value="B">Option B</option>
@@ -2183,7 +2265,7 @@ export default function TeacherDashboard() {
             </>
           )}
 
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
+          <button type="submit" className="rose-btn w-full py-2.5 mt-2">
             Save Question
           </button>
         </form>
@@ -2257,7 +2339,7 @@ export default function TeacherDashboard() {
                                     : parseInt(e.target.value),
                               })
                             }
-                            className="w-full text-right px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500"
+                            className="w-full text-right px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
                             placeholder="-"
                           />
                         </div>
@@ -2270,7 +2352,7 @@ export default function TeacherDashboard() {
                               key={opt}
                               className={`p-2 rounded-lg border ${
                                 ans.correct_option === opt
-                                  ? "bg-green-50 border-green-200 text-green-700 font-semibold"
+                                  ? "bg-rose-50 border-rose-200 text-rose-700 font-semibold"
                                   : ans.student_answer === opt
                                     ? "bg-red-50 border-red-200 text-red-700 line-through"
                                     : "border-gray-100 text-gray-500"
@@ -2292,7 +2374,7 @@ export default function TeacherDashboard() {
                           <p className="text-xs font-bold text-gray-500 mb-1">
                             Student's Answer:
                           </p>
-                          <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-lg text-sm text-dark-900 whitespace-pre-wrap min-h-[60px]">
+                          <div className="bg-rose-50/50 border border-rose-100 p-4 rounded-lg text-sm text-dark-900 whitespace-pre-wrap min-h-[60px]">
                             {ans.student_answer || (
                               <span className="text-gray-400 italic">
                                 No answer provided.
@@ -2316,7 +2398,7 @@ export default function TeacherDashboard() {
               </button>
               <button
                 onClick={handleManualGradeSubmit}
-                className="tomato-btn px-6 py-2"
+                className="rose-btn px-6 py-2"
               >
                 Save Grades
               </button>
@@ -2353,7 +2435,7 @@ export default function TeacherDashboard() {
               </button>
               <button
                 onClick={confirmStopLive}
-                className="px-5 py-2 rounded-xl font-bold bg-tomato-500 text-white hover:bg-tomato-600 shadow-lg shadow-tomato-500/30 transition-all"
+                className="px-5 py-2 rounded-xl font-bold bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-500/30 transition-all"
               >
                 OK
               </button>
@@ -2378,11 +2460,11 @@ export default function TeacherDashboard() {
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-rose-50 text-rose-800">
                     <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider sm:pl-6">Name</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-rose-800 uppercase tracking-wider sm:pl-6">Name</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-rose-800 uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-rose-800 uppercase tracking-wider">Phone</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -2420,7 +2502,7 @@ export default function TeacherDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              className="absolute top-0 h-1 bg-rose-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -2430,7 +2512,7 @@ export default function TeacherDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-500' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-rose-500' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>

@@ -67,7 +67,7 @@ const StudentEvents = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-dark-900 flex items-center gap-2">
-          <Calendar className="text-tomato-500" /> Upcoming Events
+          <Calendar className="text-rose-500" /> Upcoming Events
         </h2>
       </div>
 
@@ -83,7 +83,7 @@ const StudentEvents = () => {
               <div key={evt._id} className="card-hover p-6 flex flex-col justify-between h-full bg-white relative cursor-pointer" onClick={() => navigate(`/event/${evt._id}`)}>
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isEnded ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isEnded ? 'bg-gray-100 text-gray-600' : 'bg-rose-100 text-rose-700'}`}>
                       {isEnded ? 'ENDED' : 'LIVE'}
                     </span>
                   </div>
@@ -96,7 +96,7 @@ const StudentEvents = () => {
                   <div className="text-sm text-gray-500 mb-4 line-clamp-3 prose prose-sm" dangerouslySetInnerHTML={{ __html: evt.description }}></div>
                   <div className="space-y-2 mb-6">
                     <div className="flex items-center text-sm text-gray-600 gap-2">
-                      <Clock size={16} className="text-green-500" />
+                      <Clock size={16} className="text-rose-500" />
                       <span><strong className="font-semibold text-gray-700">Starts:</strong> {new Date(evt.event_date).toLocaleString()}</span>
                     </div>
                     {evt.end_date && (
@@ -118,7 +118,7 @@ const StudentEvents = () => {
                         setEmailError("");
                         setIsRegisterModalOpen(true); 
                       }}
-                      className="flex-1 bg-tomato-500 hover:bg-tomato-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
+                      className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
                     >
                       <UserCheck size={14} /> Register Now
                     </button>
@@ -152,7 +152,7 @@ const StudentEvents = () => {
               required 
               value={regForm.name} 
               onChange={e => setRegForm({...regForm, name: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors" 
               placeholder="e.g. John Doe"
             />
           </div>
@@ -167,7 +167,7 @@ const StudentEvents = () => {
                 setRegForm({...regForm, email: e.target.value});
                 if(emailError) setEmailError("");
               }} 
-              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-tomato-500'}`} 
+              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-rose-500'}`} 
               placeholder="johndoe@example.com"
             />
             {emailError && <p className="text-red-500 text-xs font-bold mt-1">{emailError}</p>}
@@ -180,13 +180,13 @@ const StudentEvents = () => {
               required 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors" 
               placeholder="+8801XXXXXXXXX"
             />
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm">
+            <button type="submit" className="w-full py-2.5 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-colors shadow-sm">
               Submit Registration
             </button>
           </div>
@@ -196,8 +196,8 @@ const StudentEvents = () => {
       {/* Success Modal */}
       <Modal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)}>
         <div className="py-6 text-center space-y-4">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <CheckCircle size={40} className="text-green-500" />
+          <div className="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <CheckCircle size={40} className="text-rose-500" />
           </div>
           <h2 className="text-2xl font-bold text-dark-900">Registration Successful!</h2>
           <p className="text-gray-600 max-w-sm mx-auto">

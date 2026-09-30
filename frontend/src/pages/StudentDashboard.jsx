@@ -155,16 +155,16 @@ export default function StudentDashboard() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {loading && <Loader />}
 
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-150 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
           </div>
-          <span className="font-extrabold text-md text-black">S-Exam<span className="text-tomato-500">.ai</span></span>
+          <span className="font-extrabold text-md text-black">SExam<span className="text-rose-500">.AI</span></span>
         </div>
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -175,20 +175,20 @@ export default function StudentDashboard() {
       </div>
 
       {/* Sidebar Navigation */}
-      <div className={`fixed inset-y-0 left-0 bg-dark-900 border-r border-dark-800 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
+      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Logo and Menu Links */}
         <div>
           {/* Brand Logo Header */}
-          <div className="p-6 border-b border-dark-800 flex items-center justify-between">
+          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-extrabold text-lg tracking-tight text-white">
-                  S-Exam<span className="text-tomato-500">.ai</span>
+                <span className="font-extrabold text-lg tracking-tight text-dark-900">
+                  SExam<span className="text-rose-500">.AI</span>
                 </span>
                 <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">Student Portal</span>
               </div>
@@ -219,8 +219,8 @@ export default function StudentDashboard() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id 
-                    ? 'bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in'
-                    : 'text-gray-400 hover:text-white hover:bg-dark-800/60'
+                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20 animate-fade-in'
+                    : 'text-gray-500 hover:text-dark-900 hover:bg-gray-100'
                 }`}
               >
                 <tab.icon size={18} />
@@ -231,22 +231,22 @@ export default function StudentDashboard() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-dark-800 space-y-4">
+        <div className="p-4 border-t border-gray-200 space-y-4">
           <div className="flex items-center gap-3 px-2">
             {profile.profile_image ? (
               <img 
                 src={`${API_BASE_URL}${profile.profile_image}`} 
                 alt="Student" 
-                className="w-10 h-10 rounded-full object-cover border border-tomato-500 shadow-sm"
+                className="w-10 h-10 rounded-full object-cover border border-rose-500 shadow-sm"
                 onError={(e) => { e.target.src = 'https://api.dicebear.com/7.x/initials/svg?seed=' + profile.name; }}
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-tomato-100 text-tomato-500 flex items-center justify-center border border-tomato-200 font-extrabold">
+              <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center border border-rose-200 font-extrabold">
                 {profile.name ? profile.name.charAt(0).toUpperCase() : 'S'}
               </div>
             )}
             <div className="min-w-0">
-              <span className="font-bold text-xs text-white block truncate">{profile.name || 'Student'}</span>
+              <span className="font-bold text-xs text-dark-900 block truncate">{profile.name || 'Student'}</span>
               <span className="text-[10px] text-gray-400 font-semibold block truncate">ID: {profile.id}</span>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function StudentDashboard() {
               localStorage.clear();
               navigate('/');
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dark-700 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-rose-500 hover:bg-rose-50/10 hover:text-rose-500 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -272,13 +272,13 @@ export default function StudentDashboard() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-grow flex-1 min-w-0 p-6 pb-24 md:p-10 md:pb-10 max-h-screen overflow-y-auto">
+      <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
         
         {/* Header Summary Removed */}
 
         {/* Status Alerts */}
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <CheckCircle2 size={16} />
             <span>{success}</span>
           </div>
@@ -308,8 +308,8 @@ export default function StudentDashboard() {
             
             let suggestionTitle = "Keep going!";
             let suggestionText = "Take some exams to start seeing your performance insights and suggestions here.";
-            let suggestionColor = "text-blue-700";
-            let suggestionBg = "bg-blue-50 border-blue-200";
+            let suggestionColor = "text-rose-700";
+            let suggestionBg = "bg-rose-50 border-rose-200";
 
             // Subject-wise grouping
             const subjectStats = {};
@@ -340,12 +340,12 @@ export default function StudentDashboard() {
             if (completedCount > 0) {
               if (avgPercentage >= 80) {
                 suggestionTitle = "Excellent Overall Performance!";
-                suggestionColor = "text-green-700";
-                suggestionBg = "bg-green-50 border-green-200";
+                suggestionColor = "text-rose-700";
+                suggestionBg = "bg-rose-50 border-rose-200";
               } else if (avgPercentage >= 50) {
                 suggestionTitle = "Good, but can improve!";
-                suggestionColor = "text-blue-700";
-                suggestionBg = "bg-blue-50 border-blue-200";
+                suggestionColor = "text-rose-700";
+                suggestionBg = "bg-rose-50 border-rose-200";
               } else {
                 suggestionTitle = "Needs Attention!";
                 suggestionColor = "text-red-700";
@@ -359,7 +359,7 @@ export default function StudentDashboard() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-tomato-100 text-tomato-500 rounded-full flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center shrink-0">
                       <Play size={24} />
                     </div>
                     <div>
@@ -369,7 +369,7 @@ export default function StudentDashboard() {
                   </div>
                   
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 text-green-500 rounded-full flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center shrink-0">
                       <CheckCircle2 size={24} />
                     </div>
                     <div>
@@ -379,7 +379,7 @@ export default function StudentDashboard() {
                   </div>
                   
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center shrink-0">
                       <GraduationCap size={24} />
                     </div>
                     <div>
@@ -404,7 +404,7 @@ export default function StudentDashboard() {
                     <div className="space-y-4">
                       <div className="text-sm opacity-90 leading-relaxed font-medium space-y-2">
                         {strongSubjects.length > 0 && (
-                          <div className="p-3 bg-green-100/50 rounded-xl border border-green-200 text-green-800">
+                          <div className="p-3 bg-rose-100/50 rounded-xl border border-rose-200 text-rose-800">
                             <strong className="font-extrabold block mb-1">🚀 Doing Great In:</strong> 
                             {strongSubjects.join(', ')} 
                             <p className="text-xs mt-1 font-normal opacity-80">Keep up the great work in these subjects! You have a solid grasp of the material.</p>
@@ -418,7 +418,7 @@ export default function StudentDashboard() {
                           </div>
                         )}
                         {weakSubjects.length === 0 && strongSubjects.length === 0 && (
-                          <div className="p-3 bg-blue-100/50 rounded-xl border border-blue-200 text-blue-800">
+                          <div className="p-3 bg-rose-100/50 rounded-xl border border-rose-200 text-rose-800">
                             <strong className="font-extrabold block mb-1">📈 Steady Progress:</strong> 
                             Your performance is average across subjects. Push a little harder to reach top scores!
                           </div>
@@ -427,9 +427,9 @@ export default function StudentDashboard() {
                       
                       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
                         {subjectAverages.map(s => (
-                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-sm flex items-center gap-1.5 hover:border-tomato-500 transition-colors">
+                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-sm flex items-center gap-1.5 hover:border-rose-500 transition-colors">
                             <span className="truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
-                            <span className={`px-1.5 py-0.5 rounded-md ${s.average >= 75 ? 'bg-green-100 text-green-700' : s.average < 50 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <span className={`px-1.5 py-0.5 rounded-md ${s.average >= 75 ? 'bg-rose-100 text-rose-700' : s.average < 50 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {s.average}%
                             </span>
                           </span>
@@ -446,7 +446,7 @@ export default function StudentDashboard() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h4 className="text-lg font-bold text-dark-900">Recent Results</h4>
-                      <button onClick={() => setActiveTab('results')} className="text-tomato-500 text-xs font-bold hover:underline">View All</button>
+                      <button onClick={() => setActiveTab('results')} className="text-rose-500 text-xs font-bold hover:underline">View All</button>
                     </div>
                     {completedExams.length === 0 ? (
                       <div className="bg-gray-50 border border-gray-150 rounded-xl p-5 text-center text-xs text-gray-500">
@@ -460,7 +460,7 @@ export default function StudentDashboard() {
                               <h5 className="font-bold text-dark-900 text-sm truncate">{exam.title}</h5>
                               <p className="text-[11px] text-gray-500 mt-0.5">{new Date(exam.finished_at).toLocaleDateString()}</p>
                             </div>
-                            <div className="shrink-0 bg-green-50 text-green-700 font-black text-sm px-3 py-1.5 rounded-lg border border-green-200">
+                            <div className="shrink-0 bg-rose-50 text-rose-700 font-black text-sm px-3 py-1.5 rounded-lg border border-rose-200">
                               {exam.score}
                             </div>
                           </div>
@@ -473,7 +473,7 @@ export default function StudentDashboard() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h4 className="text-lg font-bold text-dark-900">Upcoming Schedule</h4>
-                      <button onClick={() => setActiveTab('exams')} className="text-tomato-500 text-xs font-bold hover:underline">View All</button>
+                      <button onClick={() => setActiveTab('exams')} className="text-rose-500 text-xs font-bold hover:underline">View All</button>
                     </div>
                     {(() => {
                       const upcoming = exams.filter(e => !e.is_live && e.exam_status !== 'completed' && new Date(e.exam_date) > new Date())
@@ -490,9 +490,9 @@ export default function StudentDashboard() {
                         <div className="space-y-3">
                           {upcoming.map(exam => (
                             <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-sm">
-                              <div className="bg-blue-50 border border-blue-100 w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0">
-                                <span className="text-[10px] font-bold text-blue-500 uppercase">{new Date(exam.exam_date).toLocaleString('default', { month: 'short' })}</span>
-                                <span className="text-lg font-black text-blue-700 leading-none">{new Date(exam.exam_date).getDate()}</span>
+                              <div className="bg-rose-50 border border-rose-100 w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0">
+                                <span className="text-[10px] font-bold text-rose-500 uppercase">{new Date(exam.exam_date).toLocaleString('default', { month: 'short' })}</span>
+                                <span className="text-lg font-black text-rose-700 leading-none">{new Date(exam.exam_date).getDate()}</span>
                               </div>
                               <div className="min-w-0">
                                 <h5 className="font-bold text-dark-900 text-sm truncate">{exam.title}</h5>
@@ -544,7 +544,7 @@ export default function StudentDashboard() {
                   <h3 className="text-lg font-bold text-dark-900">Available Exam Sittings</h3>
                   <div className="flex bg-gray-100 p-1 rounded-lg">
                     <span className="px-4 py-1.5 text-xs font-bold bg-white text-dark-900 shadow-sm rounded-md flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
                       Live Exams Only
                     </span>
                   </div>
@@ -560,20 +560,20 @@ export default function StudentDashboard() {
                       placeholder="Search by university, course name or code..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-gray-50 hover:bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                      className="w-full pl-10 pr-4 py-2 bg-gray-50 hover:bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-500 transition-colors"
                     />
                   </div>
                   <div className="flex items-center bg-gray-100 p-1 rounded-xl">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-tomato-500' : 'text-gray-400 hover:text-gray-700'}`}
+                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-rose-500' : 'text-gray-400 hover:text-gray-700'}`}
                       title="Grid View"
                     >
                       <LayoutGrid size={18} />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-tomato-500' : 'text-gray-400 hover:text-gray-700'}`}
+                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-rose-500' : 'text-gray-400 hover:text-gray-700'}`}
                       title="List View"
                     >
                       <List size={18} />
@@ -589,7 +589,7 @@ export default function StudentDashboard() {
               ) : viewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                   <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="bg-gray-50 text-xs text-gray-700 uppercase border-b border-gray-200">
+                    <thead className="bg-rose-50 text-xs text-rose-800 uppercase border-b border-rose-200">
                       <tr>
                         <th className="px-6 py-4 font-bold">Exam Title</th>
                         <th className="px-6 py-4 font-bold">Course Details</th>
@@ -609,7 +609,7 @@ export default function StudentDashboard() {
                               <h4 className="font-bold text-dark-900">{exam.title}</h4>
                             </td>
                             <td className="px-6 py-4">
-                              {exam.university_name && <p className="text-xs text-tomato-600 font-semibold">{exam.university_name}</p>}
+                              {exam.university_name && <p className="text-xs text-rose-600 font-semibold">{exam.university_name}</p>}
                               {(exam.course_name || exam.course_code) && (
                                 <p className="text-[11px] text-gray-600 font-medium">
                                   {exam.course_name} {exam.course_code && `(${exam.course_code})`}
@@ -624,7 +624,7 @@ export default function StudentDashboard() {
                             </td>
                             <td className="px-6 py-4">
                               {exam.exam_status === 'completed' ? (
-                                <span className="bg-green-50 text-green-700 border border-green-250 px-2.5 py-0.5 rounded text-[10px] font-bold">Score: {exam.score}</span>
+                                <span className="bg-rose-50 text-rose-700 border border-rose-250 px-2.5 py-0.5 rounded text-[10px] font-bold">Score: {exam.score}</span>
                               ) : isBlocked ? (
                                 <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold flex items-center w-fit gap-1 animate-pulse">
                                   <ShieldAlert size={12} /> Locked
@@ -635,11 +635,11 @@ export default function StudentDashboard() {
                             </td>
                             <td className="px-6 py-4 text-center">
                               {isFinished ? (
-                                <span className="text-xs font-semibold text-green-700">Completed</span>
+                                <span className="text-xs font-semibold text-rose-700">Completed</span>
                               ) : (
                                 <button
                                   onClick={() => handleOpenPasswordModal(exam.id)}
-                                  className="tomato-btn w-full py-1.5 px-3 text-xs flex items-center justify-center gap-1"
+                                  className="rose-btn w-full py-1.5 px-3 text-xs flex items-center justify-center gap-1"
                                 >
                                   <Play size={12} fill="white" />
                                   <span>{exam.exam_status === 'started' ? 'Resume' : exam.exam_status === 'completed' ? 'Retake' : 'Enter'}</span>
@@ -664,7 +664,7 @@ export default function StudentDashboard() {
                         <div>
                           <div className="flex justify-end items-start mb-3">
                             {exam.exam_status === 'completed' ? (
-                              <span className="bg-green-50 text-green-700 border border-green-250 px-2.5 py-0.5 rounded text-[10px] font-bold">
+                              <span className="bg-rose-50 text-rose-700 border border-rose-250 px-2.5 py-0.5 rounded text-[10px] font-bold">
                                 Score: {exam.score}
                               </span>
                             ) : isBlocked ? (
@@ -682,7 +682,7 @@ export default function StudentDashboard() {
                           <h4 className="font-bold text-dark-900 text-sm mb-2">{exam.title}</h4>
 
                           <div className="mb-4">
-                             {exam.university_name && <p className="text-xs text-tomato-600 font-semibold truncate" title={exam.university_name}>{exam.university_name}</p>}
+                             {exam.university_name && <p className="text-xs text-rose-600 font-semibold truncate" title={exam.university_name}>{exam.university_name}</p>}
                              {(exam.course_name || exam.course_code) && (
                                <p className="text-[11px] text-gray-600 font-medium truncate" title={`${exam.course_name || ''} ${exam.course_code || ''}`}>
                                  {exam.course_name} {exam.course_code && `(${exam.course_code})`}
@@ -698,13 +698,13 @@ export default function StudentDashboard() {
 
                         <div className="mt-5 pt-2">
                           {isFinished ? (
-                            <div className="bg-green-50/35 border border-green-100 rounded-xl p-3 text-center text-xs font-semibold text-green-800">
+                            <div className="bg-rose-50/35 border border-rose-100 rounded-xl p-3 text-center text-xs font-semibold text-rose-800">
                               Exam Completed Successfully
                             </div>
                           ) : (
                             <button
                               onClick={() => handleOpenPasswordModal(exam.id)}
-                              className="tomato-btn w-full py-2.5 text-xs flex items-center justify-center gap-1"
+                              className="rose-btn w-full py-2.5 text-xs flex items-center justify-center gap-1"
                             >
                               <Play size={12} fill="white" />
                               <span>{exam.exam_status === 'started' ? 'Resume Exam' : exam.exam_status === 'completed' ? 'Retake Exam' : 'Enter Exam'}</span>
@@ -739,7 +739,7 @@ export default function StudentDashboard() {
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="bg-gray-50 text-xs text-gray-700 uppercase border-b border-gray-200">
+                      <thead className="bg-rose-50 text-xs text-rose-800 uppercase border-b border-rose-200">
                         <tr>
                           <th className="px-6 py-4 font-bold">Exam Title</th>
                           <th className="px-6 py-4 font-bold">Course Details</th>
@@ -757,7 +757,7 @@ export default function StudentDashboard() {
                                 <h4 className="font-bold text-dark-900">{exam.title}</h4>
                               </td>
                               <td className="px-6 py-4">
-                                {exam.university_name && <p className="text-xs text-tomato-600 font-semibold">{exam.university_name}</p>}
+                                {exam.university_name && <p className="text-xs text-rose-600 font-semibold">{exam.university_name}</p>}
                                 {(exam.course_name || exam.course_code) && (
                                   <p className="text-[11px] text-gray-600 font-medium">
                                     {exam.course_name} {exam.course_code && `(${exam.course_code})`}
@@ -771,7 +771,7 @@ export default function StudentDashboard() {
                               </td>
                               <td className="px-6 py-4 text-center">
                                 {isPublished ? (
-                                  <span className="bg-green-50 text-green-700 border border-green-250 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                  <span className="bg-rose-50 text-rose-700 border border-rose-250 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                                     {exam.score}
                                   </span>
                                 ) : (
@@ -813,7 +813,7 @@ export default function StudentDashboard() {
 
               <div className="border-t border-gray-150 pt-6">
                 <h4 className="font-bold text-sm text-dark-900 mb-4 flex items-center gap-1.5">
-                  <KeyRound size={16} className="text-tomato-500" />
+                  <KeyRound size={16} className="text-rose-500" />
                   <span>Update Password</span>
                 </h4>
                 
@@ -825,12 +825,12 @@ export default function StudentDashboard() {
                         type={showOldPassword ? "text" : "password"} required placeholder="••••••••"
                         value={pwData.oldPassword}
                         onChange={e => setPwData({ ...pwData, oldPassword: e.target.value })}
-                        className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                        className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
                       />
                       <button
                         type="button"
                         onClick={() => setShowOldPassword(!showOldPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-tomato-500 smooth-transition"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-rose-500 smooth-transition"
                       >
                         {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
@@ -843,18 +843,18 @@ export default function StudentDashboard() {
                         type={showNewPassword ? "text" : "password"} required placeholder="••••••••"
                         value={pwData.newPassword}
                         onChange={e => setPwData({ ...pwData, newPassword: e.target.value })}
-                        className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                        className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-tomato-500 smooth-transition"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-rose-500 smooth-transition"
                       >
                         {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
                   </div>
-                  <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
+                  <button type="submit" className="rose-btn w-full py-2.5 mt-2">
                     Submit Password Change
                   </button>
                 </form>
@@ -877,7 +877,7 @@ export default function StudentDashboard() {
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl z-10 overflow-hidden animate-fade-in flex flex-col">
             <div className="p-5 border-b border-gray-150 flex justify-between items-center bg-gray-50/50">
               <h3 className="font-bold text-dark-900">Exam Verification</h3>
-              <button onClick={() => setPasswordModalOpen(false)} className="text-gray-400 hover:text-tomato-500 text-2xl leading-none">&times;</button>
+              <button onClick={() => setPasswordModalOpen(false)} className="text-gray-400 hover:text-rose-500 text-2xl leading-none">&times;</button>
             </div>
             <div className="p-6">
               {modalError && (
@@ -893,7 +893,7 @@ export default function StudentDashboard() {
                 value={examPasswordInput}
                 onChange={e => setExamPasswordInput(e.target.value)}
                 placeholder="Required for live exams"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 smooth-transition"
                 autoFocus
               />
               <p className="text-[10px] text-gray-400 mt-2 text-center">Contact your instructor if you don't have the password.</p>
@@ -901,7 +901,7 @@ export default function StudentDashboard() {
               <button 
                 onClick={handleStartExamSubmit}
                 disabled={startingExam}
-                className="tomato-btn w-full py-2.5 mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="rose-btn w-full py-2.5 mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {startingExam ? <RefreshCw className="animate-spin" size={16} /> : null}
                 {startingExam ? 'Verifying...' : 'Proceed to Exam'}
@@ -929,7 +929,7 @@ export default function StudentDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              className="absolute top-0 h-1 bg-rose-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -939,7 +939,7 @@ export default function StudentDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-500' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-rose-500' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>

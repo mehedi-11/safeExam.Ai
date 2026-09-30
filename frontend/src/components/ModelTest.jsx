@@ -141,9 +141,9 @@ export default function ModelTest() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm text-xs font-bold text-gray-500">
             {modelReady ? (
-              <><ShieldCheck size={14} className="text-green-500" /> Model Ready</>
+              <><ShieldCheck size={14} className="text-rose-500" /> Model Ready</>
             ) : loadingModel ? (
-              <><Activity size={14} className="text-blue-500 animate-spin" /> Loading Model...</>
+              <><Activity size={14} className="text-rose-500 animate-spin" /> Loading Model...</>
             ) : (
               <><AlertTriangle size={14} className="text-orange-500" /> Model Not Loaded</>
             )}
@@ -177,12 +177,12 @@ export default function ModelTest() {
         <div className="lg:col-span-2">
           <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm h-full flex flex-col">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-1.5">
-              <Camera size={14} className="text-blue-500" />
+              <Camera size={14} className="text-rose-500" />
               <span>Camera Monitor Preview</span>
               {isDetecting && (
                 <span className="flex h-2 w-2 relative ml-auto">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                 </span>
               )}
             </h4>
@@ -214,7 +214,7 @@ export default function ModelTest() {
           <div className="bg-white border border-gray-150 rounded-2xl shadow-sm h-[500px] flex flex-col overflow-hidden">
             <div className="p-5 border-b border-gray-150 flex justify-between items-center bg-gray-50/50">
               <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                <Activity size={14} className="text-blue-500" />
+                <Activity size={14} className="text-rose-500" />
                 <span>Live Detection Feed</span>
               </h4>
               <button 

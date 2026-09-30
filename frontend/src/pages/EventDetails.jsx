@@ -81,7 +81,7 @@ const EventDetails = () => {
         <div className="bg-white rounded-2xl border border-gray-150 p-6 md:p-8 shadow-sm">
           <div className="flex justify-between items-start mb-6">
             <h2 className="text-2xl font-bold text-dark-900">{event.title}</h2>
-            <span className={`px-3 py-1 ${isEnded ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'} rounded-full text-xs font-bold uppercase tracking-wider`}>
+            <span className={`px-3 py-1 ${isEnded ? 'bg-gray-100 text-gray-600' : 'bg-rose-100 text-rose-700'} rounded-full text-xs font-bold uppercase tracking-wider`}>
               {isEnded ? 'ENDED' : 'LIVE'}
             </span>
           </div>
@@ -94,7 +94,7 @@ const EventDetails = () => {
           
           <div className="flex items-center gap-6 text-sm text-gray-600 mb-8 border-b border-gray-150 pb-6">
             <div className="flex items-center gap-2">
-              <Calendar className="text-green-500" size={18} />
+              <Calendar className="text-rose-500" size={18} />
               <span className="font-medium"><strong className="text-gray-700">Starts:</strong> {new Date(event.event_date).toLocaleString()}</span>
             </div>
             {event.end_date && (
@@ -107,7 +107,7 @@ const EventDetails = () => {
 
           <div className="space-y-4">
             <h3 className="font-bold text-dark-900 flex items-center gap-2">
-              <Info size={18} className="text-tomato-500"/> About This Event
+              <Info size={18} className="text-rose-500"/> About This Event
             </h3>
             <div className="text-gray-600 leading-relaxed text-sm prose max-w-none" dangerouslySetInnerHTML={{ __html: event.description }}></div>
           </div>
@@ -117,7 +117,7 @@ const EventDetails = () => {
         <div className="bg-white rounded-2xl border border-gray-150 p-6 md:p-8 shadow-sm text-center">
           {isRegistered ? (
             <div className="space-y-4">
-              <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-2">
                 <CheckCircle2 size={32} />
               </div>
               <h3 className="text-xl font-bold text-dark-900">You're Registered!</h3>
@@ -141,7 +141,7 @@ const EventDetails = () => {
                   setEmailError("");
                   setIsRegisterModalOpen(true);
                 }}
-                className="bg-tomato-500 hover:bg-tomato-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm transition-colors inline-flex items-center gap-2"
+                className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm transition-colors inline-flex items-center gap-2"
               >
                 <UserCheck size={18} /> Register for Event
               </button>
@@ -165,7 +165,7 @@ const EventDetails = () => {
               required 
               value={regForm.name} 
               onChange={e => setRegForm({...regForm, name: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors" 
               placeholder="e.g. John Doe"
             />
           </div>
@@ -180,7 +180,7 @@ const EventDetails = () => {
                 setRegForm({...regForm, email: e.target.value});
                 if(emailError) setEmailError("");
               }} 
-              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-tomato-500'}`} 
+              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-rose-500'}`} 
               placeholder="johndoe@example.com"
             />
             {emailError && <p className="text-red-500 text-xs font-bold mt-1">{emailError}</p>}
@@ -193,13 +193,13 @@ const EventDetails = () => {
               required 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors" 
               placeholder="+8801XXXXXXXXX"
             />
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm">
+            <button type="submit" className="w-full py-2.5 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-colors shadow-sm">
               Submit Registration
             </button>
           </div>
@@ -209,8 +209,8 @@ const EventDetails = () => {
       {/* Success Modal */}
       <Modal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)}>
         <div className="py-6 text-center space-y-4">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <CheckCircle size={40} className="text-green-500" />
+          <div className="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <CheckCircle size={40} className="text-rose-500" />
           </div>
           <h2 className="text-2xl font-bold text-dark-900">Registration Successful!</h2>
           <p className="text-gray-600 max-w-sm mx-auto">
