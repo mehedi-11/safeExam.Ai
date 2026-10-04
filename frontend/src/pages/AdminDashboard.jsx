@@ -408,33 +408,33 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-850 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {loading && <Loader />}
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-dark-850 border-b border-dark-700 p-4 sticky top-0 z-40 shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-lime-500 flex items-center justify-center text-dark-900 font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
             <LayoutDashboard size={16} />
           </div>
           <span className="font-extrabold text-md text-black">
-            SExam<span className="text-lime-400">.AI</span>
+            SExam<span className="text-tomato-400">.AI</span>
           </span>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative" ref={mobileNotifRef}>
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="p-2 border border-dark-700 rounded-lg text-gray-400 hover:bg-dark-800 transition-colors relative"
+              className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors relative"
             >
               {isNotificationsOpen ? <X size={20} /> : <Bell size={20} />}
               {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-lime-500 rounded-full"></span>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tomato-500 rounded-full"></span>
               )}
             </button>
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-dark-850 border border-dark-700 rounded-xl shadow-xl z-50 overflow-hidden">
-                <div className="p-3 border-b border-dark-700 flex justify-between items-center bg-dark-900">
-                  <span className="font-bold text-sm text-gray-100">Notifications</span>
+              <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                  <span className="font-bold text-sm text-gray-900">Notifications</span>
                   <button
                     onClick={async () => {
                       try {
@@ -442,7 +442,7 @@ export default function AdminDashboard() {
                         fetchData();
                       } catch (err) {}
                     }}
-                    className="text-[10px] font-bold text-lime-400 hover:underline"
+                    className="text-[10px] font-bold text-tomato-400 hover:underline"
                   >
                     Mark all read
                   </button>
@@ -451,13 +451,13 @@ export default function AdminDashboard() {
                   {notifications.slice(0, 10).map((n) => (
                     <div
                       key={n.id}
-                      className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-400" : "bg-lime-50 text-gray-100 font-semibold"}`}
+                      className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-tomato-50 text-gray-900 font-semibold"}`}
                     >
                       {n.message}
                     </div>
                   ))}
                   {notifications.length === 0 && (
-                    <p className="text-xs text-gray-400 p-2 text-center">No notifications</p>
+                    <p className="text-xs text-gray-500 p-2 text-center">No notifications</p>
                   )}
                 </div>
               </div>
@@ -465,7 +465,7 @@ export default function AdminDashboard() {
           </div>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 border border-dark-700 rounded-lg text-gray-400 hover:bg-dark-800 transition-colors"
+            className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <Menu size={20} />
           </button>
@@ -474,28 +474,28 @@ export default function AdminDashboard() {
 
       {/* Sidebar Navigation */}
       <div
-        className={`fixed inset-y-0 left-0 bg-dark-850 border-r border-dark-700 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
+        className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div>
-          <div className="p-6 border-b border-dark-700 flex items-center justify-between">
+          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-lime-500 flex items-center justify-center text-dark-900 shadow-lg shadow-lime-500/20">
+              <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
                 <LayoutDashboard className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-extrabold text-lg tracking-tight text-gray-100">
-                  SExam<span className="text-lime-400">.AI</span>
+                <span className="font-extrabold text-lg tracking-tight text-gray-900">
+                  SExam<span className="text-tomato-400">.AI</span>
                 </span>
-                <span className="text-[10px] text-gray-400 block font-semibold tracking-widest uppercase">
+                <span className="text-[10px] text-gray-500 block font-semibold tracking-widest uppercase">
                   Admin Portal
                 </span>
               </div>
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-1.5 text-gray-400 hover:text-white hover:bg-dark-800 rounded-lg transition-colors"
+              className="lg:hidden p-1.5 text-gray-500 hover:text-white hover:bg-gray-100 rounded-lg transition-colors"
             >
               <X size={20} />
             </button>
@@ -525,8 +525,8 @@ export default function AdminDashboard() {
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                     activeTab === tab.id
-                      ? "bg-lime-500 text-white shadow-lg shadow-lime-500/20 animate-fade-in"
-                      : "text-gray-400 hover:text-gray-100 hover:bg-dark-700"
+                      ? "bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
+                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -537,8 +537,8 @@ export default function AdminDashboard() {
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full ${
                         activeTab === tab.id
-                          ? "bg-dark-850 text-lime-400"
-                          : "bg-lime-500 text-white"
+                          ? "bg-white text-tomato-400"
+                          : "bg-tomato-500 text-white"
                       }`}
                     >
                       {unreadCount}
@@ -550,16 +550,16 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="p-4 border-t border-dark-700 space-y-4">
+        <div className="p-4 border-t border-gray-200 space-y-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-lime-100 text-lime-400 flex items-center justify-center border border-lime-200 font-extrabold">
+            <div className="w-10 h-10 rounded-full bg-tomato-100 text-tomato-400 flex items-center justify-center border border-tomato-200 font-extrabold">
               {profile.name ? profile.name.charAt(0).toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <span className="font-bold text-xs text-gray-100 block truncate">
+              <span className="font-bold text-xs text-gray-900 block truncate">
                 {profile.name || "System Admin"}
               </span>
-              <span className="text-[10px] text-gray-400 font-semibold block truncate">
+              <span className="text-[10px] text-gray-500 font-semibold block truncate">
                 {profile.email}
               </span>
             </div>
@@ -569,7 +569,7 @@ export default function AdminDashboard() {
               localStorage.clear();
               navigate("/");
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dark-700 hover:border-lime-500 hover:bg-lime-50/10 hover:text-lime-400 rounded-xl text-xs font-bold text-gray-400 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -590,7 +590,7 @@ export default function AdminDashboard() {
         {/* Header Summary Removed */}
 
         {success && (
-          <div className="bg-lime-50 border border-lime-200 text-lime-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <ShieldCheck size={16} />
             <span>{success}</span>
           </div>
@@ -604,7 +604,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Dynamic Content Sections */}
-        <div className="bg-dark-850 rounded-2xl border border-dark-700 p-6 md:p-8 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
           {/* TAB: EVENTS */}
           {activeTab === "events" && (
             <div className="animate-fade-in">
@@ -616,25 +616,25 @@ export default function AdminDashboard() {
           {activeTab === "overview" && (
             <div className="space-y-8 animate-fade-in">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-100 flex items-center gap-2">
-                  <LayoutDashboard size={18} className="text-lime-400" />
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <LayoutDashboard size={18} className="text-tomato-400" />
                   <span>System Statistics</span>
                 </h3>
                 <div className="hidden lg:flex items-center gap-3">
                   <div className="relative" ref={notifRef}>
                     <button
                       onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                      className="p-2 border border-dark-700 rounded-xl text-gray-400 hover:bg-dark-900 relative transition-colors"
+                      className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 relative transition-colors"
                     >
                       {isNotificationsOpen ? <X size={18} /> : <Bell size={18} />}
                       {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-lime-500 rounded-full"></span>
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tomato-500 rounded-full"></span>
                       )}
                     </button>
                     {isNotificationsOpen && (
-                      <div className="absolute right-0 mt-2 w-80 bg-dark-850 border border-dark-700 rounded-xl shadow-xl z-50 overflow-hidden">
-                        <div className="p-3 border-b border-dark-700 flex justify-between items-center bg-dark-900">
-                          <span className="font-bold text-sm text-gray-100">Notifications</span>
+                      <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                        <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                          <span className="font-bold text-sm text-gray-900">Notifications</span>
                           <button
                             onClick={async () => {
                               try {
@@ -642,7 +642,7 @@ export default function AdminDashboard() {
                                 fetchData();
                               } catch (err) {}
                             }}
-                            className="text-[10px] font-bold text-lime-400 hover:underline"
+                            className="text-[10px] font-bold text-tomato-400 hover:underline"
                           >
                             Mark all read
                           </button>
@@ -651,13 +651,13 @@ export default function AdminDashboard() {
                           {notifications.slice(0, 10).map((n) => (
                             <div
                               key={n.id}
-                              className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-400" : "bg-lime-50 text-gray-100 font-semibold"}`}
+                              className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-tomato-50 text-gray-900 font-semibold"}`}
                             >
                               {n.message}
                             </div>
                           ))}
                           {notifications.length === 0 && (
-                            <p className="text-xs text-gray-400 p-2 text-center">No notifications</p>
+                            <p className="text-xs text-gray-500 p-2 text-center">No notifications</p>
                           )}
                         </div>
                       </div>
@@ -667,26 +667,26 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                <div className="bg-lime-50 border border-lime-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="bg-lime-500 text-white p-3 rounded-xl mb-3">
+                <div className="bg-tomato-50 border border-tomato-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                  <div className="bg-tomato-500 text-white p-3 rounded-xl mb-3">
                     <Users size={24} />
                   </div>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
                     Total Students
                   </p>
-                  <p className="text-3xl font-black text-gray-100">
+                  <p className="text-3xl font-black text-gray-900">
                     {stats.totalStudents}
                   </p>
                 </div>
 
-                <div className="bg-lime-50 border border-lime-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="bg-lime-500 text-white p-3 rounded-xl mb-3">
+                <div className="bg-tomato-50 border border-tomato-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                  <div className="bg-tomato-500 text-white p-3 rounded-xl mb-3">
                     <UserCheck size={24} />
                   </div>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
                     Total Teachers
                   </p>
-                  <p className="text-3xl font-black text-gray-100">
+                  <p className="text-3xl font-black text-gray-900">
                     {stats.totalTeachers}
                   </p>
                 </div>
@@ -695,22 +695,22 @@ export default function AdminDashboard() {
                   <div className="bg-yellow-500 text-white p-3 rounded-xl mb-3">
                     <FileText size={24} />
                   </div>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
                     Exams Created
                   </p>
-                  <p className="text-3xl font-black text-gray-100">
+                  <p className="text-3xl font-black text-gray-900">
                     {stats.totalExamsCreated}
                   </p>
                 </div>
 
-                <div className="bg-lime-50 border border-lime-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="bg-lime-500 text-white p-3 rounded-xl mb-3">
+                <div className="bg-tomato-50 border border-tomato-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                  <div className="bg-tomato-500 text-white p-3 rounded-xl mb-3">
                     <Check size={24} />
                   </div>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
                     Exams Done
                   </p>
-                  <p className="text-3xl font-black text-gray-100">
+                  <p className="text-3xl font-black text-gray-900">
                     {stats.totalExamsDone}
                   </p>
                 </div>
@@ -719,25 +719,25 @@ export default function AdminDashboard() {
                   <div className="bg-red-500 text-white p-3 rounded-xl mb-3">
                     <Activity size={24} />
                   </div>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
                     Live Exams
                   </p>
-                  <p className="text-3xl font-black text-gray-100">
+                  <p className="text-3xl font-black text-gray-900">
                     {stats.totalLiveExams}
                   </p>
                 </div>
               </div>
 
               {/* Top Teachers Table */}
-              <div className="mt-8 border-t border-dark-700 pt-8">
-                <h3 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
-                  <UserCheck size={18} className="text-lime-400" />
+              <div className="mt-8 border-t border-gray-200 pt-8">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <UserCheck size={18} className="text-tomato-400" />
                   <span>Top 5 Teachers (By Exams Created)</span>
                 </h3>
-                <div className="bg-dark-850 rounded-xl border border-dark-700 overflow-hidden">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-400">
-                      <thead className="bg-lime-50 text-xs uppercase text-lime-800 border-b border-lime-200">
+                    <table className="w-full text-left text-sm text-gray-500">
+                      <thead className="bg-tomato-50 text-xs uppercase text-tomato-800 border-b border-tomato-200">
                         <tr>
                           <th className="px-6 py-4 font-bold">Rank</th>
                           <th className="px-6 py-4 font-bold">Teacher Name</th>
@@ -747,20 +747,20 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topTeachers?.map((teacher, index) => (
-                          <tr key={teacher.id} className="hover:bg-dark-900 transition-colors">
+                          <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4 font-semibold">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-dark-700 text-gray-400' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-dark-800 text-gray-400'}`}>
+                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-semibold text-gray-100">{teacher.name}</td>
+                            <td className="px-6 py-4 font-semibold text-gray-900">{teacher.name}</td>
                             <td className="px-6 py-4 text-xs">{teacher.email}</td>
-                            <td className="px-6 py-4 text-right font-bold text-lime-400">{teacher.exam_count}</td>
+                            <td className="px-6 py-4 text-right font-bold text-tomato-400">{teacher.exam_count}</td>
                           </tr>
                         ))}
                         {(!stats?.topTeachers || stats.topTeachers.length === 0) && (
                           <tr>
-                            <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
+                            <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
                               No data available
                             </td>
                           </tr>
@@ -772,15 +772,15 @@ export default function AdminDashboard() {
               </div>
 
               {/* Top Students Table */}
-              <div className="mt-8 border-t border-dark-700 pt-8">
-                <h3 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
-                  <Users size={18} className="text-lime-400" />
+              <div className="mt-8 border-t border-gray-200 pt-8">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Users size={18} className="text-tomato-400" />
                   <span>Top 10 Students (By Average Score)</span>
                 </h3>
-                <div className="bg-dark-850 rounded-xl border border-dark-700 overflow-hidden">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-400">
-                      <thead className="bg-lime-50 text-xs uppercase text-lime-800 border-b border-lime-200">
+                    <table className="w-full text-left text-sm text-gray-500">
+                      <thead className="bg-tomato-50 text-xs uppercase text-tomato-800 border-b border-tomato-200">
                         <tr>
                           <th className="px-6 py-4 font-bold">Rank</th>
                           <th className="px-6 py-4 font-bold">Student Name</th>
@@ -791,19 +791,19 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topStudents?.map((student, index) => (
-                          <tr key={student.id} className="hover:bg-dark-900 transition-colors">
+                          <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4 font-semibold">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-dark-700 text-gray-400' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-dark-800 text-gray-400'}`}>
+                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-semibold text-gray-100">{student.name}</td>
+                            <td className="px-6 py-4 font-semibold text-gray-900">{student.name}</td>
                             <td className="px-6 py-4 text-xs">{student.email}</td>
-                            <td className="px-6 py-4 text-center font-bold text-lime-600">{Number(student.average_score).toFixed(2)}%</td>
+                            <td className="px-6 py-4 text-center font-bold text-tomato-600">{Number(student.average_score).toFixed(2)}%</td>
                             <td className="px-6 py-4 text-right">
                               <button
                                 onClick={() => handleOpenStudentExamsModal(student)}
-                                className="px-3 py-1.5 bg-lime-50 text-lime-600 hover:bg-lime-100 rounded-lg text-xs font-bold transition-colors"
+                                className="px-3 py-1.5 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 rounded-lg text-xs font-bold transition-colors"
                               >
                                 View Details
                               </button>
@@ -812,7 +812,7 @@ export default function AdminDashboard() {
                         ))}
                         {(!stats?.topStudents || stats.topStudents.length === 0) && (
                           <tr>
-                            <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                            <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                               No data available
                             </td>
                           </tr>
@@ -824,14 +824,14 @@ export default function AdminDashboard() {
               </div>
 
               {/* INJECTED ANALYTICS */}
-              <div className="mt-8 border-t border-dark-700 pt-8">
+              <div className="mt-8 border-t border-gray-200 pt-8">
                 {analytics && (
                   <div className="space-y-6 animate-fade-in">
-                    <h3 className="text-lg font-bold text-gray-100">
+                    <h3 className="text-lg font-bold text-gray-900">
                       System Analytics
                     </h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="bg-dark-900 border border-dark-700 p-4 rounded-xl">
+                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl">
                         <h4 className="font-bold text-sm mb-4">
                           Exams Created (This Year)
                         </h4>
@@ -847,7 +847,7 @@ export default function AdminDashboard() {
                           </ResponsiveContainer>
                         </div>
                       </div>
-                      <div className="bg-dark-900 border border-dark-700 p-4 rounded-xl">
+                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl">
                         <h4 className="font-bold text-sm mb-4">
                           Proctoring Alerts Summary
                         </h4>
@@ -875,16 +875,16 @@ export default function AdminDashboard() {
           {activeTab === "users" && (
             <div className="animate-fade-in space-y-6">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                <div className="flex gap-2 p-1 bg-dark-800 rounded-xl">
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
                   <button
                     onClick={() => setActiveUserTab("teachers")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-dark-850 shadow-sm text-lime-400" : "text-gray-400 hover:text-gray-100"}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-white shadow-sm text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
                   >
                     Teachers
                   </button>
                   <button
                     onClick={() => setActiveUserTab("students")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-dark-850 shadow-sm text-lime-400" : "text-gray-400 hover:text-gray-100"}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-sm text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
                   >
                     Students
                   </button>
@@ -908,11 +908,11 @@ export default function AdminDashboard() {
               {activeUserTab === "students" && (
                 <div className="space-y-4">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <h4 className="font-bold text-gray-100">Student List</h4>
+                    <h4 className="font-bold text-gray-900">Student List</h4>
                     <div className="flex items-center gap-3 w-full md:w-auto">
                       <div className="relative flex-grow md:w-64">
                         <Search
-                          className="absolute left-3 top-2 text-gray-400"
+                          className="absolute left-3 top-2 text-gray-500"
                           size={16}
                         />
                         <input
@@ -920,22 +920,22 @@ export default function AdminDashboard() {
                           placeholder="Search by ID or Name..."
                           value={studentSearch}
                           onChange={(e) => setStudentSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+                          className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
                         />
                       </div>
                       <button
                         onClick={() => setIsStudentModalOpen(true)}
-                        className="lime-btn py-2 text-xs flex items-center gap-1 shrink-0"
+                        className="tomato-btn py-2 text-xs flex items-center gap-1 shrink-0"
                       >
                         <Plus size={14} />{" "}
                         <span className="hidden sm:inline">Add Student</span>
                       </button>
                       <div className="relative group">
-                        <button className="bg-dark-800 hover:bg-dark-600 p-2 rounded-lg text-gray-400 transition flex items-center justify-center border border-dark-700">
+                        <button className="bg-gray-100 hover:bg-dark-600 p-2 rounded-lg text-gray-500 transition flex items-center justify-center border border-gray-200">
                           <MoreVertical size={16} />
                         </button>
-                        <div className="absolute right-0 top-full mt-1 w-44 bg-dark-850 border border-dark-700 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 flex flex-col p-1.5 gap-1">
-                          <label className="cursor-pointer hover:bg-dark-700 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full">
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 flex flex-col p-1.5 gap-1">
+                          <label className="cursor-pointer hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full">
                             <Upload size={13} /> <span>Bulk Import CSV</span>
                             <input
                               type="file"
@@ -946,7 +946,7 @@ export default function AdminDashboard() {
                           </label>
                           <button
                             onClick={() => exportToCSV(students, "Students")}
-                            className="hover:bg-dark-700 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                            className="hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
                           >
                             <Download size={13} /> <span>Export CSV</span>
                           </button>
@@ -963,7 +963,7 @@ export default function AdminDashboard() {
                                 "Students"
                               )
                             }
-                            className="hover:bg-dark-700 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                            className="hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
                           >
                             <Download size={13} /> <span>Export PDF</span>
                           </button>
@@ -971,10 +971,10 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="overflow-x-auto border border-dark-700 rounded-xl">
+                  <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-dark-900 border-b border-dark-700 text-gray-400 font-bold uppercase tracking-wider">
+                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
                           <th className="p-4">Student Info</th>
                           <th className="p-4">Email</th>
                           <th className="p-4 text-center">Exams Info</th>
@@ -995,16 +995,16 @@ export default function AdminDashboard() {
                           .map((student) => (
                             <tr
                               key={student.id}
-                              className="hover:bg-dark-900/50"
+                              className="hover:bg-gray-50"
                             >
                               <td className="p-4">
-                                <div className="font-bold text-gray-100">{student.name}</div>
-                                <div className="text-gray-400 text-[11px] font-mono mt-0.5">{student.id}</div>
+                                <div className="font-bold text-gray-900">{student.name}</div>
+                                <div className="text-gray-500 text-[11px] font-mono mt-0.5">{student.id}</div>
                               </td>
                               <td className="p-4">{student.email}</td>
                               <td className="p-4 text-center">
-                                <div className="font-semibold text-gray-100">{student.totalExams || 0}</div>
-                                <div className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
+                                <div className="font-semibold text-gray-900">{student.totalExams || 0}</div>
+                                <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
                               </td>
                               <td className="p-4 flex justify-center gap-2">
                                 <button
@@ -1014,7 +1014,7 @@ export default function AdminDashboard() {
                                       student.status,
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 ${student.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-lime-200 text-lime-600 hover:bg-lime-50"}`}
+                                  className={`px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 ${student.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
                                 >
                                   {student.status === "approved" ? (
                                     <UserMinus size={13} />
@@ -1031,7 +1031,7 @@ export default function AdminDashboard() {
                                   onClick={() =>
                                     handleDeleteStudent(student.id)
                                   }
-                                  className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg"
+                                  className="p-1.5 text-gray-500 hover:text-red-500 rounded-lg"
                                 >
                                   <Trash2 size={16} />
                                 </button>
@@ -1048,13 +1048,13 @@ export default function AdminDashboard() {
               {activeUserTab === "teachers" && (
                 <div className="space-y-4">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <h4 className="font-bold text-gray-100">
+                    <h4 className="font-bold text-gray-900">
                       Approved Teachers
                     </h4>
                     <div className="flex items-center gap-3 w-full md:w-auto">
                       <div className="relative flex-grow md:w-64">
                         <Search
-                          className="absolute left-3 top-2 text-gray-400"
+                          className="absolute left-3 top-2 text-gray-500"
                           size={16}
                         />
                         <input
@@ -1062,22 +1062,22 @@ export default function AdminDashboard() {
                           placeholder="Search by Name or Email..."
                           value={teacherSearch}
                           onChange={(e) => setTeacherSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+                          className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
                         />
                       </div>
                       <button
                         onClick={() => setIsTeacherModalOpen(true)}
-                        className="lime-btn py-2 text-xs flex items-center gap-1 shrink-0"
+                        className="tomato-btn py-2 text-xs flex items-center gap-1 shrink-0"
                       >
                         <Plus size={14} />{" "}
                         <span className="hidden sm:inline">Add Teacher</span>
                       </button>
                       <div className="relative group">
-                        <button className="bg-dark-800 hover:bg-dark-600 p-2 rounded-lg text-gray-400 transition flex items-center justify-center border border-dark-700">
+                        <button className="bg-gray-100 hover:bg-dark-600 p-2 rounded-lg text-gray-500 transition flex items-center justify-center border border-gray-200">
                           <MoreVertical size={16} />
                         </button>
-                        <div className="absolute right-0 top-full mt-1 w-44 bg-dark-850 border border-dark-700 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 flex flex-col p-1.5 gap-1">
-                          <label className="cursor-pointer hover:bg-dark-700 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full">
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 flex flex-col p-1.5 gap-1">
+                          <label className="cursor-pointer hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full">
                             <Upload size={13} /> <span>Bulk Import CSV</span>
                             <input
                               type="file"
@@ -1093,7 +1093,7 @@ export default function AdminDashboard() {
                                 "Teachers"
                               )
                             }
-                            className="hover:bg-dark-700 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                            className="hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
                           >
                             <Download size={13} /> <span>Export CSV</span>
                           </button>
@@ -1110,7 +1110,7 @@ export default function AdminDashboard() {
                                 "Teachers"
                               )
                             }
-                            className="hover:bg-dark-700 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
+                            className="hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition w-full text-left"
                           >
                             <Download size={13} /> <span>Export PDF</span>
                           </button>
@@ -1118,10 +1118,10 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="overflow-x-auto border border-dark-700 rounded-xl">
+                  <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-dark-900 border-b border-dark-700 text-gray-400 font-bold uppercase tracking-wider">
+                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
                           <th className="p-4">Teacher Info</th>
                           <th className="p-4 text-center">Exams Info</th>
                           <th className="p-4">Joined Date</th>
@@ -1146,15 +1146,15 @@ export default function AdminDashboard() {
                             return (
                             <tr
                               key={teacher.id}
-                              className="hover:bg-dark-900/50"
+                              className="hover:bg-gray-50"
                             >
                               <td className="p-4">
-                                <div className="font-bold text-gray-100">{teacher.name}</div>
-                                <div className="text-gray-400 text-[11px] mt-0.5">{teacher.email}</div>
+                                <div className="font-bold text-gray-900">{teacher.name}</div>
+                                <div className="text-gray-500 text-[11px] mt-0.5">{teacher.email}</div>
                               </td>
                               <td className="p-4 text-center">
-                                <div className="font-semibold text-gray-100">{tExams.length} <span className="text-gray-400 font-normal mx-1">/</span> {completedCount}</div>
-                                <div className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
+                                <div className="font-semibold text-gray-900">{tExams.length} <span className="text-gray-500 font-normal mx-1">/</span> {completedCount}</div>
+                                <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
                               </td>
                               <td className="p-4">
                                 {new Date(
@@ -1169,7 +1169,7 @@ export default function AdminDashboard() {
                                       teacher.status,
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 ${teacher.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-lime-200 text-lime-600 hover:bg-lime-50"}`}
+                                  className={`px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 ${teacher.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
                                 >
                                   {teacher.status === "approved" ? (
                                     <UserMinus size={13} />
@@ -1186,7 +1186,7 @@ export default function AdminDashboard() {
                                   onClick={() =>
                                     handleDeleteTeacher(teacher.id)
                                   }
-                                  className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg"
+                                  className="p-1.5 text-gray-500 hover:text-red-500 rounded-lg"
                                 >
                                   <Trash2 size={16} />
                                 </button>
@@ -1207,7 +1207,7 @@ export default function AdminDashboard() {
             <div className="space-y-6 animate-fade-in">
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div className="flex items-center gap-6">
-                  <h3 className="text-lg font-bold text-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900">
                     Proctoring & Logs
                   </h3>
                 </div>
@@ -1218,9 +1218,9 @@ export default function AdminDashboard() {
                       placeholder="Search exams..."
                       value={proctoringSearchQuery}
                       onChange={(e) => setProctoringSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-dark-700 rounded-lg text-sm focus:outline-none focus:border-lime-500 w-64"
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
                     />
-                    <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                    <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
                   </div>
                 </div>
               </div>
@@ -1228,12 +1228,12 @@ export default function AdminDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-dark-700">
-                      <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">Exam Title</th>
-                      <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">Course & University</th>
-                      <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">Date & Time</th>
-                      <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest text-center">Status</th>
-                      <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest text-right">Actions</th>
+                    <tr className="border-b border-gray-200">
+                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Exam Title</th>
+                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Course & University</th>
+                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Date & Time</th>
+                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-center">Status</th>
+                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">Actions</th>
                     </tr>
                   </thead>
                     <tbody className="text-sm">
@@ -1255,7 +1255,7 @@ export default function AdminDashboard() {
                         if (filteredExams.length === 0) {
                           return (
                             <tr>
-                              <td colSpan="5" className="py-12 text-center text-gray-400">
+                              <td colSpan="5" className="py-12 text-center text-gray-500">
                                 <div className="flex flex-col items-center justify-center space-y-3">
                                   <FileText size={32} className="opacity-20" />
                                   <p>No exams found</p>
@@ -1276,34 +1276,34 @@ export default function AdminDashboard() {
                           const eId = exam._id || exam.id;
 
                           return (
-                            <tr key={eId} className="border-b border-gray-100 hover:bg-dark-900/50">
-                              <td className="py-3 px-4 font-bold text-sm text-gray-100">
+                            <tr key={eId} className="border-b border-gray-100 hover:bg-gray-50">
+                              <td className="py-3 px-4 font-bold text-sm text-gray-900">
                                 {exam.title}
                                 {exam.event_id && (
-                                  <span className="inline-block mt-1 px-2 py-0.5 bg-lime-50 text-lime-600 rounded text-[10px] font-bold">Event Exam</span>
+                                  <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px] font-bold">Event Exam</span>
                                 )}
                               </td>
-                              <td className="py-3 px-4 text-xs text-gray-400">
+                              <td className="py-3 px-4 text-xs text-gray-500">
                                 {exam.course_name} {exam.course_code ? `(${exam.course_code})` : ''}
                                 <br />
-                                <span className="text-gray-400">{exam.university_name}</span>
+                                <span className="text-gray-500">{exam.university_name}</span>
                               </td>
-                              <td className="py-3 px-4 text-xs text-gray-400">
+                              <td className="py-3 px-4 text-xs text-gray-500">
                                 <div>{examDate.toLocaleDateString()}</div>
                                 <div>{examDate.toLocaleTimeString()}</div>
                               </td>
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-lime-50 text-lime-600 border border-lime-100 w-max">
-                                    <span className="w-1.5 h-1.5 bg-lime-500 rounded-full animate-pulse"></span>
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
+                                    <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
                                     Live Now
                                   </span>
                                 ) : isEnded ? (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-dark-800 text-gray-400 border border-dark-700 w-max">
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200 w-max">
                                     Ended
                                   </span>
                                 ) : (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-lime-50 text-lime-600 border border-lime-100 w-max">
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
                                     Upcoming
                                   </span>
                                 )}
@@ -1313,7 +1313,7 @@ export default function AdminDashboard() {
                                   {isLive && (
                                     <button
                                       onClick={() => navigate(`/admin/proctoring/${eId}`)}
-                                      className="px-3 py-1.5 text-xs font-bold text-lime-600 bg-lime-50 border border-lime-200 rounded-lg hover:bg-lime-100 transition-colors flex items-center gap-1.5"
+                                      className="px-3 py-1.5 text-xs font-bold text-tomato-600 bg-tomato-50 border border-tomato-200 rounded-lg hover:bg-tomato-100 transition-colors flex items-center gap-1.5"
                                     >
                                       <Camera size={14} />
                                       View Live
@@ -1324,7 +1324,7 @@ export default function AdminDashboard() {
                                     <button
                                       onClick={() => downloadProctoringData(eId, 'logs')}
                                       title="Download Incident Logs"
-                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-400 hover:text-lime-400 bg-dark-850 border border-dark-700 rounded-lg hover:border-lime-200 transition-colors"
+                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-400 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
                                     >
                                       <Download size={14} />
                                       <span className="text-[11px] font-bold">Logs</span>
@@ -1332,7 +1332,7 @@ export default function AdminDashboard() {
                                     <button
                                       onClick={() => downloadProctoringData(eId, 'roster')}
                                       title="Download Student Roster"
-                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-400 hover:text-lime-400 bg-dark-850 border border-dark-700 rounded-lg hover:border-lime-200 transition-colors"
+                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-400 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
                                     >
                                       <Users size={14} />
                                       <span className="text-[11px] font-bold">Roster</span>
@@ -1359,15 +1359,15 @@ export default function AdminDashboard() {
 
           {activeTab === "settings" && (
             <div className="max-w-2xl animate-fade-in space-y-6">
-              <h4 className="font-bold text-gray-100 mb-4">
+              <h4 className="font-bold text-gray-900 mb-4">
                 Admin Profile Settings
               </h4>
               <form
                 onSubmit={handleProfileSubmit}
-                className="bg-dark-900 border border-dark-700 rounded-2xl p-6 space-y-5"
+                className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-5"
               >
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
                     Full Name
                   </label>
                   <input
@@ -1376,11 +1376,11 @@ export default function AdminDashboard() {
                     onChange={(e) =>
                       setProfile({ ...profile, name: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 bg-dark-850 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
                     Email Address
                   </label>
                   <input
@@ -1389,13 +1389,13 @@ export default function AdminDashboard() {
                     onChange={(e) =>
                       setProfile({ ...profile, email: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 bg-dark-850 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
                     New Password{" "}
-                    <span className="text-gray-400 font-normal lowercase">
+                    <span className="text-gray-500 font-normal lowercase">
                       (leave blank to keep current)
                     </span>
                   </label>
@@ -1406,14 +1406,14 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setProfile({ ...profile, password: e.target.value })
                       }
-                      className="w-full px-4 pr-10 py-2.5 bg-dark-850 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 transition-colors"
+                      className="w-full px-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() =>
                         setShowProfilePassword(!showProfilePassword)
                       }
-                      className="absolute right-3 top-3 text-gray-400 hover:text-lime-400 transition-colors"
+                      className="absolute right-3 top-3 text-gray-500 hover:text-tomato-400 transition-colors"
                     >
                       {showProfilePassword ? (
                         <EyeOff size={18} />
@@ -1427,7 +1427,7 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="lime-btn w-full md:w-auto py-2.5 px-6"
+                    className="tomato-btn w-full md:w-auto py-2.5 px-6"
                   >
                     {loading ? "Updating..." : "Update Profile"}
                   </button>
@@ -1440,25 +1440,25 @@ export default function AdminDashboard() {
           {activeTab === "exams" && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold text-gray-100 flex items-center gap-2">
-                  <FileText size={18} className="text-lime-400" />
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <FileText size={18} className="text-tomato-400" />
                   <span>All Exams</span>
                 </h3>
                 <div className="relative">
-                  <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                  <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
                   <input
                     type="text"
                     placeholder="Search by Title or Teacher..."
                     value={allExamsSearch}
                     onChange={(e) => setAllExamsSearch(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-dark-700 rounded-lg text-sm focus:outline-none focus:border-lime-500 w-64 md:w-72 bg-dark-900 hover:bg-dark-850 transition-colors"
+                    className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
                   />
                 </div>
               </div>
-              <div className="bg-dark-850 border border-dark-700 rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-gray-400">
-                    <thead className="bg-dark-900 text-xs uppercase text-lime-800 border-b border-dark-700">
+                  <table className="w-full text-left text-sm text-gray-500">
+                    <thead className="bg-gray-50 text-xs uppercase text-tomato-800 border-b border-gray-200">
                       <tr>
                         <th className="px-6 py-4 font-bold">Exam Title</th>
                         <th className="px-6 py-4 font-bold">Teacher Name</th>
@@ -1477,13 +1477,13 @@ export default function AdminDashboard() {
                         });
                         return filteredExams.length > 0 ? (
                           filteredExams.map((exam) => (
-                            <tr key={exam.id || exam._id} className="hover:bg-dark-900 transition-colors">
-                              <td className="px-6 py-4 font-semibold text-gray-100">{exam.title}</td>
+                            <tr key={exam.id || exam._id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4 font-semibold text-gray-900">{exam.title}</td>
                               <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
                               <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
                               <td className="px-6 py-4">{exam.duration_minutes} mins</td>
                               <td className="px-6 py-4 text-center">
-                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${exam.is_live ? "bg-lime-100 text-lime-700 border border-lime-200" : "bg-dark-800 text-gray-400 border border-dark-700"}`}>
+                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${exam.is_live ? "bg-tomato-100 text-tomato-700 border border-tomato-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
                                   {exam.is_live ? "Live" : "Not Live"}
                                 </span>
                               </td>
@@ -1491,7 +1491,7 @@ export default function AdminDashboard() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                            <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                               No exams found.
                             </td>
                           </tr>
@@ -1505,7 +1505,7 @@ export default function AdminDashboard() {
           )}
         </div>
         {/* Footer */}
-        <div className="mt-auto text-center text-gray-400 text-xs py-4 pb-24 lg:pb-4 border-t border-dark-700">
+        <div className="mt-auto text-center text-gray-500 text-xs py-4 pb-24 lg:pb-4 border-t border-gray-200">
           Developed by MD Mehedi Hasan (232004048) and MST Onamika Jannat Ara (232005048) for the final Project
         </div>
       </div>
@@ -1519,7 +1519,7 @@ export default function AdminDashboard() {
       >
         <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
           {teachers.filter((t) => t.status === "pending").length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">
+            <p className="text-sm text-gray-500 text-center py-6">
               No pending teachers.
             </p>
           ) : (
@@ -1528,20 +1528,20 @@ export default function AdminDashboard() {
               .map((teacher) => (
                 <div
                   key={teacher.id}
-                  className="flex justify-between items-center bg-dark-900 border border-dark-700 p-4 rounded-xl"
+                  className="flex justify-between items-center bg-gray-50 border border-gray-200 p-4 rounded-xl"
                 >
                   <div>
-                    <h5 className="font-bold text-gray-100 text-sm">
+                    <h5 className="font-bold text-gray-900 text-sm">
                       {teacher.name}
                     </h5>
-                    <p className="text-xs text-gray-400">{teacher.email}</p>
+                    <p className="text-xs text-gray-500">{teacher.email}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
                         handleUpdateTeacherStatus(teacher.id, "pending")
                       }
-                      className="bg-lime-100 text-lime-700 p-2 rounded-lg hover:bg-lime-200"
+                      className="bg-tomato-100 text-tomato-700 p-2 rounded-lg hover:bg-tomato-200"
                       title="Approve"
                     >
                       <Check size={16} />
@@ -1568,7 +1568,7 @@ export default function AdminDashboard() {
       >
         <form onSubmit={handleAddAdmin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Full Name
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1579,11 +1579,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setAdminForm({ ...adminForm, name: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-lime-500 focus:outline-none"
+              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-tomato-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Email Address
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1594,11 +1594,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setAdminForm({ ...adminForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-lime-500 focus:outline-none"
+              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-tomato-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Password
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1610,18 +1610,18 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setAdminForm({ ...adminForm, password: e.target.value })
                 }
-                className="w-full px-3 pr-10 py-2 border rounded-xl text-sm focus:border-lime-500 focus:outline-none"
+                className="w-full px-3 pr-10 py-2 border rounded-xl text-sm focus:border-tomato-500 focus:outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowAdminPassword(!showAdminPassword)}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-lime-400"
+                className="absolute right-3 top-2.5 text-gray-500 hover:text-tomato-400"
               >
                 {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
-          <button type="submit" className="lime-btn w-full py-2.5 mt-2">
+          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
             Add Admin
           </button>
         </form>
@@ -1634,7 +1634,7 @@ export default function AdminDashboard() {
       >
         <form onSubmit={handleAddStudent} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Student ID
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1645,11 +1645,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setStudentForm({ ...studentForm, id: e.target.value })
               }
-              className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Full Name
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1660,11 +1660,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setStudentForm({ ...studentForm, name: e.target.value })
               }
-              className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Email Address
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1675,11 +1675,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setStudentForm({ ...studentForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Password
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1691,19 +1691,19 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setStudentForm({ ...studentForm, password: e.target.value })
                 }
-                className="w-full px-3 pr-10 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+                className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
               />
               <button
                 type="button"
                 onClick={() => setShowStudentPassword(!showStudentPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-lime-400"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-tomato-400"
               >
                 {showStudentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
           <div className="pt-2">
-            <button type="submit" className="lime-btn w-full py-2.5 text-sm">
+            <button type="submit" className="tomato-btn w-full py-2.5 text-sm">
               Add Student
             </button>
           </div>
@@ -1718,7 +1718,7 @@ export default function AdminDashboard() {
       >
         <form onSubmit={handleAddTeacher} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Full Name
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1729,11 +1729,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setTeacherForm({ ...teacherForm, name: e.target.value })
               }
-              className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Email Address
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1744,11 +1744,11 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setTeacherForm({ ...teacherForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Password
  <span className="text-red-500 ml-1">*</span>
             </label>
@@ -1760,18 +1760,18 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setTeacherForm({ ...teacherForm, password: e.target.value })
                 }
-                className="w-full px-3 pr-10 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500"
+                className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
               />
               <button
                 type="button"
                 onClick={() => setShowTeacherPassword(!showTeacherPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-lime-400"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-tomato-400"
               >
                 {showTeacherPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
-          <button type="submit" className="lime-btn w-full py-2.5 mt-2">
+          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
             Submit (Approve Directly)
           </button>
         </form>
@@ -1789,11 +1789,11 @@ export default function AdminDashboard() {
       >
         <div className="space-y-4">
           {loadingStudentExams ? (
-            <p className="text-sm text-gray-400 text-center py-4">Loading exams...</p>
+            <p className="text-sm text-gray-500 text-center py-4">Loading exams...</p>
           ) : studentExamDetails.length > 0 ? (
             <div className="max-h-80 overflow-y-auto pr-2">
-              <table className="w-full text-left text-sm text-gray-400">
-                <thead className="bg-lime-50 text-xs uppercase text-lime-800 sticky top-0">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-tomato-50 text-xs uppercase text-tomato-800 sticky top-0">
                   <tr>
                     <th className="px-4 py-3 font-bold">Exam Title</th>
                     <th className="px-4 py-3 font-bold">Date Finished</th>
@@ -1802,17 +1802,17 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {studentExamDetails.map((exam, idx) => (
-                    <tr key={idx} className="hover:bg-dark-900">
-                      <td className="px-4 py-3 font-semibold text-gray-100">{exam.title}</td>
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-semibold text-gray-900">{exam.title}</td>
                       <td className="px-4 py-3 text-xs">{new Date(exam.finished_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-right font-bold text-lime-400">{exam.score}%</td>
+                      <td className="px-4 py-3 text-right font-bold text-tomato-400">{exam.score}%</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="text-sm text-gray-400 text-center py-4">No completed exams found.</p>
+            <p className="text-sm text-gray-500 text-center py-4">No completed exams found.</p>
           )}
         </div>
       </Modal>
@@ -1834,10 +1834,10 @@ export default function AdminDashboard() {
         const tabWidth = 100 / mobileTabs.length;
 
         return (
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-850 border-t border-dark-700 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-lime-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -1847,7 +1847,7 @@ export default function AdminDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-lime-400' : 'text-gray-400 hover:text-gray-400'}`}
+                className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
                 <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>

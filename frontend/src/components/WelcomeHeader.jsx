@@ -49,22 +49,26 @@ const WelcomeHeader = ({ userName }) => {
   };
 
   return (
-    <div className="bg-dark-850 border border-dark-700 rounded-2xl py-8 px-6 md:px-8 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-fade-in min-h-[100px]">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
-          {content.msg} {userName && <span className="text-lime-500">{userName}</span>}
+    <div className="relative overflow-hidden bg-gradient-to-r from-tomato-600 to-tomato-400 rounded-2xl py-8 px-6 md:px-10 mb-6 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6 animate-fade-in text-white border border-tomato-500">
+      {/* Abstract Background Elements */}
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 rounded-full bg-white opacity-10 blur-2xl pointer-events-none"></div>
+
+      <div className="relative z-10">
+        <h1 className="text-3xl font-extrabold flex flex-wrap items-center gap-2 drop-shadow-sm">
+          {content.msg} {userName && <span className="text-white/90 underline decoration-white/40 decoration-wavy underline-offset-4">{userName}</span>}
         </h1>
-        <p className="text-gray-400 mt-1 text-sm font-medium">{content.tag}</p>
+        <p className="text-tomato-50 mt-2 text-sm md:text-base font-medium opacity-90">{content.tag}</p>
       </div>
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 bg-dark-900 px-5 py-3 rounded-xl border border-dark-700 shrink-0">
-        <div className="flex items-center gap-2 text-gray-300">
-          <Calendar size={18} className="text-lime-500" />
-          <span className="text-sm font-semibold">{formatDate(currentTime)}</span>
+      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl border border-white/20 shrink-0 shadow-inner">
+        <div className="flex items-center gap-2 text-white/95">
+          <Calendar size={18} className="text-white" />
+          <span className="text-sm font-semibold tracking-wide">{formatDate(currentTime)}</span>
         </div>
-        <div className="hidden sm:block w-px h-6 bg-dark-700"></div>
-        <div className="flex items-center gap-2 text-gray-300">
-          <Clock size={18} className="text-lime-500" />
+        <div className="hidden sm:block w-px h-6 bg-white/20"></div>
+        <div className="flex items-center gap-2 text-white">
+          <Clock size={18} className="text-white font-bold" />
           <span className="text-sm font-bold tracking-wider">{formatTime(currentTime)}</span>
         </div>
       </div>

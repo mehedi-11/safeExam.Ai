@@ -182,28 +182,28 @@ const EventsManager = ({ isAdmin = false }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-6">
-          <h3 className="text-lg font-bold text-gray-100">
+          <h3 className="text-lg font-bold text-gray-900">
             Manage Events
           </h3>
-          <div className="flex bg-dark-800 p-1 rounded-lg">
+          <div className="flex bg-gray-100 p-1 rounded-lg">
             <button
               onClick={() => setEventFilter("all")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-dark-850 text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-100"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               All Events
             </button>
             <button
               onClick={() => setEventFilter("live")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-dark-850 text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-100"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               {eventFilter === "live" && (
-                <span className="w-1.5 h-1.5 bg-lime-500 rounded-full animate-pulse"></span>
+                <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
               )}
               Active
             </button>
             <button
               onClick={() => setEventFilter("closed")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-dark-850 text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-100"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               Inactive
             </button>
@@ -216,17 +216,17 @@ const EventsManager = ({ isAdmin = false }) => {
               placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-dark-700 rounded-lg text-sm focus:outline-none focus:border-lime-500 w-64"
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
             />
             <Search
-              className="absolute left-3 top-2.5 text-gray-400"
+              className="absolute left-3 top-2.5 text-gray-500"
               size={16}
             />
           </div>
           {!isAdmin && (
             <button
               onClick={openCreateModal}
-              className="lime-btn py-2 text-xs flex items-center gap-1"
+              className="tomato-btn py-2 text-xs flex items-center gap-1"
             >
               <Plus size={14} />
               <span>Create Event</span>
@@ -238,23 +238,23 @@ const EventsManager = ({ isAdmin = false }) => {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-dark-700">
-              <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">
+            <tr className="border-b border-gray-200">
+              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
                 Image
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">
+              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
                 Event Title
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">
+              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
                 Date & Time
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest text-center">
+              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-center">
                 Registrations
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest">
+              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
                 Status
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-lime-800 uppercase tracking-widest text-right">
+              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">
                 Actions
               </th>
             </tr>
@@ -264,7 +264,7 @@ const EventsManager = ({ isAdmin = false }) => {
               <tr>
                 <td
                   colSpan="5"
-                  className="py-8 text-center text-xs text-gray-400"
+                  className="py-8 text-center text-xs text-gray-500"
                 >
                   No events found.
                 </td>
@@ -277,26 +277,26 @@ const EventsManager = ({ isAdmin = false }) => {
                 return (
                 <tr
                   key={evt._id}
-                  className="border-b border-gray-100 hover:bg-dark-900/50"
+                  className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="py-3 px-4">
                     {evt.image ? (
-                      <img src={evt.image} alt={evt.title} className="w-16 h-12 rounded object-cover border border-dark-700" />
+                      <img src={evt.image} alt={evt.title} className="w-16 h-12 rounded object-cover border border-gray-200" />
                     ) : (
-                      <div className="w-16 h-12 rounded bg-dark-800 flex items-center justify-center border border-dark-700">
-                        <ImageIcon size={16} className="text-gray-400" />
+                      <div className="w-16 h-12 rounded bg-gray-100 flex items-center justify-center border border-gray-200">
+                        <ImageIcon size={16} className="text-gray-500" />
                       </div>
                     )}
                   </td>
-                  <td className="py-3 px-4 font-bold text-sm text-gray-100">
+                  <td className="py-3 px-4 font-bold text-sm text-gray-900">
                     {evt.title}
                   </td>
-                  <td className="py-3 px-4 text-xs text-gray-400">
+                  <td className="py-3 px-4 text-xs text-gray-500">
                     {new Date(evt.event_date).toLocaleString()}
                     {evt.end_date && (
                       <>
                         <br />
-                        <span className="text-gray-400">
+                        <span className="text-gray-500">
                           Ends: {new Date(evt.end_date).toLocaleString()}
                         </span>
                       </>
@@ -305,7 +305,7 @@ const EventsManager = ({ isAdmin = false }) => {
                   <td className="py-3 px-4 text-center">
                     <button 
                       onClick={() => fetchRegistrations(evt._id, evt.title)}
-                      className="inline-flex items-center justify-center px-3 py-1 bg-lime-50 text-lime-700 font-bold rounded-lg border border-lime-200 hover:bg-lime-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center justify-center px-3 py-1 bg-tomato-50 text-tomato-700 font-bold rounded-lg border border-tomato-200 hover:bg-tomato-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       title="View Registrations"
                       disabled={!evt.registration_count}
                     >
@@ -323,18 +323,18 @@ const EventsManager = ({ isAdmin = false }) => {
                           handleToggleStatus(evt);
                         }}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                          isActive ? 'bg-lime-500' : 'bg-gray-300'
+                          isActive ? 'bg-tomato-500' : 'bg-gray-300'
                         } ${expired ? 'opacity-50 cursor-not-allowed' : ''}`}
                         title={expired ? 'Event has expired' : `Toggle to ${isActive ? 'Inactive' : 'Active'}`}
                       >
                         <span className="sr-only">Toggle status</span>
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-dark-850 transition-transform ${
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                             isActive ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
                       </button>
-                      <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${isActive ? 'text-lime-600' : 'text-gray-400'}`}>
+                      <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${isActive ? 'text-tomato-600' : 'text-gray-500'}`}>
                         {expired ? 'Expired' : isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -343,7 +343,7 @@ const EventsManager = ({ isAdmin = false }) => {
                     {!isAdmin && (
                       <button
                         onClick={() => openEditModal(evt)}
-                        className="p-1.5 text-lime-400 hover:bg-lime-50 rounded-lg transition-colors"
+                        className="p-1.5 text-tomato-400 hover:bg-tomato-50 rounded-lg transition-colors"
                         title="Edit Event"
                       >
                         <Edit size={16} />
@@ -351,7 +351,7 @@ const EventsManager = ({ isAdmin = false }) => {
                     )}
                     <button
                       onClick={() => handleDelete(evt._id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete Event"
                     >
                       <Trash2 size={16} />
@@ -367,29 +367,29 @@ const EventsManager = ({ isAdmin = false }) => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingEventId ? "Edit Event" : "Create Event"} maxWidth="max-w-[70%]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Event Title <span className="text-red-500 ml-1">*</span></label>
-            <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 smooth-transition" />
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Title <span className="text-red-500 ml-1">*</span></label>
+            <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Event Description</label>
-            <ReactQuill theme="snow" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} className="bg-dark-850 rounded-xl quill-large" />
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Description</label>
+            <ReactQuill theme="snow" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} className="bg-white rounded-xl quill-large" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Start Date & Time <span className="text-red-500 ml-1">*</span></label>
-              <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 smooth-transition" />
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Start Date & Time <span className="text-red-500 ml-1">*</span></label>
+              <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">End Date & Time <span className="text-red-500 ml-1">*</span></label>
-              <input type="datetime-local" required value={formData.end_date} onChange={e => setFormData({...formData, end_date: e.target.value})} className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 smooth-transition" />
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">End Date & Time <span className="text-red-500 ml-1">*</span></label>
+              <input type="datetime-local" required value={formData.end_date} onChange={e => setFormData({...formData, end_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
             </div>
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Event Image</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Image</label>
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors ${formData.image ? 'border-lime-500 bg-lime-50' : 'border-dark-600 bg-dark-900 hover:bg-dark-700'}`}
+              className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors ${formData.image ? 'border-tomato-500 bg-tomato-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-200'}`}
             >
               {formData.image ? (
                 <div className="w-full h-full p-1 relative">
@@ -400,9 +400,9 @@ const EventsManager = ({ isAdmin = false }) => {
                 </div>
               ) : (
                 <>
-                  <ImageIcon size={24} className="text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-400 font-medium">Click to upload image</span>
-                  <span className="text-xs text-gray-400 mt-1">Auto-compressed for web</span>
+                  <ImageIcon size={24} className="text-gray-500 mb-2" />
+                  <span className="text-sm text-gray-500 font-medium">Click to upload image</span>
+                  <span className="text-xs text-gray-500 mt-1">Auto-compressed for web</span>
                 </>
               )}
             </div>
@@ -414,7 +414,7 @@ const EventsManager = ({ isAdmin = false }) => {
               onChange={handleImageUpload} 
             />
           </div>
-          <button type="submit" className="lime-btn w-full py-2.5 mt-2">{editingEventId ? "Update Event" : "Save Event"}</button>
+          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">{editingEventId ? "Update Event" : "Save Event"}</button>
         </form>
       </Modal>
 
@@ -427,26 +427,26 @@ const EventsManager = ({ isAdmin = false }) => {
       >
         <div className="overflow-x-auto">
           {registrationsLoading ? (
-            <div className="text-center py-10 text-gray-400 font-medium">Loading registrations...</div>
+            <div className="text-center py-10 text-gray-500 font-medium">Loading registrations...</div>
           ) : selectedEventRegistrations.length === 0 ? (
-            <div className="text-center py-10 text-gray-400 font-medium bg-dark-900 rounded-xl border border-dashed border-dark-700">No registrations found.</div>
+            <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-xl border border-dashed border-gray-200">No registrations found.</div>
           ) : (
             <div className="inline-block min-w-full align-middle">
-              <div className="overflow-hidden border border-dark-700 sm:rounded-xl">
+              <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-lime-50 text-lime-800">
+                  <thead className="bg-tomato-50 text-tomato-800">
                     <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-lime-800 uppercase tracking-wider sm:pl-6">Name</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-lime-800 uppercase tracking-wider">Email</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-lime-800 uppercase tracking-wider">Phone</th>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider sm:pl-6">Name</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Phone</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-dark-850">
+                  <tbody className="divide-y divide-gray-200 bg-white">
                     {selectedEventRegistrations.map((reg) => (
-                      <tr key={reg._id} className="hover:bg-dark-900 transition-colors">
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-gray-100 sm:pl-6">{reg.name}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-400">{reg.email}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-400">{reg.phone || 'N/A'}</td>
+                      <tr key={reg._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-6">{reg.name}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.phone || 'N/A'}</td>
                       </tr>
                     ))}
                   </tbody>

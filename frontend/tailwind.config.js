@@ -7,14 +7,14 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        'none': '0px',
-        'sm': '0px',
-        DEFAULT: '0px', 
-        'md': '0px',
-        'lg': '0px',
-        'xl': '0px',
-        '2xl': '0px',
-        '3xl': '0px',
+        'none': '4px',
+        'sm': '4px',
+        DEFAULT: '4px', 
+        'md': '4px',
+        'lg': '4px',
+        'xl': '4px',
+        '2xl': '4px',
+        '3xl': '4px',
         'full': '50%', // Icons/Avatars 50%
       },
       boxShadow: {
@@ -64,6 +64,18 @@ export default {
           700: '#6d9900',
           800: '#496600',
           900: '#243300',
+        },
+        tomato: {
+          50: '#fff0ec',
+          100: '#ffdcd3',
+          200: '#ffbfae',
+          300: '#ff987c',
+          400: '#ff6742',
+          500: '#ff4c24', // Tomato
+          600: '#e53610',
+          700: '#c0270a',
+          800: '#9f230d',
+          900: '#83220f',
         }
       },
     },

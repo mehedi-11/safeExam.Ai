@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 // Get Profile
 exports.getProfile = async (req, res) => {
   try {
-    const student = await Student.findOne({ id: req.user.id }).select('id name email profile_image status dob university address');
+    const student = await Student.findOne({ id: req.user.id }).select('id name email status dob university address');
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -32,9 +32,7 @@ exports.updateProfile = async (req, res) => {
     if (university) updateData.university = university;
     if (address) updateData.address = address;
     
-    if (req.file) {
-      updateData.profile_image = `/uploads/${req.file.filename}`;
-    }
+
 
     if (email) {
       const existing = await Student.findOne({ email, id: { $ne: req.user.id } });
@@ -43,7 +41,7 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
-    const student = await Student.findOneAndUpdate({ id: req.user.id }, updateData, { new: true }).select('id name email profile_image status dob university address');
+    const student = await Student.findOneAndUpdate({ id: req.user.id }, updateData, { new: true }).select('id name email status dob university address');
     if (!student) return res.status(404).json({ message: 'Student not found' });
     
     return res.json({ message: 'Profile updated successfully', user: student });

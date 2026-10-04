@@ -3,7 +3,7 @@ const teacherSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  profile_image: { type: String, default: null },
+
   dob: { type: Date },
   university: { type: String },
   address: { type: String },

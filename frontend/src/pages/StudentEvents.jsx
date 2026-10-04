@@ -66,13 +66,13 @@ const StudentEvents = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
-          <Calendar className="text-lime-400" /> Upcoming Events
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Calendar className="text-tomato-400" /> Upcoming Events
         </h2>
       </div>
 
       {events.length === 0 ? (
-        <div className="bg-dark-850 p-10 rounded-2xl border border-dark-700 text-center text-gray-400">
+        <div className="bg-white p-10 rounded-2xl border border-gray-200 text-center text-gray-500">
           No live events available.
         </div>
       ) : (
@@ -80,29 +80,29 @@ const StudentEvents = () => {
           {events.map((evt) => {
             const isEnded = evt.end_date && new Date(evt.end_date) < new Date();
             return (
-              <div key={evt._id} className="card-hover p-6 flex flex-col justify-between h-full bg-dark-850 relative cursor-pointer" onClick={() => navigate(`/event/${evt._id}`)}>
+              <div key={evt._id} className="card-hover p-6 flex flex-col justify-between h-full bg-white relative cursor-pointer" onClick={() => navigate(`/event/${evt._id}`)}>
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isEnded ? 'bg-dark-800 text-gray-400' : 'bg-lime-100 text-lime-700'}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isEnded ? 'bg-gray-100 text-gray-500' : 'bg-tomato-100 text-tomato-700'}`}>
                       {isEnded ? 'ENDED' : 'LIVE'}
                     </span>
                   </div>
                   {evt.image && (
-                    <div className="mb-4 rounded-xl overflow-hidden h-32 w-full bg-dark-800 border border-dark-700">
+                    <div className="mb-4 rounded-xl overflow-hidden h-32 w-full bg-gray-100 border border-gray-200">
                       <img src={evt.image} alt={evt.title} className="w-full h-full object-cover" />
                     </div>
                   )}
-                  <h3 className="text-lg font-bold text-gray-100 mb-2 line-clamp-2">{evt.title}</h3>
-                  <div className="text-sm text-gray-400 mb-4 line-clamp-3 prose plime-sm" dangerouslySetInnerHTML={{ __html: evt.description }}></div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{evt.title}</h3>
+                  <div className="text-sm text-gray-500 mb-4 line-clamp-3 prose ptomato-sm" dangerouslySetInnerHTML={{ __html: evt.description }}></div>
                   <div className="space-y-2 mb-6">
-                    <div className="flex items-center text-sm text-gray-400 gap-2">
-                      <Clock size={16} className="text-lime-400" />
-                      <span><strong className="font-semibold text-gray-300">Starts:</strong> {new Date(evt.event_date).toLocaleString()}</span>
+                    <div className="flex items-center text-sm text-gray-500 gap-2">
+                      <Clock size={16} className="text-tomato-400" />
+                      <span><strong className="font-semibold text-gray-700">Starts:</strong> {new Date(evt.event_date).toLocaleString()}</span>
                     </div>
                     {evt.end_date && (
-                      <div className="flex items-center text-sm text-gray-400 gap-2">
+                      <div className="flex items-center text-sm text-gray-500 gap-2">
                         <Clock size={16} className="text-red-500" />
-                        <span><strong className="font-semibold text-gray-300">Ends:</strong> {new Date(evt.end_date).toLocaleString()}</span>
+                        <span><strong className="font-semibold text-gray-700">Ends:</strong> {new Date(evt.end_date).toLocaleString()}</span>
                       </div>
                     )}
                   </div>
@@ -118,13 +118,13 @@ const StudentEvents = () => {
                         setEmailError("");
                         setIsRegisterModalOpen(true); 
                       }}
-                      className="flex-1 bg-lime-500 hover:bg-lime-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
+                      className="flex-1 bg-tomato-500 hover:bg-tomato-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
                     >
                       <UserCheck size={14} /> Register Now
                     </button>
                   ) : (
                     <button 
-                      className="flex-1 bg-dark-800 text-gray-400 py-2 rounded-xl text-sm font-bold cursor-not-allowed flex justify-center items-center gap-1"
+                      className="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm font-bold cursor-not-allowed flex justify-center items-center gap-1"
                       disabled
                     >
                       Event Ended
@@ -146,19 +146,19 @@ const StudentEvents = () => {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Full Name <span className="text-red-500 ml-1">*</span></label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
               value={regForm.name} 
               onChange={e => setRegForm({...regForm, name: e.target.value})} 
-              className="w-full px-4 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
               placeholder="e.g. John Doe"
             />
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Email Address <span className="text-red-500 ml-1">*</span></label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Email Address <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
@@ -167,26 +167,26 @@ const StudentEvents = () => {
                 setRegForm({...regForm, email: e.target.value});
                 if(emailError) setEmailError("");
               }} 
-              className={`w-full px-4 py-2 bg-dark-900 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-dark-700 focus:border-lime-500'}`} 
+              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-tomato-500'}`} 
               placeholder="johndoe@example.com"
             />
             {emailError && <p className="text-red-500 text-xs font-bold mt-1">{emailError}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Phone Number <span className="text-red-500 ml-1">*</span></label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="tel" 
               required 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
-              className="w-full px-4 py-2 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:border-lime-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
               placeholder="+8801XXXXXXXXX"
             />
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-lime-500 text-white rounded-xl font-bold hover:bg-lime-600 transition-colors shadow-sm">
+            <button type="submit" className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm">
               Submit Registration
             </button>
           </div>
@@ -196,19 +196,19 @@ const StudentEvents = () => {
       {/* Success Modal */}
       <Modal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)}>
         <div className="py-6 text-center space-y-4">
-          <div className="w-20 h-20 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <CheckCircle size={40} className="text-lime-400" />
+          <div className="w-20 h-20 bg-tomato-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <CheckCircle size={40} className="text-tomato-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-100">Registration Successful!</h2>
-          <p className="text-gray-400 max-w-sm mx-auto">
-            Please check your email. A <strong>security code</strong> has been sent to <span className="font-semibold text-gray-100">{regForm.email}</span>. You will need this code to login to the event exam.
+          <h2 className="text-2xl font-bold text-gray-900">Registration Successful!</h2>
+          <p className="text-gray-500 max-w-sm mx-auto">
+            Please check your email. A <strong>security code</strong> has been sent to <span className="font-semibold text-gray-900">{regForm.email}</span>. You will need this code to login to the event exam.
           </p>
           <button 
             onClick={() => {
               setIsSuccessModalOpen(false);
               navigate(`/event/${selectedEventId}`);
             }} 
-            className="mt-6 px-8 py-2.5 bg-dark-800 text-gray-200 font-bold rounded-xl hover:bg-dark-600 transition-colors"
+            className="mt-6 px-8 py-2.5 bg-gray-100 text-gray-800 font-bold rounded-xl hover:bg-dark-600 transition-colors"
           >
             Go to Event Details
           </button>
