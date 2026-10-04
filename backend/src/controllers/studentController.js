@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 // Get Profile
 exports.getProfile = async (req, res) => {
   try {
-    const student = await Student.findOne({ id: req.user.id }).select('id name email profile_image status');
+    const student = await Student.findOne({ id: req.user.id }).select('id name email profile_image status dob university address');
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -17,6 +17,39 @@ exports.getProfile = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching student profile' });
+  }
+};
+
+// Update Profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, dob, university, address } = req.body;
+    let updateData = {};
+    
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (dob) updateData.dob = dob;
+    if (university) updateData.university = university;
+    if (address) updateData.address = address;
+    
+    if (req.file) {
+      updateData.profile_image = `/uploads/${req.file.filename}`;
+    }
+
+    if (email) {
+      const existing = await Student.findOne({ email, id: { $ne: req.user.id } });
+      if (existing) {
+        return res.status(400).json({ message: 'Email is already in use.' });
+      }
+    }
+
+    const student = await Student.findOneAndUpdate({ id: req.user.id }, updateData, { new: true }).select('id name email profile_image status dob university address');
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    
+    return res.json({ message: 'Profile updated successfully', user: student });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error updating profile' });
   }
 };
 

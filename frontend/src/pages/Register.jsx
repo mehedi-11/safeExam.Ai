@@ -105,24 +105,24 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-dark-900 flex flex-col">
       <Navbar />
 
       <div className="flex-grow flex items-center justify-center px-4 py-12">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 relative overflow-hidden">
+        <div className="bg-dark-850 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 relative overflow-hidden">
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-rose-500"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-lime-500"></div>
 
           {/* Back button */}
           <button 
             onClick={() => navigate('/')} 
-            className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-rose-500 mb-6 smooth-transition"
+            className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-lime-400 mb-6 smooth-transition"
           >
             <ArrowLeft size={14} />
             <span>Back to portals</span>
           </button>
 
-          <h2 className="text-2xl font-bold text-dark-900 mb-2">
+          <h2 className="text-2xl font-bold text-gray-100 mb-2">
             Register as {role === 'teacher' ? 'Teacher' : 'Student'}
           </h2>
           <p className="text-xs text-gray-400 mb-6">
@@ -137,13 +137,13 @@ export default function Register() {
           )}
 
           {success && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-xs flex flex-col gap-2 mb-6 animate-fade-in">
+            <div className="bg-lime-50 border border-lime-200 text-lime-700 p-4 rounded-xl text-xs flex flex-col gap-2 mb-6 animate-fade-in">
               <div className="flex items-center gap-2 font-semibold text-sm">
-                <BadgeCheck size={18} className="text-rose-600 shrink-0" />
+                <BadgeCheck size={18} className="text-lime-600 shrink-0" />
                 <span>Request Submitted!</span>
               </div>
-              <p className="text-rose-600 leading-normal">{success}</p>
-              <Link to={`/login/${role}`} className="rose-btn py-2 text-center text-xs mt-2 w-full">
+              <p className="text-lime-600 leading-normal">{success}</p>
+              <Link to={`/login/${role}`} className="lime-btn py-2 text-center text-xs mt-2 w-full">
                 Go to Sign In
               </Link>
             </div>
@@ -153,7 +153,7 @@ export default function Register() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {role === 'student' && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID <span className="text-red-500 ml-1">*</span></label>
+                  <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Student ID <span className="text-red-500 ml-1">*</span></label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                       <UserSquare size={18} />
@@ -165,14 +165,14 @@ export default function Register() {
                       onChange={handleChange}
                       required
                       placeholder="e.g. STU1002"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:bg-dark-850 focus:border-lime-500 focus:ring-1 focus:ring-lime-500 smooth-transition"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Full Name <span className="text-red-500 ml-1">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                     <UserSquare size={18} />
@@ -184,13 +184,13 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. John Smith"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:bg-dark-850 focus:border-lime-500 focus:ring-1 focus:ring-lime-500 smooth-transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                     <Mail size={18} />
@@ -202,13 +202,13 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. john@student.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:bg-dark-850 focus:border-lime-500 focus:ring-1 focus:ring-lime-500 smooth-transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Password <span className="text-red-500 ml-1">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                     <KeyRound size={18} />
@@ -220,19 +220,19 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition font-mono"
+                    className="w-full pl-10 pr-10 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm focus:outline-none focus:bg-dark-850 focus:border-lime-500 focus:ring-1 focus:ring-lime-500 smooth-transition font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-rose-500 smooth-transition"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-lime-400 smooth-transition"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className="w-full rose-btn py-3 mt-4 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
+              <button type="submit" disabled={loading} className="w-full lime-btn py-3 mt-4 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
                 {loading ? 'Processing...' : 'Verify Email'}
               </button>
             </form>
@@ -240,15 +240,15 @@ export default function Register() {
 
           {!success && otpStep === 2 && (
             <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
-              <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl mb-4 text-center">
-                <p className="text-sm text-rose-800">
+              <div className="bg-lime-50 border border-lime-200 p-4 rounded-xl mb-4 text-center">
+                <p className="text-sm text-lime-800">
                   We've sent a 6-digit OTP to <strong>{formData.email}</strong>.<br />
                   Please enter it below to verify your email.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 text-center">Enter OTP <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 text-center">Enter OTP <span className="text-red-500 ml-1">*</span></label>
                 <input
                   type="text"
                   maxLength="6"
@@ -256,7 +256,7 @@ export default function Register() {
                   onChange={(e) => setEnteredOtp(e.target.value.replace(/[^0-9]/g, ''))}
                   required
                   placeholder="123456"
-                  className="w-full text-center text-2xl tracking-[0.5em] py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:bg-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500 smooth-transition font-mono"
+                  className="w-full text-center text-2xl tracking-[0.5em] py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:bg-dark-850 focus:border-lime-500 focus:ring-1 focus:ring-lime-500 smooth-transition font-mono"
                 />
               </div>
 
@@ -265,14 +265,14 @@ export default function Register() {
                   type="button" 
                   onClick={() => setOtpStep(1)} 
                   disabled={loading}
-                  className="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl smooth-transition disabled:opacity-70"
+                  className="flex-1 py-3 text-sm font-semibold text-gray-400 bg-dark-800 hover:bg-dark-600 rounded-xl smooth-transition disabled:opacity-70"
                 >
                   Back
                 </button>
                 <button 
                   type="submit" 
                   disabled={loading || enteredOtp.length !== 6} 
-                  className="flex-1 rose-btn py-3 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex-1 lime-btn py-3 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Verifying...' : 'Verify & Register'}
                 </button>
@@ -282,7 +282,7 @@ export default function Register() {
 
           <div className="text-center mt-6">
             <span className="text-xs text-gray-400">Already have a request? </span>
-            <Link to={`/login/${role}`} className="text-xs font-semibold text-rose-500 hover:text-rose-600 hover:underline smooth-transition">
+            <Link to={`/login/${role}`} className="text-xs font-semibold text-lime-400 hover:text-lime-600 hover:underline smooth-transition">
               Sign In
             </Link>
           </div>

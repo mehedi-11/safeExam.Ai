@@ -5,6 +5,9 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   profile_image: { type: String, default: null },
+  dob: { type: Date },
+  university: { type: String },
+  address: { type: String },
   joining_date: { type: Date, default: Date.now },
   status: { type: String, enum: ['active', 'blocked', 'suspended', 'pending', 'approved'], default: 'active' }
 });

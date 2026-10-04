@@ -510,18 +510,18 @@ export default function ExamInterface() {
   // Render Views
   if (limitReached) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border-t-4 border-red-500 animate-scale-up flex flex-col items-center">
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4">
+        <div className="bg-dark-850 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border-t-4 border-red-500 animate-scale-up flex flex-col items-center">
           <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
             <ShieldAlert size={40} className="text-red-500" />
           </div>
-          <h2 className="text-2xl font-black text-dark-900 mb-2">Maximum Attempts Reached</h2>
-          <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+          <h2 className="text-2xl font-black text-gray-100 mb-2">Maximum Attempts Reached</h2>
+          <p className="text-gray-400 text-sm mb-8 leading-relaxed">
             You have already reached the maximum number of allowed attempts for this exam. You cannot take this exam again.
           </p>
           <button 
             onClick={() => window.close()} 
-            className="w-full bg-gray-100 hover:bg-gray-200 text-dark-900 font-bold py-3 px-6 rounded-xl transition-colors"
+            className="w-full bg-dark-800 hover:bg-dark-600 text-gray-100 font-bold py-3 px-6 rounded-xl transition-colors"
           >
             Close Window
           </button>
@@ -532,7 +532,7 @@ export default function ExamInterface() {
 
   return (
     <div 
-      className="min-h-screen bg-gray-50 flex flex-col font-sans"
+      className="min-h-screen bg-dark-900 flex flex-col font-sans"
       onCopy={handleClipboard}
       onCut={handleClipboard}
       onPaste={handleClipboard}
@@ -540,10 +540,10 @@ export default function ExamInterface() {
       {/* Rules Modal */}
       {showRulesModal && (
         <div className="fixed inset-0 z-50 bg-dark-900/95 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto">
-          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative">
-            <h2 className="text-2xl font-black text-dark-900 mb-4 border-b pb-4">Exam Rules & Proctoring Policies</h2>
-            <div className="space-y-4 text-sm text-gray-700 max-h-[60vh] overflow-y-auto pr-4">
-              <p className="font-semibold text-rose-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 20 points will result in automatic submission.</p>
+          <div className="bg-dark-850 rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative">
+            <h2 className="text-2xl font-black text-gray-100 mb-4 border-b pb-4">Exam Rules & Proctoring Policies</h2>
+            <div className="space-y-4 text-sm text-gray-300 max-h-[60vh] overflow-y-auto pr-4">
+              <p className="font-semibold text-lime-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 20 points will result in automatic submission.</p>
               <ul className="list-disc pl-5 space-y-2">
                 <li><span className="font-bold">Copy/Paste/Cut (Shortcut):</span> 1 demerit point.</li>
                 <li><span className="font-bold">Tab Switching / Minimize:</span> 1 demerit point. If away for &gt;10s, auto-submit.</li>
@@ -561,7 +561,7 @@ export default function ExamInterface() {
             <div className="mt-8 flex justify-end">
               <button 
                 onClick={startExamSession}
-                className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg"
+                className="bg-lime-500 hover:bg-lime-600 text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg"
               >
                 I Understand, Start Exam
               </button>
@@ -576,24 +576,24 @@ export default function ExamInterface() {
         
         {/* Left Side: Exam content */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white border border-gray-150 p-6 rounded-2xl flex justify-between items-center shadow-sm">
+          <div className="bg-dark-850 border border-dark-700 p-6 rounded-2xl flex justify-between items-center shadow-sm">
             <div>
               <button 
                 onClick={() => { if(window.confirm('Abandon exam? Your progress will not be submitted.')) navigate('/dashboard/student'); }} 
-                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-rose-500 mb-2 smooth-transition"
+                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-lime-400 mb-2 smooth-transition"
               >
                 <ArrowLeft size={13} />
                 <span>Exit Exam Portal</span>
               </button>
-              <h2 className="text-xl font-bold text-dark-900 leading-tight">{examTitle || 'Loading Exam...'}</h2>
+              <h2 className="text-xl font-bold text-gray-100 leading-tight">{examTitle || 'Loading Exam...'}</h2>
               <p className="text-xs text-gray-400 mt-1">Answer all multiple choice questions. Copy/paste checks are active.</p>
             </div>
 
             {/* Timer widget */}
-            <div className="flex items-center gap-3 bg-rose-50 text-rose-650 py-2.5 px-4 rounded-xl border border-rose-100 font-semibold shadow-sm">
+            <div className="flex items-center gap-3 bg-lime-50 text-lime-650 py-2.5 px-4 rounded-xl border border-lime-100 font-semibold shadow-sm">
               <Clock size={18} className="animate-pulse" />
               <div className="text-left font-mono">
-                <span className="text-[10px] block uppercase text-rose-500 font-bold leading-3">Time Left</span>
+                <span className="text-[10px] block uppercase text-lime-400 font-bold leading-3">Time Left</span>
                 <span className="text-lg font-bold">{formatTime(timeLeft)}</span>
               </div>
             </div>
@@ -608,14 +608,14 @@ export default function ExamInterface() {
 
           {/* Questions Render */}
           {questions.length === 0 && !loading && !isBlocked ? (
-            <div className="bg-white border border-gray-150 py-16 text-center text-xs text-gray-400 rounded-2xl shadow-sm">
+            <div className="bg-dark-850 border border-dark-700 py-16 text-center text-xs text-gray-400 rounded-2xl shadow-sm">
               Exam questions are not configured or are locked. Please contact your instructor.
             </div>
           ) : (
             <div className="space-y-6">
               {questions.map((q, idx) => (
-                <div key={q.id} className="bg-white border border-gray-150 p-6 rounded-2xl shadow-sm">
-                  <h4 className="font-bold text-dark-900 text-sm mb-4 leading-relaxed">
+                <div key={q.id} className="bg-dark-850 border border-dark-700 p-6 rounded-2xl shadow-sm">
+                  <h4 className="font-bold text-gray-100 text-sm mb-4 leading-relaxed">
                     Question {idx + 1}: {q.question_text}
                   </h4>
                   <div className="mt-4">
@@ -624,7 +624,7 @@ export default function ExamInterface() {
                         value={answers[q.id] || ''}
                         onChange={(e) => handleOptionChange(q.id, e.target.value)}
                         placeholder="Type your answer here..."
-                        className="w-full h-32 p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-rose-500 text-sm resize-none"
+                        className="w-full h-32 p-3 border border-dark-700 rounded-xl focus:outline-none focus:border-lime-500 text-sm resize-none"
                       ></textarea>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -641,14 +641,14 @@ export default function ExamInterface() {
                               onClick={() => handleOptionChange(q.id, opt.key)}
                               className={`flex items-center gap-3 p-3.5 border rounded-xl cursor-pointer smooth-transition ${
                                 isSelected 
-                                  ? 'border-rose-500 bg-rose-50/15 font-semibold text-rose-800' 
-                                  : 'border-gray-100 hover:border-rose-200 hover:bg-gray-50/50 text-gray-650'
+                                  ? 'border-lime-500 bg-lime-50/15 font-semibold text-lime-800' 
+                                  : 'border-gray-100 hover:border-lime-200 hover:bg-dark-900/50 text-gray-650'
                               }`}
                             >
                               <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-extrabold border ${
                                 isSelected 
-                                  ? 'bg-rose-500 border-rose-500 text-white' 
-                                  : 'bg-gray-50 border-gray-200 text-gray-500'
+                                  ? 'bg-lime-500 border-lime-500 text-white' 
+                                  : 'bg-dark-900 border-dark-700 text-gray-400'
                               }`}>
                                 {opt.key}
                               </span>
@@ -665,7 +665,7 @@ export default function ExamInterface() {
               {!isBlocked && questions.length > 0 && (
                 <button 
                   onClick={() => handleSubmitExam(false)}
-                  className="rose-btn w-full py-3.5 text-sm flex items-center justify-center gap-2"
+                  className="lime-btn w-full py-3.5 text-sm flex items-center justify-center gap-2"
                 >
                   <CheckSquare size={18} />
                   <span>Submit Exam Assessment</span>
@@ -679,12 +679,12 @@ export default function ExamInterface() {
         <div className="lg:col-span-1 space-y-6">
           
           {/* Live webcam component */}
-          <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm flex flex-col items-center">
+          <div className="bg-dark-850 border border-dark-700 p-5 rounded-2xl shadow-sm flex flex-col items-center">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5 self-start">
-              <Camera size={14} className="text-rose-500" />
+              <Camera size={14} className="text-lime-400" />
               <span>Camera Monitor Preview</span>
             </h4>
-            <div className="w-full aspect-[4/3] bg-dark-900 rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
+            <div className="w-full aspect-[4/3] bg-dark-900 rounded-xl overflow-hidden border border-dark-700 relative flex items-center justify-center">
               <video 
                 ref={videoRef} 
                 autoPlay 
@@ -696,7 +696,7 @@ export default function ExamInterface() {
               <canvas ref={canvasRef} width="320" height="240" className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />
               {!streamRef.current && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mb-2 animate-bounce">
+                  <div className="w-10 h-10 rounded-full bg-lime-50 text-lime-400 flex items-center justify-center mb-2 animate-bounce">
                     <ShieldAlert size={20} />
                   </div>
                   <span className="text-[10px] font-bold text-gray-400">Webcam Inactive / Denied</span>
@@ -706,27 +706,27 @@ export default function ExamInterface() {
           </div>
 
           {/* Demerit points status */}
-          <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm">
+          <div className="bg-dark-850 border border-dark-700 p-5 rounded-2xl shadow-sm">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3">AI Integrity Score</h4>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-semibold text-gray-500">Demerit Suspicion Points</span>
+              <span className="text-xs font-semibold text-gray-400">Demerit Suspicion Points</span>
               <span className={`px-2 py-0.5 rounded text-xs font-extrabold ${
                 demerits >= 15 ? 'bg-red-100 text-red-700' :
                 demerits >= 10 ? 'bg-yellow-100 text-yellow-700' :
-                'bg-rose-150 text-rose-700'
+                'bg-lime-150 text-lime-700'
               }`}>
                 {demerits} / 20
               </span>
             </div>
             {/* Demerit bar graph */}
-            <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden flex">
+            <div className="w-full bg-dark-800 h-2.5 rounded-full overflow-hidden flex">
               {Array.from({ length: 20 }, (_, i) => i + 1).map(tick => (
                 <div 
                   key={tick}
                   className={`flex-1 border-r border-white last:border-0 ${
                     demerits >= tick 
-                      ? tick >= 15 ? 'bg-red-500' : tick >= 10 ? 'bg-yellow-500' : 'bg-rose-500' 
-                      : 'bg-gray-100'
+                      ? tick >= 15 ? 'bg-red-500' : tick >= 10 ? 'bg-yellow-500' : 'bg-lime-500' 
+                      : 'bg-dark-800'
                   }`}
                 />
               ))}
@@ -738,20 +738,20 @@ export default function ExamInterface() {
 
 
           {/* Live AI Detection Logs */}
-          <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm">
+          <div className="bg-dark-850 border border-dark-700 p-5 rounded-2xl shadow-sm">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5">
-              <Terminal size={14} className="text-rose-500" />
+              <Terminal size={14} className="text-lime-400" />
               <span>YOLOv8 AI Log Feed</span>
             </h4>
             <div className="bg-dark-900 rounded-xl p-3 h-32 overflow-y-auto">
               {showLogFeed.length > 0 ? (
-                <div className="font-mono text-[9px] text-rose-300 space-y-1.5">
+                <div className="font-mono text-[9px] text-lime-300 space-y-1.5">
                   {showLogFeed.map((log, idx) => (
                     <div key={idx} className="truncate">{log}</div>
                   ))}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-[10px] text-gray-600 font-mono italic">
+                <div className="h-full flex items-center justify-center text-[10px] text-gray-400 font-mono italic">
                   No suspicious activity detected...
                 </div>
               )}
