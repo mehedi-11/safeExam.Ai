@@ -7,9 +7,9 @@ exports.createEvent = async (req, res) => {
       return res.status(403).json({ message: 'Admins are not allowed to create events.' });
     }
 
-    const { title, description, event_date, end_date, image } = req.body;
+    const { title, description, event_date, image } = req.body;
     
-    if (!title || !description || !event_date || !end_date) {
+    if (!title || !description || !event_date) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -17,7 +17,6 @@ exports.createEvent = async (req, res) => {
       title,
       description,
       event_date,
-      end_date,
       image: image || '',
       status: 'live',
       created_by_model: 'Teacher',
@@ -98,8 +97,8 @@ exports.getEventDetails = async (req, res) => {
 exports.registerForEvent = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
-    if (!name || !email || !phone) {
-      return res.status(400).json({ message: 'Name, email, and phone are required.' });
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required.' });
     }
 
     const event = await Event.findById(req.params.id);
@@ -159,7 +158,7 @@ exports.updateEvent = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
       return res.status(403).json({ message: 'Unauthorized' });
     }
-    const { title, description, event_date, end_date, image, status } = req.body;
+    const { title, description, event_date, image, status } = req.body;
     
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
@@ -174,7 +173,6 @@ exports.updateEvent = async (req, res) => {
       if (title) event.title = title;
       if (description) event.description = description;
       if (event_date) event.event_date = event_date;
-      if (end_date) event.end_date = end_date;
       if (image !== undefined) event.image = image;
       if (status) event.status = status;
     }

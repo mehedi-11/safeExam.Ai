@@ -14,6 +14,7 @@ const StudentEvents = () => {
   
   const [regForm, setRegForm] = useState({ name: '', email: '', phone: '' });
   const [emailError, setEmailError] = useState("");
+  const [formError, setFormError] = useState("");
 
   const navigate = useNavigate();
 
@@ -45,6 +46,7 @@ const StudentEvents = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setEmailError("");
+    setFormError("");
 
     if (!regForm.email.includes('@')) {
       setEmailError("Invalid email. An '@' symbol is required.");
@@ -57,7 +59,7 @@ const StudentEvents = () => {
       setIsSuccessModalOpen(true);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to register');
+      setFormError(err.response?.data?.message || 'Failed to register');
     }
   };
 
@@ -78,13 +80,12 @@ const StudentEvents = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((evt) => {
-            const isEnded = evt.end_date && new Date(evt.end_date) < new Date();
             return (
               <div key={evt._id} className="card-hover p-6 flex flex-col justify-between h-full bg-white relative cursor-pointer" onClick={() => navigate(`/event/${evt._id}`)}>
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isEnded ? 'bg-gray-100 text-gray-500' : 'bg-tomato-100 text-tomato-700'}`}>
-                      {isEnded ? 'ENDED' : 'LIVE'}
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-tomato-100 text-tomato-700`}>
+                      LIVE
                     </span>
                   </div>
                   {evt.image && (
@@ -97,39 +98,34 @@ const StudentEvents = () => {
                   <div className="space-y-2 mb-6">
                     <div className="flex items-center text-sm text-gray-500 gap-2">
                       <Clock size={16} className="text-tomato-400" />
-                      <span><strong className="font-semibold text-gray-700">Starts:</strong> {new Date(evt.event_date).toLocaleString()}</span>
+                      <span><strong className="font-semibold text-gray-700">Exam Time:</strong> {new Date(evt.event_date).toLocaleString()}</span>
                     </div>
-                    {evt.end_date && (
-                      <div className="flex items-center text-sm text-gray-500 gap-2">
-                        <Clock size={16} className="text-red-500" />
-                        <span><strong className="font-semibold text-gray-700">Ends:</strong> {new Date(evt.end_date).toLocaleString()}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  {!isEnded ? (
-                    <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        setSelectedEventId(evt._id); 
-                        setRegForm({ name: '', email: '', phone: '' });
-                        setEmailError("");
-                        setIsRegisterModalOpen(true); 
-                      }}
-                      className="flex-1 bg-tomato-500 hover:bg-tomato-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
-                    >
-                      <UserCheck size={14} /> Register Now
-                    </button>
-                  ) : (
-                    <button 
-                      className="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm font-bold cursor-not-allowed flex justify-center items-center gap-1"
-                      disabled
-                    >
-                      Event Ended
-                    </button>
-                  )}
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setSelectedEventId(evt._id); 
+                      const userStr = localStorage.getItem('user');
+                      let userName = '', userEmail = '';
+                      if (userStr) {
+                        try {
+                          const user = JSON.parse(userStr);
+                          userName = user.name || '';
+                          userEmail = user.email || '';
+                        } catch (e) {}
+                      }
+                      setRegForm({ name: userName, email: userEmail, phone: '' });
+                      setEmailError("");
+                      setFormError("");
+                      setIsRegisterModalOpen(true); 
+                    }}
+                    className="flex-1 bg-tomato-500 hover:bg-tomato-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
+                  >
+                    <UserCheck size={14} /> Register Now
+                  </button>
                 </div>
               </div>
             );
@@ -142,17 +138,24 @@ const StudentEvents = () => {
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
           <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-xs font-semibold flex items-start gap-2 border border-yellow-200">
             <Info size={16} className="mt-0.5 shrink-0" />
-            <p>Please use your original email. A security code will be sent to this email which is required to log into the event exam.</p>
+            <p>Please use your original email. A security code will be sent to this email when the exam is created, which is required to log into the event exam.</p>
           </div>
+
+          {formError && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-xs font-semibold border border-red-200 text-center">
+              {formError}
+            </div>
+          )}
           
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
+              readOnly
               value={regForm.name} 
               onChange={e => setRegForm({...regForm, name: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm cursor-not-allowed text-gray-500 focus:outline-none" 
               placeholder="e.g. John Doe"
             />
           </div>
@@ -162,22 +165,22 @@ const StudentEvents = () => {
             <input 
               type="text" 
               required 
+              readOnly
               value={regForm.email} 
               onChange={e => {
                 setRegForm({...regForm, email: e.target.value});
                 if(emailError) setEmailError("");
               }} 
-              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-tomato-500'}`} 
+              className={`w-full px-4 py-2 bg-gray-100 border rounded-xl text-sm cursor-not-allowed text-gray-500 focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200'}`} 
               placeholder="johndoe@example.com"
             />
             {emailError && <p className="text-red-500 text-xs font-bold mt-1">{emailError}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number <span className="text-red-500 ml-1">*</span></label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number</label>
             <input 
               type="tel" 
-              required 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
               className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
@@ -201,7 +204,7 @@ const StudentEvents = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Registration Successful!</h2>
           <p className="text-gray-500 max-w-sm mx-auto">
-            Please check your email. A <strong>security code</strong> has been sent to <span className="font-semibold text-gray-900">{regForm.email}</span>. You will need this code to login to the event exam.
+            Your registration is complete! A <strong>security code</strong> will be sent to <span className="font-semibold text-gray-900">{regForm.email}</span> when the exam is created. You will need this code to login to the event exam.
           </p>
           <button 
             onClick={() => {

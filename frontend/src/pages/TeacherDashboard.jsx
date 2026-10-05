@@ -1024,9 +1024,7 @@ export default function TeacherDashboard() {
                                 <ShieldCheck size={14} className="inline mr-1" /> Proctor
                               </button>
                             )}
-                            {exam.event_id ? (
-                              <span className="text-xs text-gray-500 italic">Auto-starts</span>
-                            ) : exam.is_live ? (
+                            {exam.is_live ? (
                               <button
                                 onClick={() => handleStopLive(exam.id)}
                                 className="px-3 py-1.5 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-xs font-bold transition-colors"

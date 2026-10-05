@@ -3,6 +3,7 @@ const Exam = require('../models/Exam');
 const StudentExam = require('../models/StudentExam');
 const StudentAnswer = require('../models/StudentAnswer');
 const ExamQuestion = require('../models/ExamQuestion');
+const Event = require('../models/Event');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -107,10 +108,22 @@ exports.requestEnrollment = async (req, res) => {
 exports.getExams = async (req, res) => {
   try {
     const rawExams = await Exam.find().lean();
+    const events = await Event.find().select('_id status event_date').lean();
     
-    // Auto expire live exams
+    // Auto expire live exams and auto-live event exams
     const now = new Date();
     const exams = rawExams.map(exam => {
+      if (!exam.is_live && exam.event_id) {
+        const associatedEvent = events.find(e => e._id.toString() === exam.event_id.toString());
+        if (associatedEvent && associatedEvent.status === 'live') {
+          const eventDate = new Date(associatedEvent.event_date);
+          if (now >= eventDate) {
+            exam.is_live = true;
+            exam.exam_date = eventDate;
+          }
+        }
+      }
+
       if (exam.is_live) {
         const examDate = new Date(exam.exam_date);
         const durationMs = (exam.duration_minutes + 5) * 60000;
@@ -203,7 +216,30 @@ exports.startExam = async (req, res) => {
     const examDetails = await Exam.findById(examId);
     if (!examDetails) return res.status(404).json({ message: 'Exam not found' });
 
+    const existingAttempts = await StudentExam.find({ student_id: req.user.id, exam_id: examId }).sort({ started_at: -1 });
+    
+    if (existingAttempts.length > 0) {
+      const latest = existingAttempts[0];
+      // If there's an ongoing attempt, allow resuming regardless of actualIsLive
+      if (latest.status !== 'completed' && latest.status !== 'finished') {
+        return res.json(latest);
+      }
+    }
+
+    // Checking is_live for NEW attempts
     let actualIsLive = examDetails.is_live;
+    
+    if (!actualIsLive && examDetails.event_id) {
+      const associatedEvent = await Event.findById(examDetails.event_id);
+      if (associatedEvent && associatedEvent.status === 'live') {
+        const eventDate = new Date(associatedEvent.event_date);
+        if (new Date() >= eventDate) {
+          actualIsLive = true;
+          examDetails.exam_date = eventDate; // for expiration check below
+        }
+      }
+    }
+
     if (actualIsLive) {
       const examDate = new Date(examDetails.exam_date);
       const durationMs = (examDetails.duration_minutes + 5) * 60000;
@@ -222,8 +258,6 @@ exports.startExam = async (req, res) => {
     }
 
     const max_attempts = examDetails.max_attempts || 1;
-
-    const existingAttempts = await StudentExam.find({ student_id: req.user.id, exam_id: examId }).sort({ started_at: -1 });
 
     if (existingAttempts.length > 0) {
       const latest = existingAttempts[0];
@@ -244,7 +278,6 @@ exports.startExam = async (req, res) => {
         
         return res.json(newAttempt);
       }
-      return res.json(latest);
     }
 
     const newAttempt = new StudentExam({

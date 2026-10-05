@@ -162,7 +162,7 @@ export default function ModelTest() {
               disabled={!modelReady}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
                 modelReady 
-                  ? "bg-gray-50 text-white hover:bg-gray-100 shadow-dark-900/20" 
+                  ? "bg-gray-900 text-white hover:bg-gray-800 shadow-dark-900/20" 
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
             >

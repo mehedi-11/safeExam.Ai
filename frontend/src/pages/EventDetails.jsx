@@ -16,6 +16,7 @@ const EventDetails = () => {
   
   const [regForm, setRegForm] = useState({ name: '', email: '', phone: '' });
   const [emailError, setEmailError] = useState("");
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     fetchEventDetails();
@@ -36,6 +37,7 @@ const EventDetails = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setEmailError("");
+    setFormError("");
 
     if (!regForm.email.includes('@')) {
       setEmailError("Invalid email. An '@' symbol is required.");
@@ -49,7 +51,7 @@ const EventDetails = () => {
       setIsSuccessModalOpen(true);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to register');
+      setFormError(err.response?.data?.message || 'Failed to register');
     }
   };
 
@@ -137,8 +139,18 @@ const EventDetails = () => {
               <p className="text-gray-500 text-sm mb-4">Secure your spot for this event by registering now.</p>
               <button 
                 onClick={() => {
-                  setRegForm({ name: '', email: '', phone: '' });
+                  const userStr = localStorage.getItem('user');
+                  let userName = '', userEmail = '';
+                  if (userStr) {
+                    try {
+                      const user = JSON.parse(userStr);
+                      userName = user.name || '';
+                      userEmail = user.email || '';
+                    } catch (e) {}
+                  }
+                  setRegForm({ name: userName, email: userEmail, phone: '' });
                   setEmailError("");
+                  setFormError("");
                   setIsRegisterModalOpen(true);
                 }}
                 className="bg-tomato-500 hover:bg-tomato-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm transition-colors inline-flex items-center gap-2"
@@ -155,17 +167,24 @@ const EventDetails = () => {
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
           <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-xs font-semibold flex items-start gap-2 border border-yellow-200">
             <Info size={16} className="mt-0.5 shrink-0" />
-            <p>Please use your original email. A security code will be sent to this email which is required to log into the event exam.</p>
+            <p>Please use your original email. A security code will be sent to this email when the exam is created, which is required to log into the event exam.</p>
           </div>
+
+          {formError && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-xs font-semibold border border-red-200 text-center">
+              {formError}
+            </div>
+          )}
           
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Full Name <span className="text-red-500 ml-1">*</span></label>
             <input 
               type="text" 
               required 
+              readOnly
               value={regForm.name} 
               onChange={e => setRegForm({...regForm, name: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm cursor-not-allowed text-gray-500 focus:outline-none" 
               placeholder="e.g. John Doe"
             />
           </div>
@@ -175,22 +194,22 @@ const EventDetails = () => {
             <input 
               type="text" 
               required 
+              readOnly
               value={regForm.email} 
               onChange={e => {
                 setRegForm({...regForm, email: e.target.value});
                 if(emailError) setEmailError("");
               }} 
-              className={`w-full px-4 py-2 bg-gray-50 border rounded-xl text-sm focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-tomato-500'}`} 
+              className={`w-full px-4 py-2 bg-gray-100 border rounded-xl text-sm cursor-not-allowed text-gray-500 focus:outline-none transition-colors ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-200'}`} 
               placeholder="johndoe@example.com"
             />
             {emailError && <p className="text-red-500 text-xs font-bold mt-1">{emailError}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number <span className="text-red-500 ml-1">*</span></label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phone Number</label>
             <input 
               type="tel" 
-              required 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
               className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
@@ -214,7 +233,7 @@ const EventDetails = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Registration Successful!</h2>
           <p className="text-gray-500 max-w-sm mx-auto">
-            Please check your email. A <strong>security code</strong> has been sent to <span className="font-semibold text-gray-900">{regForm.email}</span>. You will need this code to login to the event exam.
+            Your registration is complete! A <strong>security code</strong> will be sent to <span className="font-semibold text-gray-900">{regForm.email}</span> when the exam is created. You will need this code to login to the event exam.
           </p>
           <button 
             onClick={() => setIsSuccessModalOpen(false)} 

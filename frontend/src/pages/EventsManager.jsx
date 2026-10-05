@@ -13,6 +13,20 @@ const EventsManager = ({ isAdmin = false }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
   
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'align': [] }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ],
+  };
+  
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
   const [selectedEventRegistrations, setSelectedEventRegistrations] = useState([]);
   const [registrationsLoading, setRegistrationsLoading] = useState(false);
@@ -22,7 +36,6 @@ const EventsManager = ({ isAdmin = false }) => {
     title: '', 
     description: '', 
     event_date: '', 
-    end_date: '', 
     image: '',
     status: 'live'
   });
@@ -59,23 +72,26 @@ const EventsManager = ({ isAdmin = false }) => {
     }
   };
 
+  const formatLocalDatetime = (dateString) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const openCreateModal = () => {
     setEditingEventId(null);
-    setFormData({ title: '', description: '', event_date: '', end_date: '', image: '', status: 'live' });
+    setFormData({ title: '', description: '', event_date: '', image: '', status: 'live' });
     setIsModalOpen(true);
   };
 
   const openEditModal = (evt) => {
     setEditingEventId(evt._id);
     
-    const startDate = evt.event_date ? new Date(evt.event_date).toISOString().slice(0, 16) : '';
-    const endDate = evt.end_date ? new Date(evt.end_date).toISOString().slice(0, 16) : '';
-
     setFormData({ 
       title: evt.title, 
       description: evt.description, 
-      event_date: startDate, 
-      end_date: endDate, 
+      event_date: formatLocalDatetime(evt.event_date),
       image: evt.image || '',
       status: evt.status || 'live'
     });
@@ -165,8 +181,7 @@ const EventsManager = ({ isAdmin = false }) => {
   const filteredEvents = events.filter((evt) => {
     const matchesSearch = evt.title.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const expired = evt.end_date && new Date() > new Date(evt.end_date);
-    const isActive = evt.status === 'live' && !expired;
+    const isActive = evt.status === 'live';
 
     let matchesFilter = false;
     if (eventFilter === "all") matchesFilter = true;
@@ -271,8 +286,7 @@ const EventsManager = ({ isAdmin = false }) => {
               </tr>
             ) : (
               filteredEvents.map((evt) => {
-                const expired = evt.end_date && new Date() > new Date(evt.end_date);
-                const isActive = evt.status === 'live' && !expired;
+                const isActive = evt.status === 'live';
 
                 return (
                 <tr
@@ -293,14 +307,6 @@ const EventsManager = ({ isAdmin = false }) => {
                   </td>
                   <td className="py-3 px-4 text-xs text-gray-500">
                     {new Date(evt.event_date).toLocaleString()}
-                    {evt.end_date && (
-                      <>
-                        <br />
-                        <span className="text-gray-500">
-                          Ends: {new Date(evt.end_date).toLocaleString()}
-                        </span>
-                      </>
-                    )}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <button 
@@ -316,16 +322,12 @@ const EventsManager = ({ isAdmin = false }) => {
                     <div className="flex items-center">
                       <button
                         onClick={() => {
-                          if (expired) {
-                            alert("Cannot activate an expired event. Please update the end date first.");
-                            return;
-                          }
                           handleToggleStatus(evt);
                         }}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                           isActive ? 'bg-tomato-500' : 'bg-gray-300'
-                        } ${expired ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        title={expired ? 'Event has expired' : `Toggle to ${isActive ? 'Inactive' : 'Active'}`}
+                        }`}
+                        title={`Toggle to ${isActive ? 'Inactive' : 'Active'}`}
                       >
                         <span className="sr-only">Toggle status</span>
                         <span
@@ -335,7 +337,7 @@ const EventsManager = ({ isAdmin = false }) => {
                         />
                       </button>
                       <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${isActive ? 'text-tomato-600' : 'text-gray-500'}`}>
-                        {expired ? 'Expired' : isActive ? 'Active' : 'Inactive'}
+                        {isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                   </td>
@@ -372,17 +374,11 @@ const EventsManager = ({ isAdmin = false }) => {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Description</label>
-            <ReactQuill theme="snow" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} className="bg-white rounded-xl quill-large" />
+            <ReactQuill theme="snow" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} modules={modules} className="bg-white rounded-xl quill-large" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Start Date & Time <span className="text-red-500 ml-1">*</span></label>
-              <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">End Date & Time <span className="text-red-500 ml-1">*</span></label>
-              <input type="datetime-local" required value={formData.end_date} onChange={e => setFormData({...formData, end_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Exam Time <span className="text-red-500 ml-1">*</span></label>
+            <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
           </div>
           
           <div>
