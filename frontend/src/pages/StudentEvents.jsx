@@ -122,7 +122,7 @@ const StudentEvents = () => {
                       setFormError("");
                       setIsRegisterModalOpen(true); 
                     }}
-                    className="flex-1 bg-tomato-500 hover:bg-tomato-600 text-white py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex justify-center items-center gap-1"
+                    className="flex-1 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white py-2 rounded-xl text-sm font-bold shadow-md shadow-gray-200/50 transition-colors flex justify-center items-center gap-1"
                   >
                     <UserCheck size={14} /> Register Now
                   </button>
@@ -183,13 +183,13 @@ const StudentEvents = () => {
               type="tel" 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 transition-colors" 
               placeholder="+8801XXXXXXXXX"
             />
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm">
+            <button type="submit" className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50">
               Submit Registration
             </button>
           </div>

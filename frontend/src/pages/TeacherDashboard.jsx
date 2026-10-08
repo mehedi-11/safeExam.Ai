@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import WelcomeHeader from "../components/WelcomeHeader";
+import TopMenu from "../components/TopMenu";
 import { useNavigate } from "react-router-dom";
 import api, { API_BASE_URL } from "../api/axiosConfig";
 import {
@@ -573,9 +574,9 @@ export default function TeacherDashboard() {
       {loading && <Loader />}
 
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-md shadow-gray-200/50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
           </div>
           <span className="font-extrabold text-md text-black">
@@ -600,7 +601,7 @@ export default function TeacherDashboard() {
         <div>
           {/* Brand Logo Header */}
           <div className="p-6 border-b border-gray-200 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+            <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
@@ -632,7 +633,7 @@ export default function TeacherDashboard() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id
-                    ? "bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
+                    ? "bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
                     : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
                 }`}
               >
@@ -663,7 +664,7 @@ export default function TeacherDashboard() {
               localStorage.clear();
               navigate("/");
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-gray-800 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -681,6 +682,7 @@ export default function TeacherDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
+        <TopMenu pageName={activeTab} />
         {activeTab === "dashboard" && <WelcomeHeader userName={profile?.name || profileName} />}
         {/* Header Summary Removed */}
         <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-4 mb-6">
@@ -688,16 +690,16 @@ export default function TeacherDashboard() {
 
             
             {activeTab === 'add_exam' && (
-              <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-sm">
+              <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-md shadow-gray-200/50">
                 <button
                   onClick={() => setExamCategoryFilter("academic")}
-                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-tomato-50 text-tomato-600 shadow-md shadow-gray-200/50 scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
                 >
                   Academic Exams
                 </button>
                 <button
                   onClick={() => setExamCategoryFilter("event")}
-                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-tomato-50 text-tomato-600 shadow-md shadow-gray-200/50 scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
                 >
                   Event Exams
                 </button>
@@ -708,27 +710,27 @@ export default function TeacherDashboard() {
 
         {/* Global Notifications */}
         {success && (
-          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <Check size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dynamic Panel */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
           {/* TAB: DASHBOARD */}
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-fade-in">
               {/* Dashboard Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center">
                     <FileText size={24} />
                   </div>
@@ -741,7 +743,7 @@ export default function TeacherDashboard() {
                     </h3>
                   </div>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center">
                     <FileQuestion size={24} />
                   </div>
@@ -754,7 +756,7 @@ export default function TeacherDashboard() {
                     </h3>
                   </div>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center">
                     <Activity size={24} />
                   </div>
@@ -775,7 +777,7 @@ export default function TeacherDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <button
                   onClick={() => setActiveTab("add_exam")}
-                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
                 >
                   <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center shrink-0">
                     <Plus size={24} />
@@ -789,7 +791,7 @@ export default function TeacherDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab("exam_results")}
-                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
                 >
                   <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center shrink-0">
                     <Award size={24} />
@@ -803,7 +805,7 @@ export default function TeacherDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab("logs")}
-                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
                 >
                   <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
                     <ShieldAlert size={24} />
@@ -837,28 +839,28 @@ export default function TeacherDashboard() {
                   <div className="flex flex-wrap bg-gray-100 p-1 rounded-lg w-full sm:w-max">
                     <button
                       onClick={() => setExamFilter("all")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "all" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       All
                     </button>
                     <button
                       onClick={() => setExamFilter("live")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1 flex-1 sm:flex-none ${examFilter === "live" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1 flex-1 sm:flex-none ${examFilter === "live" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       {examFilter === "live" && (
-                        <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                       )}
                       Live
                     </button>
                     <button
                       onClick={() => setExamFilter("upcoming")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "upcoming" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "upcoming" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       Upcoming
                     </button>
                     <button
                       onClick={() => setExamFilter("ended")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "ended" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "ended" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       Ended
                     </button>
@@ -872,7 +874,7 @@ export default function TeacherDashboard() {
                       placeholder="Search exams..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-full sm:w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-800 w-full sm:w-64 md:w-72 bg-white hover:bg-white transition-colors"
                     />
                   </div>
                   <button
@@ -980,7 +982,7 @@ export default function TeacherDashboard() {
                       return filteredExams.map((exam) => (
                         <tr
                           key={exam.id}
-                          className="border-b border-gray-100 hover:bg-gray-50"
+                          className="border-b border-gray-100 hover:bg-white"
                         >
                           <td className="py-3 px-4 font-bold text-sm text-gray-900">
                             {exam.title}
@@ -997,7 +999,7 @@ export default function TeacherDashboard() {
                             {new Date(exam.exam_date).toLocaleString()}
                           </td>
                           <td className="py-3 px-4 text-center">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-xs font-semibold text-gray-700">
                               <Clock size={12} className="text-gray-500" />
                               {exam.duration_minutes}m
                             </span>
@@ -1005,7 +1007,7 @@ export default function TeacherDashboard() {
                           <td className="py-3 px-4">
                             {exam.is_live ? (
                               <span className="px-2.5 py-1 bg-tomato-100 text-tomato-700 text-[10px] font-bold rounded-full flex items-center gap-1 w-max">
-                                <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
+                                <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                                 LIVE
                               </span>
                             ) : (
@@ -1121,7 +1123,7 @@ export default function TeacherDashboard() {
                         setExamResults([]);
                       }
                     }}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 transition-colors"
                   >
                     <option value="">-- Choose an Exam --</option>
                     {exams.map((e) => (
@@ -1148,7 +1150,7 @@ export default function TeacherDashboard() {
                       className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
                         isPublished 
                         ? "bg-gray-100 text-gray-700 hover:bg-dark-600" 
-                        : "bg-tomato-500 text-white shadow-md shadow-tomato-500/20 hover:bg-tomato-600"
+                        : "bg-gray-900 text-white shadow-md shadow-tomato-500/20 hover:bg-black"
                       }`}
                     >
                       {isPublished ? (
@@ -1167,7 +1169,7 @@ export default function TeacherDashboard() {
 
               {selectedResultExamId ? (
                 examResults.length === 0 ? (
-                  <div className="border border-dashed border-gray-200 bg-gray-50 py-12 rounded-xl text-center text-xs text-gray-500">
+                  <div className="border border-dashed border-gray-200 bg-white py-12 rounded-xl text-center text-xs text-gray-500">
                     No students have taken this exam yet.
                   </div>
                 ) : (
@@ -1196,7 +1198,7 @@ export default function TeacherDashboard() {
                         {examResults.map((res, index) => (
                           <tr
                             key={res.attempt_id || res.student_id || index}
-                            className="border-b border-gray-100 hover:bg-gray-50"
+                            className="border-b border-gray-100 hover:bg-white"
                           >
                             <td className="py-3 px-4">
                               <p className="font-bold text-sm text-gray-900">
@@ -1280,7 +1282,7 @@ export default function TeacherDashboard() {
                       placeholder="Search exams..."
                       value={proctoringSearchQuery}
                       onChange={(e) => setProctoringSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-800 w-64"
                     />
                     <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
                   </div>
@@ -1338,7 +1340,7 @@ export default function TeacherDashboard() {
                           const eId = exam._id || exam.id;
 
                           return (
-                            <tr key={eId} className="border-b border-gray-100 hover:bg-gray-50">
+                            <tr key={eId} className="border-b border-gray-100 hover:bg-white">
                               <td className="py-3 px-4 font-bold text-sm text-gray-900">
                                 {exam.title}
                                 {exam.event_id && (
@@ -1357,7 +1359,7 @@ export default function TeacherDashboard() {
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
                                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max uppercase tracking-wider">
-                                    <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                                     Online
                                   </span>
                                 ) : (
@@ -1411,7 +1413,7 @@ export default function TeacherDashboard() {
           {activeTab === "profile" && (
             <div className="max-w-4xl mx-auto animate-fade-in space-y-8">
               {/* Profile Card with Banner */}
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
+              <div className="bg-white rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100 overflow-hidden relative">
                 
                 {/* Gradient Banner */}
                 <div className="h-40 w-full bg-gradient-to-r from-tomato-500 via-tomato-400 to-tomato-600 relative">
@@ -1419,7 +1421,7 @@ export default function TeacherDashboard() {
                     <button
                       type="button"
                       onClick={() => setIsProfileModalOpen(true)}
-                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-md shadow-gray-200/50 flex items-center gap-2"
                     >
                       <Edit size={16} />
                       Edit Profile
@@ -1449,8 +1451,8 @@ export default function TeacherDashboard() {
                   {/* Info Cards Grid */}
                   <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Info Item */}
-                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
                         <Activity size={24} />
                       </div>
                       <div>
@@ -1459,8 +1461,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Info Item */}
-                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
                         <Calendar size={24} />
                       </div>
                       <div>
@@ -1471,8 +1473,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Info Item */}
-                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
                         <BookOpen size={24} />
                       </div>
                       <div>
@@ -1481,8 +1483,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Info Item */}
-                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
                         <Award size={24} />
                       </div>
                       <div>
@@ -1493,8 +1495,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Full Width Address Item */}
-                    <div className="md:col-span-2 bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform shrink-0">
+                    <div className="md:col-span-2 bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform shrink-0">
                         <MapPin size={24} />
                       </div>
                       <div>
@@ -1507,7 +1509,7 @@ export default function TeacherDashboard() {
               </div>
 
               {/* Password Section */}
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+              <div className="bg-white p-8 rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100">
                 <h4 className="font-bold text-sm text-gray-900 mb-6 flex items-center gap-1.5">
                   <Key size={16} className="text-tomato-400" />
                   <span>Update Password</span>
@@ -1528,7 +1530,7 @@ export default function TeacherDashboard() {
                         onChange={(e) =>
                           setPwData({ ...pwData, oldPassword: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
                       />
                       <button
                         type="button"
@@ -1557,7 +1559,7 @@ export default function TeacherDashboard() {
                         onChange={(e) =>
                           setPwData({ ...pwData, newPassword: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
                       />
                       <button
                         type="button"
@@ -1607,7 +1609,7 @@ export default function TeacherDashboard() {
                             type="text"
                             disabled
                             value={profile.id || ''}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200/50 rounded-xl text-sm text-gray-500 cursor-not-allowed opacity-70"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200/50 rounded-xl text-sm text-gray-500 cursor-not-allowed opacity-70"
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1620,7 +1622,7 @@ export default function TeacherDashboard() {
                               required
                               value={profileName}
                               onChange={(e) => setProfileName(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                             />
                           </div>
                           <div>
@@ -1632,7 +1634,7 @@ export default function TeacherDashboard() {
                               required
                               value={profileEmail}
                               onChange={(e) => setProfileEmail(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                             />
                           </div>
                           <div>
@@ -1643,7 +1645,7 @@ export default function TeacherDashboard() {
                               type="date"
                               value={profileDob}
                               onChange={(e) => setProfileDob(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                             />
                           </div>
                           <div>
@@ -1655,7 +1657,7 @@ export default function TeacherDashboard() {
                               min="0"
                               value={profileYearsOfExperience}
                               onChange={(e) => setProfileYearsOfExperience(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                             />
                           </div>
                         </div>
@@ -1669,7 +1671,7 @@ export default function TeacherDashboard() {
                             value={profileUniversity}
                             onChange={(e) => setProfileUniversity(e.target.value)}
                             placeholder="e.g. Dhaka University"
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                           />
                         </div>
 
@@ -1682,7 +1684,7 @@ export default function TeacherDashboard() {
                             value={profileAddress}
                             onChange={(e) => setProfileAddress(e.target.value)}
                             placeholder="Full address"
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                           ></textarea>
                         </div>
 
@@ -1690,7 +1692,7 @@ export default function TeacherDashboard() {
 
                         <button
                           type="submit"
-                          className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 smooth-transition shadow-sm"
+                          className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50"
                         >
                           Save Changes
                         </button>
@@ -1721,7 +1723,7 @@ export default function TeacherDashboard() {
               onChange={(e) =>
                 setExamForm({ ...examForm, title: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
             />
           </div>
           <div className="grid grid-cols-1 gap-4">
@@ -1739,7 +1741,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, duration_minutes: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
               />
             </div>
           </div>
@@ -1755,7 +1757,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, course_name: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
               />
             </div>
             <div>
@@ -1769,7 +1771,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, course_code: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
               />
             </div>
             <div>
@@ -1783,7 +1785,7 @@ export default function TeacherDashboard() {
                 onChange={(e) =>
                   setExamForm({ ...examForm, university_name: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
               />
             </div>
             <div>
@@ -1804,7 +1806,7 @@ export default function TeacherDashboard() {
                       e.target.value === "" ? "" : parseInt(e.target.value),
                   })
                 }
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
               />
             </div>
           </div>
@@ -1842,7 +1844,7 @@ export default function TeacherDashboard() {
                     title: selectedEvent ? selectedEvent.title : ""
                   });
                 }}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
               >
                 <option value="">-- Choose an Event --</option>
                 {eventsList.map(ev => (
@@ -1865,7 +1867,7 @@ export default function TeacherDashboard() {
                   onChange={(e) =>
                     setExamForm({ ...examForm, duration_minutes: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
                 />
               </div>
               <div>
@@ -1881,7 +1883,7 @@ export default function TeacherDashboard() {
                   onChange={(e) =>
                     setExamForm({ ...examForm, exam_password: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
                 />
               </div>
             </div>
@@ -1914,12 +1916,12 @@ export default function TeacherDashboard() {
               placeholder="e.g. Secret123"
               value={liveForm.password}
               onChange={(e) => setLiveForm({ password: e.target.value })}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition font-mono"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition font-mono"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2.5 mt-2 bg-tomato-500 hover:bg-tomato-600 text-white rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2"
+            className="w-full py-2.5 mt-2 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2"
           >
             <Play size={16} /> Start Live Exam Now
           </button>
@@ -1951,7 +1953,7 @@ export default function TeacherDashboard() {
               fetchQuestions(examForm.id);
               setIsManageQuestionsModalOpen(true);
             }}
-            className="w-full py-2.5 bg-tomato-500 hover:bg-tomato-600 text-white rounded-xl font-bold shadow-md transition-colors"
+            className="w-full py-2.5 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold shadow-md transition-colors"
           >
             Go to Set Questions
           </button>
@@ -2004,7 +2006,7 @@ export default function TeacherDashboard() {
           </div>
 
           {questions.length === 0 ? (
-            <div className="border border-dashed border-gray-200 bg-gray-50 py-12 rounded-xl text-center text-xs text-gray-500">
+            <div className="border border-dashed border-gray-200 bg-white py-12 rounded-xl text-center text-xs text-gray-500">
               No questions added to this exam yet.
             </div>
           ) : (
@@ -2018,7 +2020,7 @@ export default function TeacherDashboard() {
                   onDragEnd={handleSort}
                   onDragOver={(e) => e.preventDefault()}
                   className={`border border-gray-200 bg-white p-5 rounded-xl relative hover:border-gray-300 transition-colors flex gap-3 ${
-                    dragItemIndex === qidx ? "opacity-50 border-dashed border-gray-300 bg-gray-50" : ""
+                    dragItemIndex === qidx ? "opacity-50 border-dashed border-gray-300 bg-white" : ""
                   }`}
                 >
                   <div className="mt-1 cursor-grab active:cursor-grabbing text-gray-700 hover:text-gray-500">
@@ -2080,7 +2082,7 @@ export default function TeacherDashboard() {
                     )}
                     {q.type === "Written" && (
                       <div className="pl-20">
-                        <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-4 text-xs text-gray-500 italic">
+                        <div className="bg-white border border-dashed border-gray-200 rounded-lg p-4 text-xs text-gray-500 italic">
                           Students will type their answer in a text box.
                         </div>
                       </div>
@@ -2104,14 +2106,14 @@ export default function TeacherDashboard() {
           <button
             type="button"
             onClick={() => setQuestionTab("MCQ")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "MCQ" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "MCQ" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
           >
             MCQ
           </button>
           <button
             type="button"
             onClick={() => setQuestionTab("Written")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "Written" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "Written" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
           >
             Written
           </button>
@@ -2133,7 +2135,7 @@ export default function TeacherDashboard() {
                   question_text: e.target.value,
                 })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 h-20 resize-none smooth-transition"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 h-20 resize-none smooth-transition"
             />
           </div>
 
@@ -2153,7 +2155,7 @@ export default function TeacherDashboard() {
                   marks: e.target.value === "" ? "" : parseInt(e.target.value),
                 })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
             />
           </div>
 
@@ -2177,7 +2179,7 @@ export default function TeacherDashboard() {
                           [`option_${opt}`]: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-tomato-500 smooth-transition"
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-800 smooth-transition"
                     />
                   </div>
                 ))}
@@ -2196,7 +2198,7 @@ export default function TeacherDashboard() {
                       correct_option: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
                 >
                   <option value="A">Option A</option>
                   <option value="B">Option B</option>
@@ -2217,7 +2219,7 @@ export default function TeacherDashboard() {
       {isAnswersModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-up">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
               <div>
                 <h3 className="font-extrabold text-lg text-gray-900">
                   Answersheet: {selectedStudentForAnswers?.name}
@@ -2236,7 +2238,7 @@ export default function TeacherDashboard() {
               </div>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1 bg-gray-50">
+            <div className="p-6 overflow-y-auto flex-1 bg-white">
               {studentAnswers.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">
                   No answers recorded.
@@ -2246,7 +2248,7 @@ export default function TeacherDashboard() {
                   {studentAnswers.map((ans, idx) => (
                     <div
                       key={ans.answer_id}
-                      className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+                      className="bg-white border border-gray-200 rounded-xl p-5 shadow-md shadow-gray-200/50"
                     >
                       <div className="flex justify-between items-start gap-4 mb-4">
                         <div className="flex-1">
@@ -2281,7 +2283,7 @@ export default function TeacherDashboard() {
                                     : parseInt(e.target.value),
                               })
                             }
-                            className="w-full text-right px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500"
+                            className="w-full text-right px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-gray-800 focus:ring-1 focus:ring-tomato-500"
                             placeholder="-"
                           />
                         </div>
@@ -2353,7 +2355,7 @@ export default function TeacherDashboard() {
       {isStopExamModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col animate-scale-up">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
               <div>
                 <h3 className="font-extrabold text-lg text-gray-900">
                   Stop this exam?
@@ -2365,7 +2367,7 @@ export default function TeacherDashboard() {
                 Students will no longer be able to enter.
               </p>
             </div>
-            <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+            <div className="p-4 border-t border-gray-100 bg-white rounded-b-2xl flex justify-end gap-3">
               <button
                 onClick={() => {
                   setIsStopExamModalOpen(false);
@@ -2377,7 +2379,7 @@ export default function TeacherDashboard() {
               </button>
               <button
                 onClick={confirmStopLive}
-                className="px-5 py-2 rounded-xl font-bold bg-tomato-500 text-white hover:bg-tomato-600 shadow-lg shadow-tomato-500/30 transition-all"
+                className="px-5 py-2 rounded-xl font-bold bg-gray-900 text-white hover:bg-black shadow-lg shadow-tomato-500/30 transition-all"
               >
                 OK
               </button>
@@ -2397,7 +2399,7 @@ export default function TeacherDashboard() {
           {registrationsLoading ? (
             <div className="text-center py-10 text-gray-500 font-medium">Loading registrations...</div>
           ) : selectedEventRegistrations.length === 0 ? (
-            <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-xl border border-dashed border-gray-200">No registrations found.</div>
+            <div className="text-center py-10 text-gray-500 font-medium bg-white rounded-xl border border-dashed border-gray-200">No registrations found.</div>
           ) : (
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
@@ -2411,7 +2413,7 @@ export default function TeacherDashboard() {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {selectedEventRegistrations.map((reg) => (
-                      <tr key={reg._id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={reg._id} className="hover:bg-white transition-colors">
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-6">{reg.name}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.phone || 'N/A'}</td>
@@ -2444,7 +2446,7 @@ export default function TeacherDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -2456,7 +2458,7 @@ export default function TeacherDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
-                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-md shadow-gray-200/50' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
               </button>
             ))}

@@ -203,22 +203,22 @@ const EventsManager = ({ isAdmin = false }) => {
           <div className="flex bg-gray-100 p-1 rounded-lg">
             <button
               onClick={() => setEventFilter("all")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
             >
               All Events
             </button>
             <button
               onClick={() => setEventFilter("live")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
             >
               {eventFilter === "live" && (
-                <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
+                <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
               )}
               Active
             </button>
             <button
               onClick={() => setEventFilter("closed")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
             >
               Inactive
             </button>
@@ -231,7 +231,7 @@ const EventsManager = ({ isAdmin = false }) => {
               placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-800 w-64"
             />
             <Search
               className="absolute left-3 top-2.5 text-gray-500"
@@ -291,7 +291,7 @@ const EventsManager = ({ isAdmin = false }) => {
                 return (
                 <tr
                   key={evt._id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 hover:bg-white"
                 >
                   <td className="py-3 px-4">
                     {evt.image ? (
@@ -325,7 +325,7 @@ const EventsManager = ({ isAdmin = false }) => {
                           handleToggleStatus(evt);
                         }}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                          isActive ? 'bg-tomato-500' : 'bg-gray-300'
+                          isActive ? 'bg-gray-900' : 'bg-gray-300'
                         }`}
                         title={`Toggle to ${isActive ? 'Inactive' : 'Active'}`}
                       >
@@ -370,7 +370,7 @@ const EventsManager = ({ isAdmin = false }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Title <span className="text-red-500 ml-1">*</span></label>
-            <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
+            <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Description</label>
@@ -378,14 +378,14 @@ const EventsManager = ({ isAdmin = false }) => {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Exam Time <span className="text-red-500 ml-1">*</span></label>
-            <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition" />
+            <input type="datetime-local" required value={formData.event_date} onChange={e => setFormData({...formData, event_date: e.target.value})} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition" />
           </div>
           
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Event Image</label>
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors ${formData.image ? 'border-tomato-500 bg-tomato-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-200'}`}
+              className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors ${formData.image ? 'border-gray-800 bg-tomato-50' : 'border-gray-300 bg-white hover:bg-gray-200'}`}
             >
               {formData.image ? (
                 <div className="w-full h-full p-1 relative">
@@ -425,7 +425,7 @@ const EventsManager = ({ isAdmin = false }) => {
           {registrationsLoading ? (
             <div className="text-center py-10 text-gray-500 font-medium">Loading registrations...</div>
           ) : selectedEventRegistrations.length === 0 ? (
-            <div className="text-center py-10 text-gray-500 font-medium bg-gray-50 rounded-xl border border-dashed border-gray-200">No registrations found.</div>
+            <div className="text-center py-10 text-gray-500 font-medium bg-white rounded-xl border border-dashed border-gray-200">No registrations found.</div>
           ) : (
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
@@ -439,7 +439,7 @@ const EventsManager = ({ isAdmin = false }) => {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {selectedEventRegistrations.map((reg) => (
-                      <tr key={reg._id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={reg._id} className="hover:bg-white transition-colors">
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-6">{reg.name}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.phone || 'N/A'}</td>

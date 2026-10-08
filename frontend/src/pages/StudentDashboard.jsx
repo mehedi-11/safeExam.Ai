@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WelcomeHeader from "../components/WelcomeHeader";
+import TopMenu from "../components/TopMenu";
 import { useNavigate } from 'react-router-dom';
 import api, { API_BASE_URL } from '../api/axiosConfig';
 import StudentEvents from './StudentEvents';
@@ -197,9 +198,9 @@ export default function StudentDashboard() {
       {loading && <Loader />}
 
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-md shadow-gray-200/50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
           </div>
           <span className="font-extrabold text-md text-gray-900">SExam<span className="text-tomato-400">.AI</span></span>
@@ -221,7 +222,7 @@ export default function StudentDashboard() {
           {/* Brand Logo Header */}
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
@@ -257,7 +258,7 @@ export default function StudentDashboard() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id 
-                    ? 'bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in'
+                    ? 'bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
                 }`}
               >
@@ -284,7 +285,7 @@ export default function StudentDashboard() {
               localStorage.clear();
               navigate('/');
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-gray-800 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -302,26 +303,27 @@ export default function StudentDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
+        <TopMenu pageName={activeTab} />
         {activeTab === "dashboard" && <WelcomeHeader userName={user?.name || user?.username} />}
         {/* Header Summary Removed */}
 
         {/* Status Alerts */}
         {success && (
-          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <CheckCircle2 size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <ShieldAlert size={16} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dynamic Panel */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
           
           {/* TAB: DASHBOARD */}
           {activeTab === 'dashboard' && (() => {
@@ -387,7 +389,7 @@ export default function StudentDashboard() {
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Dashboard Overview</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
                     <div className="w-12 h-12 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center shrink-0">
                       <Play size={24} />
                     </div>
@@ -397,7 +399,7 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
                     <div className="w-12 h-12 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center shrink-0">
                       <CheckCircle2 size={24} />
                     </div>
@@ -407,7 +409,7 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
                     <div className="w-12 h-12 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center shrink-0">
                       <GraduationCap size={24} />
                     </div>
@@ -418,9 +420,9 @@ export default function StudentDashboard() {
                   </div>
                 </div>
 
-                <div className={`p-6 rounded-2xl border ${suggestionBg} mt-8 shadow-sm transition-colors duration-300`}>
+                <div className={`p-6 rounded-2xl border ${suggestionBg} mt-8 shadow-md shadow-gray-200/50 transition-colors duration-300`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-sm`}>
+                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-md shadow-gray-200/50`}>
                       <ShieldAlert size={20} className={suggestionColor} />
                     </div>
                     <div>
@@ -456,7 +458,7 @@ export default function StudentDashboard() {
                       
                       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
                         {subjectAverages.map(s => (
-                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-sm flex items-center gap-1.5 hover:border-tomato-500 transition-colors">
+                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-md shadow-gray-200/50 flex items-center gap-1.5 hover:border-gray-800 transition-colors">
                             <span className="truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
                             <span className={`px-1.5 py-0.5 rounded-md ${s.average >= 75 ? 'bg-tomato-100 text-tomato-700' : s.average < 50 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {s.average}%
@@ -478,13 +480,13 @@ export default function StudentDashboard() {
                       <button onClick={() => setActiveTab('results')} className="text-tomato-400 text-xs font-bold hover:underline">View All</button>
                     </div>
                     {completedExams.length === 0 ? (
-                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center text-xs text-gray-500">
+                      <div className="bg-white border border-gray-200 rounded-xl p-5 text-center text-xs text-gray-500">
                         No recent results.
                       </div>
                     ) : (
                       <div className="space-y-3">
                         {completedExams.sort((a, b) => new Date(b.finished_at) - new Date(a.finished_at)).slice(0, 3).map(exam => (
-                          <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+                          <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-md shadow-gray-200/50">
                             <div className="min-w-0 pr-4">
                               <h5 className="font-bold text-gray-900 text-sm truncate">{exam.title}</h5>
                               <p className="text-[11px] text-gray-500 mt-0.5">{new Date(exam.finished_at).toLocaleDateString()}</p>
@@ -510,7 +512,7 @@ export default function StudentDashboard() {
                                             .slice(0, 3);
                       if (upcoming.length === 0) {
                         return (
-                          <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center text-xs text-gray-500">
+                          <div className="bg-white border border-gray-200 rounded-xl p-5 text-center text-xs text-gray-500">
                             No upcoming exams scheduled.
                           </div>
                         );
@@ -518,7 +520,7 @@ export default function StudentDashboard() {
                       return (
                         <div className="space-y-3">
                           {upcoming.map(exam => (
-                            <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-sm">
+                            <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-md shadow-gray-200/50">
                               <div className="bg-tomato-50 border border-tomato-100 w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0">
                                 <span className="text-[10px] font-bold text-tomato-400 uppercase">{new Date(exam.exam_date).toLocaleString('default', { month: 'short' })}</span>
                                 <span className="text-lg font-black text-tomato-700 leading-none">{new Date(exam.exam_date).getDate()}</span>
@@ -572,8 +574,8 @@ export default function StudentDashboard() {
                 <div className="flex items-center gap-6">
                   <h3 className="text-lg font-bold text-gray-900">Available Exam Sittings</h3>
                   <div className="flex bg-gray-100 p-1 rounded-lg">
-                    <span className="px-4 py-1.5 text-xs font-bold bg-white text-gray-900 shadow-sm rounded-md flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
+                    <span className="px-4 py-1.5 text-xs font-bold bg-white text-gray-900 shadow-md shadow-gray-200/50 rounded-md flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                       Live Exams Only
                     </span>
                   </div>
@@ -589,20 +591,20 @@ export default function StudentDashboard() {
                       placeholder="Search by university, course name or code..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-gray-50 hover:bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                      className="w-full pl-10 pr-4 py-2 bg-white hover:bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-800 transition-colors"
                     />
                   </div>
                   <div className="flex items-center bg-gray-100 p-1 rounded-xl">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-md shadow-gray-200/50 text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
                       title="Grid View"
                     >
                       <LayoutGrid size={18} />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-md shadow-gray-200/50 text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
                       title="List View"
                     >
                       <List size={18} />
@@ -612,11 +614,11 @@ export default function StudentDashboard() {
               </div>
               
               {filteredExams.length === 0 ? (
-                <div className="border border-dashed border-gray-200 bg-gray-50/20 py-12 text-center text-xs text-gray-500 rounded-xl">
+                <div className="border border-dashed border-gray-200 bg-white/20 py-12 text-center text-xs text-gray-500 rounded-xl">
                   {searchQuery ? 'No exams match your search.' : 'There are no exams available at the moment.'}
                 </div>
               ) : viewMode === 'list' ? (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
                   <table className="w-full text-left text-sm text-gray-500">
                     <thead className="bg-tomato-50 text-xs text-tomato-800 uppercase border-b border-tomato-200">
                       <tr>
@@ -633,7 +635,7 @@ export default function StudentDashboard() {
                         const isBlocked = exam.block_until && new Date(exam.block_until) > new Date();
                         
                         return (
-                          <tr key={exam.unique_id || exam.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={exam.unique_id || exam.id} className="hover:bg-white transition-colors">
                             <td className="px-6 py-4">
                               <h4 className="font-bold text-gray-900">{exam.title}</h4>
                             </td>
@@ -762,11 +764,11 @@ export default function StudentDashboard() {
                 </div>
 
                 {completedExams.length === 0 ? (
-                  <div className="border border-dashed border-gray-200 bg-gray-50/20 py-12 text-center text-xs text-gray-500 rounded-xl">
+                  <div className="border border-dashed border-gray-200 bg-white/20 py-12 text-center text-xs text-gray-500 rounded-xl">
                     You haven't completed any exams yet.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
                     <table className="w-full text-left text-sm text-gray-500">
                       <thead className="bg-tomato-50 text-xs text-tomato-800 uppercase border-b border-tomato-200">
                         <tr>
@@ -781,7 +783,7 @@ export default function StudentDashboard() {
                           const isPublished = exam.results_published;
 
                           return (
-                            <tr key={exam.unique_id || exam.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={exam.unique_id || exam.id} className="hover:bg-white transition-colors">
                               <td className="px-6 py-4">
                                 <h4 className="font-bold text-gray-900">{exam.title}</h4>
                               </td>
@@ -800,7 +802,7 @@ export default function StudentDashboard() {
                               </td>
                               <td className="px-6 py-4 text-center">
                                 {isPublished ? (
-                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs font-bold shadow-md shadow-gray-200/50">
                                     {exam.score}
                                   </span>
                                 ) : (
@@ -824,7 +826,7 @@ export default function StudentDashboard() {
           {activeTab === "profile" && (
             <div className="max-w-4xl mx-auto animate-fade-in space-y-8">
               {/* Profile Card with Banner */}
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
+              <div className="bg-white rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100 overflow-hidden relative">
                 
                 {/* Gradient Banner */}
                 <div className="h-40 w-full bg-gradient-to-r from-tomato-500 via-tomato-400 to-tomato-600 relative">
@@ -832,7 +834,7 @@ export default function StudentDashboard() {
                     <button
                       type="button"
                       onClick={() => setIsProfileModalOpen(true)}
-                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-md shadow-gray-200/50 flex items-center gap-2"
                     >
                       <Edit size={16} />
                       Edit Profile
@@ -859,11 +861,11 @@ export default function StudentDashboard() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                       <div className="space-y-4">
-                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-100/50">
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Email Address</p>
                           <p className="text-gray-800 font-medium">{profile.email}</p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-100/50">
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Date of Birth</p>
                           <p className="text-gray-800 font-medium">
                             {profile.dob ? new Date(profile.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not provided'}
@@ -872,11 +874,11 @@ export default function StudentDashboard() {
                       </div>
                       
                       <div className="space-y-4">
-                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-100/50">
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">University / Institution</p>
                           <p className="text-gray-800 font-medium">{profile.university || 'Not provided'}</p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-100/50">
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Address</p>
                           <p className="text-gray-800 font-medium">{profile.address || 'Not provided'}</p>
                         </div>
@@ -887,7 +889,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* Password Section */}
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+              <div className="bg-white p-8 rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                   <KeyRound size={20} className="text-tomato-500" />
                   Security Options
@@ -901,7 +903,7 @@ export default function StudentDashboard() {
                         type={showOldPassword ? "text" : "password"} required placeholder="••••••••"
                         value={pwData.oldPassword}
                         onChange={e => setPwData({ ...pwData, oldPassword: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
                       />
                       <button
                         type="button"
@@ -919,7 +921,7 @@ export default function StudentDashboard() {
                         type={showNewPassword ? "text" : "password"} required placeholder="••••••••"
                         value={pwData.newPassword}
                         onChange={e => setPwData({ ...pwData, newPassword: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
                       />
                       <button
                         type="button"
@@ -969,7 +971,7 @@ export default function StudentDashboard() {
                     type="text"
                     disabled
                     value={profile.id || ''}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200/50 rounded-xl text-sm text-gray-500 cursor-not-allowed opacity-70"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200/50 rounded-xl text-sm text-gray-500 cursor-not-allowed opacity-70"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -982,7 +984,7 @@ export default function StudentDashboard() {
                       required
                       value={profileName}
                       onChange={(e) => setProfileName(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                   <div>
@@ -994,7 +996,7 @@ export default function StudentDashboard() {
                       required
                       value={profileEmail}
                       onChange={(e) => setProfileEmail(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                   <div>
@@ -1005,7 +1007,7 @@ export default function StudentDashboard() {
                       type="date"
                       value={profileDob}
                       onChange={(e) => setProfileDob(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                   <div>
@@ -1017,7 +1019,7 @@ export default function StudentDashboard() {
                       value={profileUniversity}
                       onChange={(e) => setProfileUniversity(e.target.value)}
                       placeholder="e.g. Dhaka University"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                 </div>
@@ -1031,7 +1033,7 @@ export default function StudentDashboard() {
                     value={profileAddress}
                     onChange={(e) => setProfileAddress(e.target.value)}
                     placeholder="Full address"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   ></textarea>
                 </div>
 
@@ -1039,7 +1041,7 @@ export default function StudentDashboard() {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 smooth-transition shadow-sm"
+                  className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50"
                 >
                   Save Changes
                 </button>
@@ -1054,7 +1056,7 @@ export default function StudentDashboard() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPasswordModalOpen(false)} />
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl z-10 overflow-hidden animate-fade-in flex flex-col">
-            <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+            <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-white">
               <h3 className="font-bold text-gray-900">Exam Verification</h3>
               <button onClick={() => setPasswordModalOpen(false)} className="text-gray-500 hover:text-tomato-400 text-2xl leading-none">&times;</button>
             </div>
@@ -1072,7 +1074,7 @@ export default function StudentDashboard() {
                 value={examPasswordInput}
                 onChange={e => setExamPasswordInput(e.target.value)}
                 placeholder="Required for live exams"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 smooth-transition"
+                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 smooth-transition"
                 autoFocus
               />
               <p className="text-[10px] text-gray-500 mt-2 text-center">Contact your instructor if you don't have the password.</p>
@@ -1108,7 +1110,7 @@ export default function StudentDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -1120,7 +1122,7 @@ export default function StudentDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
-                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-md shadow-gray-200/50' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
               </button>
             ))}

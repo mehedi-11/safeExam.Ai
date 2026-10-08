@@ -8,7 +8,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = "ma
   const modalContent = (
     <div className="modal-backdrop">
       <div className={`modal-content ${maxWidth} w-full relative`}>
-        <div className="flex justify-between items-center bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex justify-between items-center bg-white px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
           <button 
             type="button"

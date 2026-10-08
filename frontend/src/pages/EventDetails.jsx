@@ -55,13 +55,13 @@ const EventDetails = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading Details...</div>;
-  if (!event) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Event not found.</div>;
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center">Loading Details...</div>;
+  if (!event) return <div className="min-h-screen bg-white flex items-center justify-center">Event not found.</div>;
 
   const isEnded = event.end_date && new Date(event.end_date) < new Date();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
@@ -80,7 +80,7 @@ const EventDetails = () => {
 
       {/* Main Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
           <div className="flex justify-between items-start mb-6">
             <h2 className="text-2xl font-bold text-gray-900">{event.title}</h2>
             <span className={`px-3 py-1 ${isEnded ? 'bg-gray-100 text-gray-500' : 'bg-tomato-100 text-tomato-700'} rounded-full text-xs font-bold uppercase tracking-wider`}>
@@ -116,7 +116,7 @@ const EventDetails = () => {
         </div>
 
         {/* Registration Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm text-center">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50 text-center">
           {isRegistered ? (
             <div className="space-y-4">
               <div className="w-16 h-16 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -153,7 +153,7 @@ const EventDetails = () => {
                   setFormError("");
                   setIsRegisterModalOpen(true);
                 }}
-                className="bg-tomato-500 hover:bg-tomato-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm transition-colors inline-flex items-center gap-2"
+                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-gray-200/50 transition-colors inline-flex items-center gap-2"
               >
                 <UserCheck size={18} /> Register for Event
               </button>
@@ -212,13 +212,13 @@ const EventDetails = () => {
               type="tel" 
               value={regForm.phone} 
               onChange={e => setRegForm({...regForm, phone: e.target.value})} 
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors" 
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 transition-colors" 
               placeholder="+8801XXXXXXXXX"
             />
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-tomato-500 text-white rounded-xl font-bold hover:bg-tomato-600 transition-colors shadow-sm">
+            <button type="submit" className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50">
               Submit Registration
             </button>
           </div>

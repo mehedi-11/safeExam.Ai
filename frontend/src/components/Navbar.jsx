@@ -38,7 +38,7 @@ export default function Navbar() {
     <nav className="sticky top-0 bg-white border-b border-gray-100 z-40 px-6 py-4 flex justify-between items-center relative">
       <div className="w-[250px]">
         <Link to="/" className="flex items-center gap-2 group w-fit">
-          <span className="w-9 h-9 rounded-full bg-tomato-500 flex items-center justify-center text-white font-bold text-lg group-hover:scale-105 smooth-transition shadow-md shadow-tomato-200">
+          <span className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold text-lg group-hover:scale-105 smooth-transition shadow-md shadow-tomato-200">
             S
           </span>
           <span className="font-bold text-xl tracking-tight text-gray-900">
@@ -49,7 +49,7 @@ export default function Navbar() {
 
       {token && user.role ? (
         <div className="flex items-center gap-5">
-          <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 py-1.5 px-3 rounded-xl">
+          <div className="flex items-center gap-3 bg-white border border-gray-200 py-1.5 px-3 rounded-xl">
             {user.profile_image ? (
               <img 
                 src={`${API_BASE_URL}${user.profile_image}`} 
@@ -93,7 +93,7 @@ export default function Navbar() {
       {showContact && createPortal(
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-tomato-500 p-6 flex justify-between items-center text-white">
+            <div className="bg-gray-900 p-6 flex justify-between items-center text-white">
               <h2 className="text-2xl font-bold">Contact Us</h2>
               <button onClick={() => setShowContact(false)} className="hover:bg-white/20 p-2 rounded-full smooth-transition">
                 <X size={24} />
@@ -113,15 +113,15 @@ export default function Navbar() {
                 <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name <span className="text-red-500 ml-1">*</span></label>
-                    <input type="text" required placeholder="John Doe" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition" />
+                    <input type="text" required placeholder="John Doe" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
-                    <input type="email" required placeholder="john@example.com" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition" />
+                    <input type="email" required placeholder="john@example.com" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Message <span className="text-red-500 ml-1">*</span></label>
-                    <textarea required rows="4" placeholder="How can we help you?" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition resize-none"></textarea>
+                    <textarea required rows="4" placeholder="How can we help you?" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition resize-none"></textarea>
                   </div>
                   
                   <div className="flex gap-4 items-center pt-4 border-t border-gray-100">

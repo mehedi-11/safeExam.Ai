@@ -139,7 +139,7 @@ export default function ModelTest() {
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm text-xs font-bold text-gray-500">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white shadow-md shadow-gray-200/50 text-xs font-bold text-gray-500">
             {modelReady ? (
               <><ShieldCheck size={14} className="text-tomato-400" /> Model Ready</>
             ) : loadingModel ? (
@@ -152,7 +152,7 @@ export default function ModelTest() {
           {isCameraActive ? (
             <button
               onClick={stopCamera}
-              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition-all shadow-md shadow-gray-200/50"
             >
               <Square size={16} /> Stop Camera
             </button>
@@ -160,7 +160,7 @@ export default function ModelTest() {
             <button
               onClick={startCamera}
               disabled={!modelReady}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md shadow-gray-200/50 ${
                 modelReady 
                   ? "bg-gray-900 text-white hover:bg-gray-800 shadow-dark-900/20" 
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -175,19 +175,19 @@ export default function ModelTest() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Camera Preview */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm h-full flex flex-col">
+          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-md shadow-gray-200/50 h-full flex flex-col">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-1.5">
               <Camera size={14} className="text-tomato-400" />
               <span>Camera Monitor Preview</span>
               {isDetecting && (
                 <span className="flex h-2 w-2 relative ml-auto">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tomato-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-tomato-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gray-900"></span>
                 </span>
               )}
             </h4>
             
-            <div className="flex-1 w-full aspect-[4/3] bg-gray-50 rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
+            <div className="flex-1 w-full aspect-[4/3] bg-white rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
               <video 
                 ref={videoRef} 
                 autoPlay 
@@ -211,8 +211,8 @@ export default function ModelTest() {
 
         {/* Live Feed */}
         <div className="lg:col-span-1">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm h-[500px] flex flex-col overflow-hidden">
-            <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-md shadow-gray-200/50 h-[500px] flex flex-col overflow-hidden">
+            <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-white">
               <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
                 <Activity size={14} className="text-tomato-400" />
                 <span>Live Detection Feed</span>
@@ -227,7 +227,7 @@ export default function ModelTest() {
             
             <div 
               ref={logContainerRef}
-              className="flex-1 overflow-y-auto p-5 space-y-3 bg-gray-50/30"
+              className="flex-1 overflow-y-auto p-5 space-y-3 bg-white/30"
             >
               {detectedLog.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-500">
@@ -236,9 +236,9 @@ export default function ModelTest() {
                 </div>
               ) : (
                 detectedLog.map((log, i) => (
-                  <div key={i} className="bg-white border border-gray-200 p-3 rounded-xl shadow-sm animate-fade-in">
+                  <div key={i} className="bg-white border border-gray-200 p-3 rounded-xl shadow-md shadow-gray-200/50 animate-fade-in">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="text-[10px] font-mono text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-mono text-gray-500 bg-white px-2 py-0.5 rounded-md">
                         {log.time}
                       </span>
                     </div>

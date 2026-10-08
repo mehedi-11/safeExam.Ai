@@ -171,11 +171,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <div className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 relative overflow-hidden">
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-tomato-500"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900"></div>
 
           {/* Removed Back button */}
 
@@ -183,19 +183,19 @@ export default function Login() {
           <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
             <button 
               onClick={() => navigate('/login/admin')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'admin' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'admin' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Admin
             </button>
             <button 
               onClick={() => navigate('/login/teacher')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'teacher' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'teacher' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Teacher
             </button>
             <button 
               onClick={() => navigate('/login/student')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'student' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'student' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Student
             </button>
@@ -234,7 +234,7 @@ export default function Login() {
                       onChange={handleChange}
                       required
                       placeholder="e.g. STU1001"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function Login() {
                       onChange={handleChange}
                       required
                       placeholder="name@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                 </div>
@@ -276,7 +276,7 @@ export default function Login() {
                     onChange={handleChange}
                     required
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   />
                   <button
                     type="button"
@@ -313,7 +313,7 @@ export default function Login() {
                       onChange={(e) => { setResetIdentifier(e.target.value); setError(''); }}
                       required
                       placeholder={role === 'student' ? 'e.g. STU1001' : 'name@example.com'}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default function Login() {
                       onChange={(e) => { setEnteredOtp(e.target.value); setError(''); }}
                       required
                       placeholder="XXXXXX"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono tracking-widest text-center"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono tracking-widest text-center"
                     />
                   </div>
                 </div>
@@ -352,7 +352,7 @@ export default function Login() {
                       onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
                       required
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                     <button
                       type="button"

@@ -105,13 +105,13 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
 
       <div className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 relative overflow-hidden">
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-tomato-500"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900"></div>
 
           {/* Back button */}
           <button 
@@ -165,7 +165,7 @@ export default function Register() {
                       onChange={handleChange}
                       required
                       placeholder="e.g. STU1002"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. John Smith"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   />
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. john@student.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   />
                 </div>
               </div>
@@ -220,7 +220,7 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
                   />
                   <button
                     type="button"
@@ -256,7 +256,7 @@ export default function Register() {
                   onChange={(e) => setEnteredOtp(e.target.value.replace(/[^0-9]/g, ''))}
                   required
                   placeholder="123456"
-                  className="w-full text-center text-2xl tracking-[0.5em] py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:bg-white focus:border-tomato-500 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                  className="w-full text-center text-2xl tracking-[0.5em] py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
                 />
               </div>
 

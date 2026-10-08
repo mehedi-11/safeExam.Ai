@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import WelcomeHeader from "../components/WelcomeHeader";
+import TopMenu from "../components/TopMenu";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import {
@@ -411,9 +412,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {loading && <Loader />}
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-40 shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-40 shadow-md shadow-gray-200/50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-tomato-500 flex items-center justify-center text-white font-extrabold text-sm">
+          <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-extrabold text-sm">
             <LayoutDashboard size={16} />
           </div>
           <span className="font-extrabold text-md text-black">
@@ -428,12 +429,12 @@ export default function AdminDashboard() {
             >
               {isNotificationsOpen ? <X size={20} /> : <Bell size={20} />}
               {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tomato-500 rounded-full"></span>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gray-900 rounded-full"></span>
               )}
             </button>
             {isNotificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-white">
                   <span className="font-bold text-sm text-gray-900">Notifications</span>
                   <button
                     onClick={async () => {
@@ -481,7 +482,7 @@ export default function AdminDashboard() {
         <div>
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-tomato-500 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
                 <LayoutDashboard className="w-6 h-6" />
               </div>
               <div>
@@ -525,7 +526,7 @@ export default function AdminDashboard() {
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                     activeTab === tab.id
-                      ? "bg-tomato-500 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
+                      ? "bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
                       : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
                   }`}
                 >
@@ -538,7 +539,7 @@ export default function AdminDashboard() {
                       className={`text-[10px] px-2 py-0.5 rounded-full ${
                         activeTab === tab.id
                           ? "bg-white text-tomato-400"
-                          : "bg-tomato-500 text-white"
+                          : "bg-gray-900 text-white"
                       }`}
                     >
                       {unreadCount}
@@ -569,7 +570,7 @@ export default function AdminDashboard() {
               localStorage.clear();
               navigate("/");
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-tomato-500 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 hover:border-gray-800 hover:bg-tomato-50/10 hover:text-tomato-400 rounded-xl text-xs font-bold text-gray-500 transition-all active:scale-95"
           >
             <LogOut size={14} />
             <span>Sign Out</span>
@@ -586,25 +587,72 @@ export default function AdminDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
+        <TopMenu 
+          pageName={activeTab}
+          rightContent={
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-white relative transition-colors"
+              >
+                {isNotificationsOpen ? <X size={20} /> : <Bell size={20} />}
+                {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gray-900 rounded-full"></span>
+                )}
+              </button>
+              {isNotificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                  <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-white">
+                    <span className="font-bold text-sm text-gray-900">Notifications</span>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await api.put("/admin/notifications/mark-read");
+                          fetchData();
+                        } catch (err) {}
+                      }}
+                      className="text-[10px] font-bold text-tomato-400 hover:underline"
+                    >
+                      Mark all read
+                    </button>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto p-2 space-y-1">
+                    {notifications.slice(0, 10).map((n) => (
+                      <div
+                        key={n.id}
+                        className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-tomato-50 text-gray-900 font-semibold"}`}
+                      >
+                        {n.message}
+                      </div>
+                    ))}
+                    {notifications.length === 0 && (
+                      <p className="text-xs text-gray-500 p-2 text-center">No notifications</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          }
+        />
         {activeTab === "overview" && <WelcomeHeader />}
         {/* Header Summary Removed */}
 
         {success && (
-          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <ShieldCheck size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <ShieldAlert size={16} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dynamic Content Sections */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
           {/* TAB: EVENTS */}
           {activeTab === "events" && (
             <div className="animate-fade-in">
@@ -620,55 +668,12 @@ export default function AdminDashboard() {
                   <LayoutDashboard size={18} className="text-tomato-400" />
                   <span>System Statistics</span>
                 </h3>
-                <div className="hidden lg:flex items-center gap-3">
-                  <div className="relative" ref={notifRef}>
-                    <button
-                      onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                      className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 relative transition-colors"
-                    >
-                      {isNotificationsOpen ? <X size={18} /> : <Bell size={18} />}
-                      {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tomato-500 rounded-full"></span>
-                      )}
-                    </button>
-                    {isNotificationsOpen && (
-                      <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                        <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                          <span className="font-bold text-sm text-gray-900">Notifications</span>
-                          <button
-                            onClick={async () => {
-                              try {
-                                await api.put("/admin/notifications/mark-read");
-                                fetchData();
-                              } catch (err) {}
-                            }}
-                            className="text-[10px] font-bold text-tomato-400 hover:underline"
-                          >
-                            Mark all read
-                          </button>
-                        </div>
-                        <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                          {notifications.slice(0, 10).map((n) => (
-                            <div
-                              key={n.id}
-                              className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-tomato-50 text-gray-900 font-semibold"}`}
-                            >
-                              {n.message}
-                            </div>
-                          ))}
-                          {notifications.length === 0 && (
-                            <p className="text-xs text-gray-500 p-2 text-center">No notifications</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <div className="bg-tomato-50 border border-tomato-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="bg-tomato-500 text-white p-3 rounded-xl mb-3">
+                  <div className="bg-gray-900 text-white p-3 rounded-xl mb-3">
                     <Users size={24} />
                   </div>
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
@@ -680,7 +685,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="bg-tomato-50 border border-tomato-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="bg-tomato-500 text-white p-3 rounded-xl mb-3">
+                  <div className="bg-gray-900 text-white p-3 rounded-xl mb-3">
                     <UserCheck size={24} />
                   </div>
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
@@ -704,7 +709,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="bg-tomato-50 border border-tomato-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="bg-tomato-500 text-white p-3 rounded-xl mb-3">
+                  <div className="bg-gray-900 text-white p-3 rounded-xl mb-3">
                     <Check size={24} />
                   </div>
                   <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
@@ -747,7 +752,7 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topTeachers?.map((teacher, index) => (
-                          <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={teacher.id} className="hover:bg-white transition-colors">
                             <td className="px-6 py-4 font-semibold">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
@@ -791,7 +796,7 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topStudents?.map((student, index) => (
-                          <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={student.id} className="hover:bg-white transition-colors">
                             <td className="px-6 py-4 font-semibold">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
@@ -831,7 +836,7 @@ export default function AdminDashboard() {
                       System Analytics
                     </h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl">
+                      <div className="bg-white border border-gray-200 p-4 rounded-xl">
                         <h4 className="font-bold text-sm mb-4">
                           Exams Created (This Year)
                         </h4>
@@ -847,7 +852,7 @@ export default function AdminDashboard() {
                           </ResponsiveContainer>
                         </div>
                       </div>
-                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl">
+                      <div className="bg-white border border-gray-200 p-4 rounded-xl">
                         <h4 className="font-bold text-sm mb-4">
                           Proctoring Alerts Summary
                         </h4>
@@ -878,13 +883,13 @@ export default function AdminDashboard() {
                 <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
                   <button
                     onClick={() => setActiveUserTab("teachers")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-white shadow-sm text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-white shadow-md shadow-gray-200/50 text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
                   >
                     Teachers
                   </button>
                   <button
                     onClick={() => setActiveUserTab("students")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-sm text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-md shadow-gray-200/50 text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
                   >
                     Students
                   </button>
@@ -920,7 +925,7 @@ export default function AdminDashboard() {
                           placeholder="Search by ID or Name..."
                           value={studentSearch}
                           onChange={(e) => setStudentSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
                         />
                       </div>
                       <button
@@ -974,7 +979,7 @@ export default function AdminDashboard() {
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
+                        <tr className="bg-white border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
                           <th className="p-4">Student Info</th>
                           <th className="p-4">Email</th>
                           <th className="p-4 text-center">Exams Info</th>
@@ -995,7 +1000,7 @@ export default function AdminDashboard() {
                           .map((student) => (
                             <tr
                               key={student.id}
-                              className="hover:bg-gray-50"
+                              className="hover:bg-white"
                             >
                               <td className="p-4">
                                 <div className="font-bold text-gray-900">{student.name}</div>
@@ -1062,7 +1067,7 @@ export default function AdminDashboard() {
                           placeholder="Search by Name or Email..."
                           value={teacherSearch}
                           onChange={(e) => setTeacherSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
                         />
                       </div>
                       <button
@@ -1121,7 +1126,7 @@ export default function AdminDashboard() {
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
+                        <tr className="bg-white border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
                           <th className="p-4">Teacher Info</th>
                           <th className="p-4 text-center">Exams Info</th>
                           <th className="p-4">Joined Date</th>
@@ -1146,7 +1151,7 @@ export default function AdminDashboard() {
                             return (
                             <tr
                               key={teacher.id}
-                              className="hover:bg-gray-50"
+                              className="hover:bg-white"
                             >
                               <td className="p-4">
                                 <div className="font-bold text-gray-900">{teacher.name}</div>
@@ -1218,7 +1223,7 @@ export default function AdminDashboard() {
                       placeholder="Search exams..."
                       value={proctoringSearchQuery}
                       onChange={(e) => setProctoringSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64"
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-800 w-64"
                     />
                     <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
                   </div>
@@ -1276,7 +1281,7 @@ export default function AdminDashboard() {
                           const eId = exam._id || exam.id;
 
                           return (
-                            <tr key={eId} className="border-b border-gray-100 hover:bg-gray-50">
+                            <tr key={eId} className="border-b border-gray-100 hover:bg-white">
                               <td className="py-3 px-4 font-bold text-sm text-gray-900">
                                 {exam.title}
                                 {exam.event_id && (
@@ -1295,7 +1300,7 @@ export default function AdminDashboard() {
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
                                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
-                                    <span className="w-1.5 h-1.5 bg-tomato-500 rounded-full animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                                     Live Now
                                   </span>
                                 ) : isEnded ? (
@@ -1364,7 +1369,7 @@ export default function AdminDashboard() {
               </h4>
               <form
                 onSubmit={handleProfileSubmit}
-                className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-5"
+                className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5"
               >
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
@@ -1376,7 +1381,7 @@ export default function AdminDashboard() {
                     onChange={(e) =>
                       setProfile({ ...profile, name: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 transition-colors"
                   />
                 </div>
                 <div>
@@ -1389,7 +1394,7 @@ export default function AdminDashboard() {
                     onChange={(e) =>
                       setProfile({ ...profile, email: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 transition-colors"
                   />
                 </div>
                 <div>
@@ -1406,7 +1411,7 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setProfile({ ...profile, password: e.target.value })
                       }
-                      className="w-full px-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500 transition-colors"
+                      className="w-full px-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 transition-colors"
                     />
                     <button
                       type="button"
@@ -1451,14 +1456,14 @@ export default function AdminDashboard() {
                     placeholder="Search by Title or Teacher..."
                     value={allExamsSearch}
                     onChange={(e) => setAllExamsSearch(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-tomato-500 w-64 md:w-72 bg-gray-50 hover:bg-white transition-colors"
+                    className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-800 w-64 md:w-72 bg-white hover:bg-white transition-colors"
                   />
                 </div>
               </div>
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md shadow-gray-200/50">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="bg-gray-50 text-xs uppercase text-tomato-800 border-b border-gray-200">
+                    <thead className="bg-white text-xs uppercase text-tomato-800 border-b border-gray-200">
                       <tr>
                         <th className="px-6 py-4 font-bold">Exam Title</th>
                         <th className="px-6 py-4 font-bold">Teacher Name</th>
@@ -1477,7 +1482,7 @@ export default function AdminDashboard() {
                         });
                         return filteredExams.length > 0 ? (
                           filteredExams.map((exam) => (
-                            <tr key={exam.id || exam._id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={exam.id || exam._id} className="hover:bg-white transition-colors">
                               <td className="px-6 py-4 font-semibold text-gray-900">{exam.title}</td>
                               <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
                               <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
@@ -1528,7 +1533,7 @@ export default function AdminDashboard() {
               .map((teacher) => (
                 <div
                   key={teacher.id}
-                  className="flex justify-between items-center bg-gray-50 border border-gray-200 p-4 rounded-xl"
+                  className="flex justify-between items-center bg-white border border-gray-200 p-4 rounded-xl"
                 >
                   <div>
                     <h5 className="font-bold text-gray-900 text-sm">
@@ -1579,7 +1584,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setAdminForm({ ...adminForm, name: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-tomato-500 focus:outline-none"
+              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-gray-800 focus:outline-none"
             />
           </div>
           <div>
@@ -1594,7 +1599,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setAdminForm({ ...adminForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-tomato-500 focus:outline-none"
+              className="w-full px-3 py-2 border rounded-xl text-sm focus:border-gray-800 focus:outline-none"
             />
           </div>
           <div>
@@ -1610,7 +1615,7 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setAdminForm({ ...adminForm, password: e.target.value })
                 }
-                className="w-full px-3 pr-10 py-2 border rounded-xl text-sm focus:border-tomato-500 focus:outline-none"
+                className="w-full px-3 pr-10 py-2 border rounded-xl text-sm focus:border-gray-800 focus:outline-none"
               />
               <button
                 type="button"
@@ -1645,7 +1650,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setStudentForm({ ...studentForm, id: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
             />
           </div>
           <div>
@@ -1660,7 +1665,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setStudentForm({ ...studentForm, name: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
             />
           </div>
           <div>
@@ -1675,7 +1680,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setStudentForm({ ...studentForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
             />
           </div>
           <div>
@@ -1691,7 +1696,7 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setStudentForm({ ...studentForm, password: e.target.value })
                 }
-                className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+                className="w-full px-3 pr-10 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
               />
               <button
                 type="button"
@@ -1729,7 +1734,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setTeacherForm({ ...teacherForm, name: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
             />
           </div>
           <div>
@@ -1744,7 +1749,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setTeacherForm({ ...teacherForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
             />
           </div>
           <div>
@@ -1760,7 +1765,7 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setTeacherForm({ ...teacherForm, password: e.target.value })
                 }
-                className="w-full px-3 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-tomato-500"
+                className="w-full px-3 pr-10 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800"
               />
               <button
                 type="button"
@@ -1802,7 +1807,7 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {studentExamDetails.map((exam, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
+                    <tr key={idx} className="hover:bg-white">
                       <td className="px-4 py-3 font-semibold text-gray-900">{exam.title}</td>
                       <td className="px-4 py-3 text-xs">{new Date(exam.finished_at).toLocaleDateString()}</td>
                       <td className="px-4 py-3 text-right font-bold text-tomato-400">{exam.score}%</td>
@@ -1837,7 +1842,7 @@ export default function AdminDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-tomato-500 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
+              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -1849,7 +1854,7 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
-                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-sm' : ''}`} />
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-md shadow-gray-200/50' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
               </button>
             ))}
