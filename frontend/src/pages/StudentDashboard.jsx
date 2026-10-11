@@ -64,6 +64,7 @@ export default function StudentDashboard() {
       localStorage.removeItem(blockKey);
       setPasswordModalOpen(false);
       sessionStorage.setItem(`exam_pwd_${selectedExamId}`, examPasswordInput);
+      localStorage.setItem(`exam_pwd_${selectedExamId}`, examPasswordInput);
       window.open(`/exam/${selectedExamId}`, '_blank');
     } catch (err) {
       if (err.response?.status === 403 || err.response?.status === 404) {
@@ -620,8 +621,8 @@ export default function StudentDashboard() {
               ) : viewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
                   <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="bg-tomato-50 text-xs text-tomato-800 uppercase border-b border-tomato-200">
-                      <tr>
+                    <thead className="clay-header text-xs text-tomato-800 uppercase border-b border-tomato-200">
+                      <tr className="border-b border-tomato-200">
                         <th className="px-6 py-4 font-bold">Exam Title</th>
                         <th className="px-6 py-4 font-bold">Course Details</th>
                         <th className="px-6 py-4 font-bold">Schedule</th>
@@ -770,8 +771,8 @@ export default function StudentDashboard() {
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="bg-tomato-50 text-xs text-tomato-800 uppercase border-b border-tomato-200">
-                        <tr>
+                      <thead className="clay-header text-xs text-tomato-800 uppercase border-b border-tomato-200">
+                        <tr className="border-b border-tomato-200">
                           <th className="px-6 py-4 font-bold">Exam Title</th>
                           <th className="px-6 py-4 font-bold">Course Details</th>
                           <th className="px-6 py-4 font-bold">Completed On</th>

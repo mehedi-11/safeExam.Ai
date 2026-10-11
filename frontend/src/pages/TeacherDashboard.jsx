@@ -36,6 +36,8 @@ import {
   LayoutDashboard,
   Search,
   GripVertical,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import Loader from "../components/Loader";
@@ -729,44 +731,124 @@ export default function TeacherDashboard() {
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-fade-in">
               {/* Dashboard Statistics */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center">
-                    <FileText size={24} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                      Total Exams
-                    </p>
-                    <h3 className="text-2xl font-extrabold text-gray-900">
-                      {exams.length}
-                    </h3>
+              <div className="space-y-6 mb-8">
+                <div>
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <FileText size={16} className="text-tomato-500" />
+                    <span>Examination Metrics</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                        <FileText size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                          Total Exams
+                        </p>
+                        <h3 className="text-2xl font-black text-gray-900 mt-0.5">
+                          {exams.length}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                        <FileQuestion size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                          Total Questions
+                        </p>
+                        <h3 className="text-2xl font-black text-gray-900 mt-0.5">
+                          {exams.reduce((sum, e) => sum + e.questions_count, 0)}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                        <Activity size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                          Submissions
+                        </p>
+                        <h3 className="text-2xl font-black text-gray-900 mt-0.5">
+                          {exams.reduce((sum, e) => sum + e.submissions_count, 0)}
+                        </h3>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center">
-                    <FileQuestion size={24} />
+
+                {/* Teacher Event Statistics Row */}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <Calendar size={16} className="text-tomato-500" />
+                      <span>My Events & Community Overview</span>
+                    </h4>
+                    <button
+                      onClick={() => setActiveTab("events")}
+                      className="text-xs font-bold text-tomato-600 hover:text-tomato-700 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      Manage My Events &rarr;
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                      Total Questions
-                    </p>
-                    <h3 className="text-2xl font-extrabold text-gray-900">
-                      {exams.reduce((sum, e) => sum + e.questions_count, 0)}
-                    </h3>
-                  </div>
-                </div>
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center">
-                    <Activity size={24} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                      Submissions
-                    </p>
-                    <h3 className="text-2xl font-extrabold text-gray-900">
-                      {exams.reduce((sum, e) => sum + e.submissions_count, 0)}
-                    </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                        <Calendar size={22} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                          Events Created
+                        </p>
+                        <h3 className="text-2xl font-black text-gray-900 mt-0.5">
+                          {eventsList.length}
+                        </h3>
+                        <p className="text-[11px] text-gray-500 mt-0.5 font-medium">
+                          {eventsList.filter((e) => e.status === "live").length} active &bull; {eventsList.filter((e) => e.status === "closed").length} closed
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                        <Sparkles size={22} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                          Live Active Events
+                        </p>
+                        <h3 className="text-2xl font-black text-gray-900 mt-0.5 flex items-center gap-2">
+                          {eventsList.filter((e) => e.status === "live").length}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            LIVE
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-emerald-700 font-medium mt-0.5 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Open for registrations
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                        <Users size={22} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">
+                          Total Event Registrations
+                        </p>
+                        <h3 className="text-2xl font-black text-gray-900 mt-0.5">
+                          {eventsList.reduce((sum, e) => sum + (e.registration_count || 0), 0)}
+                        </h3>
+                        <p className="text-[11px] text-indigo-600 font-medium mt-0.5">
+                          Registered student attendees
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -774,46 +856,60 @@ export default function TeacherDashboard() {
               <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">
                 Quick Links
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <button
                   onClick={() => setActiveTab("add_exam")}
-                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md flex items-center gap-4 hover:border-tomato-300 transition-all text-left cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center shrink-0 border border-tomato-100">
                     <Plus size={24} />
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900">Create New Exam</h4>
                     <p className="text-xs text-gray-500 mt-1">
-                      Set up a new examination with proctoring.
+                      Set up an exam with proctoring.
                     </p>
                   </div>
                 </button>
                 <button
                   onClick={() => setActiveTab("exam_results")}
-                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md flex items-center gap-4 hover:border-tomato-300 transition-all text-left cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center shrink-0 border border-tomato-100">
                     <Award size={24} />
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900">View Results</h4>
                     <p className="text-xs text-gray-500 mt-1">
-                      Check grades and submissions for exams.
+                      Check grades and submissions.
                     </p>
                   </div>
                 </button>
                 <button
                   onClick={() => setActiveTab("logs")}
-                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4 hover:border-tomato-300 transition-colors text-left"
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md flex items-center gap-4 hover:border-tomato-300 transition-all text-left cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 border border-red-100">
                     <ShieldAlert size={24} />
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900">Proctor Alerts</h4>
                     <p className="text-xs text-gray-500 mt-1">
-                      Review live cheating alerts and activity.
+                      Review live cheating alerts.
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab("events")}
+                  className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md flex items-center gap-4 hover:border-tomato-300 transition-all text-left cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+                    <Calendar size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">Manage Events</h4>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {eventsList.length} events &bull; {eventsList.reduce((sum, e) => sum + (e.registration_count || 0), 0)} registrations
                     </p>
                   </div>
                 </button>
@@ -831,6 +927,64 @@ export default function TeacherDashboard() {
           {/* TAB: ADD EXAM */}
           {activeTab === "add_exam" && (
             <div className="space-y-6 animate-fade-in">
+              {/* Manage Exams Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{exams.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                      <FileText size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Created examinations</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Live Active</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5 flex items-center gap-1.5">
+                        {exams.filter(e => e.is_live).length}
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                      <Activity size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 mt-2 font-medium">Currently active for students</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Upcoming / Draft</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{exams.filter(e => !e.is_live).length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200">
+                      <Clock size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Scheduled & offline tests</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Question Bank</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{exams.reduce((sum, e) => sum + (e.questions_count || 0), 0)}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                      <FileQuestion size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-indigo-600 mt-2 font-medium">Total question items created</p>
+                </div>
+              </div>
+
               <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-2">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full xl:w-auto">
                   <h3 className="text-lg font-bold text-gray-900 whitespace-nowrap">
@@ -907,24 +1061,24 @@ export default function TeacherDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                    <tr className="border-b border-tomato-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
                         Exam Title
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
                         Course & University
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
                         Date & Time
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-center">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-center">
                         Duration
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
                         Status
                       </th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">
                         Actions
                       </th>
                     </tr>
@@ -1109,6 +1263,69 @@ export default function TeacherDashboard() {
           {/* TAB: EXAM RESULTS */}
           {activeTab === "exam_results" && (
             <div className="space-y-6 animate-fade-in">
+              {/* Results Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Submissions</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+                        {exams.reduce((sum, e) => sum + (e.submissions_count || 0), 0)}
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                      <FileText size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Across all your exams</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Active Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+                        {exams.filter(e => (e.submissions_count || 0) > 0).length}
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                      <Check size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 mt-2 font-medium">Exams with submissions</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Current Selection</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+                        {examResults.length}
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                      <Users size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-indigo-600 mt-2 font-medium">Submissions loaded</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-amber-50/40 border border-amber-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Selected Avg Score</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+                        {examResults.length > 0 ? (examResults.reduce((s, r) => s + (Number(r.score) || 0), 0) / examResults.length).toFixed(1) : "—"}
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center border border-amber-200">
+                      <Award size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-amber-700 mt-2 font-medium">Marks per submission</p>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between gap-4 border-b border-gray-200 pb-6 flex-wrap">
                 <div className="flex-1 w-full max-w-md">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">
@@ -1173,27 +1390,28 @@ export default function TeacherDashboard() {
                     No students have taken this exam yet.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
-                            Student
-                          </th>
-                          <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
-                            Status
-                          </th>
-                          <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
-                            Demerit Points
-                          </th>
-                          <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
-                            Marks
-                          </th>
-                          <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
+                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                          <tr className="border-b border-tomato-200">
+                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                              Student Name & ID
+                            </th>
+                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                              Status
+                            </th>
+                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                              Demerit Points
+                            </th>
+                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                              Marks / Score
+                            </th>
+                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
                       <tbody>
                         {examResults.map((res, index) => (
                           <tr
@@ -1253,6 +1471,7 @@ export default function TeacherDashboard() {
                       </tbody>
                     </table>
                   </div>
+                </div>
                 )
               ) : (
                 <div className="py-24 text-center text-xs text-gray-500">
@@ -1269,6 +1488,66 @@ export default function TeacherDashboard() {
           {/* TAB: PROCTORING */}
           {activeTab === "proctoring" && (
             <div className="space-y-6 animate-fade-in">
+              {/* Proctoring Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Monitored Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{exams.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                      <FileText size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Instructor exams covered</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Live Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5 flex items-center gap-1.5">
+                        {exams.filter(e => e.is_live).length}
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                      <Activity size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 mt-2 font-medium">Currently receiving proctor feed</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-red-50/40 border border-red-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Total Alerts</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{proctoringLogs.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center border border-red-200">
+                      <ShieldAlert size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-red-700 mt-2 font-medium">Flagged student behaviors</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">High Demerits</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+                        {proctoringLogs.filter(l => (l.demerit_points || 0) >= 5).length}
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                      <ShieldCheck size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-indigo-600 mt-2 font-medium">Critical anomaly logs</p>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div className="flex items-center gap-6">
                   <h3 className="text-lg font-bold text-gray-900">
@@ -1291,13 +1570,13 @@ export default function TeacherDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Exam Title</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Course & University</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Date & Time</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-center">Status</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">Actions</th>
+                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                    <tr className="border-b border-tomato-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Exam Title</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Course & University</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Date & Time</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-center">Status</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">Actions</th>
                     </tr>
                   </thead>
                     <tbody className="text-sm">
@@ -1412,6 +1691,38 @@ export default function TeacherDashboard() {
 
           {activeTab === "profile" && (
             <div className="max-w-4xl mx-auto animate-fade-in space-y-8">
+              {/* Profile Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Account Status</p>
+                  <h4 className="text-xl font-black text-emerald-600 mt-0.5 flex items-center gap-1.5">
+                    {profile?.status || "Approved"}
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  </h4>
+                  <p className="text-[11px] text-gray-500 mt-1 font-medium">Verified Instructor</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-tomato-50/30 border border-tomato-100 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-bold text-tomato-700 uppercase tracking-wider">Exams Conducted</p>
+                  <h4 className="text-xl font-black text-gray-900 mt-0.5">{exams.length}</h4>
+                  <p className="text-[11px] text-tomato-600 mt-1 font-medium">{exams.reduce((sum, e) => sum + (e.questions_count || 0), 0)} questions created</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Events Created</p>
+                  <h4 className="text-xl font-black text-gray-900 mt-0.5">{eventsList.length}</h4>
+                  <p className="text-[11px] text-indigo-600 mt-1 font-medium">{eventsList.reduce((sum, e) => sum + (e.registration_count || 0), 0)} attendee enrollments</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-amber-50/30 border border-amber-100 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Experience</p>
+                  <h4 className="text-xl font-black text-gray-900 mt-0.5">
+                    {profile?.years_of_experience ? `${profile.years_of_experience} Years` : "Faculty"}
+                  </h4>
+                  <p className="text-[11px] text-amber-700 mt-1 font-medium">{profile?.university || "Computer Science"}</p>
+                </div>
+              </div>
+
               {/* Profile Card with Banner */}
               <div className="bg-white rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100 overflow-hidden relative">
                 
@@ -2404,8 +2715,8 @@ export default function TeacherDashboard() {
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-tomato-50 text-tomato-800">
-                    <tr>
+                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                    <tr className="border-b border-tomato-200">
                       <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider sm:pl-6">Name</th>
                       <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Email</th>
                       <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Phone</th>

@@ -54,7 +54,8 @@ export default function TeacherProctoring() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => {
-              const role = localStorage.getItem("role");
+              const user = JSON.parse(localStorage.getItem("user") || "{}");
+              const role = user.role || localStorage.getItem("role");
               navigate(role === "admin" ? "/dashboard/admin" : "/dashboard/teacher");
             }}
             className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-tomato-400 smooth-transition"
@@ -127,12 +128,12 @@ export default function TeacherProctoring() {
             
             <div className="flex-1 overflow-y-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-tomato-50/80 text-tomato-800 sticky top-0 z-10 backdrop-blur-sm">
-                  <tr>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Student</th>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Time (Join - Submit)</th>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Demerits</th>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Status</th>
+                <thead className="clay-header text-tomato-800 border-b border-tomato-200 sticky top-0 z-10">
+                  <tr className="border-b border-tomato-200">
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Student</th>
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Time (Join - Submit)</th>
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Demerits</th>
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Status</th>
                   </tr>
                 </thead>
                 <tbody className="text-xs">
@@ -185,11 +186,11 @@ export default function TeacherProctoring() {
             
             <div className="flex-1 overflow-y-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-tomato-50/80 text-tomato-800 sticky top-0 z-10 backdrop-blur-sm">
-                    <tr>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Time</th>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Student</th>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-gray-200">Incident Detail</th>
+                  <thead className="clay-header text-tomato-800 border-b border-tomato-200 sticky top-0 z-10">
+                    <tr className="border-b border-tomato-200">
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Time</th>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Student</th>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Incident Detail</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs">

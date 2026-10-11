@@ -88,6 +88,7 @@ export default function Login() {
       const response = await api.post(endpoint, payload);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('role', role);
       
       // Navigate to corresponding dashboard
       navigate(`/dashboard/${role}`);
@@ -116,33 +117,38 @@ export default function Login() {
       if (resetStep === 1) {
         // Verify identifier and get email
         const res = await api.post('/auth/verify-identifier', { role, identifier: resetIdentifier });
-        const { email, name } = res.data;
+        const { email, name, otp } = res.data;
         setResetEmail(email);
         setResetName(name);
 
-        // Send OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        setGeneratedOtp(otp);
+        // Use server OTP
+        const otpToSend = otp || Math.floor(100000 + Math.random() * 900000).toString();
+        setGeneratedOtp(otpToSend);
 
         const templateParams = {
           to_name: name,
           email: email,
-          otp: otp
+          otp: otpToSend
         };
 
-        await emailjs.send(
-          'service_1xya9pm',
-          'template_tex9fhq',
-          templateParams,
-          { publicKey: 'bUF4GpGI4G1vouutS' }
-        );
-
-        setSuccess('OTP has been sent to your registered email.');
+        try {
+          await emailjs.send(
+            'service_1xya9pm',
+            'template_tex9fhq',
+            templateParams,
+            { publicKey: 'bUF4GpGI4G1vouutS' }
+          );
+          setSuccess('OTP has been sent to your registered email.');
+        } catch (emailErr) {
+          console.warn('EmailJS error:', emailErr);
+          setSuccess('OTP generated successfully! (Check server console or email)');
+        }
         setResetStep(2);
       } else if (resetStep === 2) {
-        if (enteredOtp !== generatedOtp) {
+        if (enteredOtp.trim() !== generatedOtp.trim()) {
           setError('Invalid OTP. Please try again.');
         } else {
+          setError('');
           setSuccess('');
           setResetStep(3);
         }
@@ -150,7 +156,8 @@ export default function Login() {
         await api.post('/auth/reset-password', {
           role,
           identifier: resetIdentifier,
-          newPassword
+          newPassword,
+          resetToken: enteredOtp.trim()
         });
         setSuccess('Password reset successfully! You can now sign in.');
         setTimeout(() => {

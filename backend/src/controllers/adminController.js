@@ -5,6 +5,7 @@ const Exam = require('../models/Exam');
 const AdminNotification = require('../models/AdminNotification');
 const SystemSetting = require('../models/SystemSetting');
 const Event = require('../models/Event');
+const EventRegistration = require('../models/EventRegistration');
 const StudentExam = require('../models/StudentExam');
 const ProctoringLog = require('../models/ProctoringLog');
 const bcrypt = require('bcryptjs');
@@ -131,8 +132,8 @@ exports.addTeacher = async (req, res) => {
 
 exports.updateTeacherStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; // 'approved', 'suspended', 'pending'
-  if (!['approved', 'suspended', 'pending'].includes(status)) {
+  const { status } = req.body;
+  if (!['active', 'approved', 'suspended', 'pending', 'blocked'].includes(status)) {
     return res.status(400).json({ message: 'Invalid status' });
   }
   try {
@@ -210,7 +211,7 @@ exports.addStudent = async (req, res) => {
 exports.updateStudentStatus = async (req, res) => {
   const { id } = req.params; // studentID
   const { status } = req.body;
-  if (!['approved', 'suspended', 'pending'].includes(status)) {
+  if (!['active', 'approved', 'suspended', 'pending', 'blocked'].includes(status)) {
     return res.status(400).json({ message: 'Invalid status' });
   }
   try {
@@ -295,6 +296,29 @@ exports.getDashboardStats = async (req, res) => {
     const totalLiveExams = await Exam.countDocuments({ is_live: true });
     const totalExamsDone = await StudentExam.countDocuments({ status: 'completed' });
     
+    // Event Statistics
+    const totalEvents = await Event.countDocuments();
+    const totalLiveEvents = await Event.countDocuments({ status: 'live' });
+    const totalClosedEvents = await Event.countDocuments({ status: 'closed' });
+    const totalEventRegistrations = await EventRegistration.countDocuments();
+
+    // Top 5 events by registrations
+    const topEventsAgg = await EventRegistration.aggregate([
+      { $group: { _id: "$event_id", registration_count: { $sum: 1 } } },
+      { $sort: { registration_count: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: 'events', localField: '_id', foreignField: '_id', as: 'event' } },
+      { $unwind: "$event" },
+      { $project: {
+          id: "$event._id",
+          title: "$event.title",
+          event_date: "$event.event_date",
+          status: "$event.status",
+          registration_count: 1,
+          _id: 0
+      }}
+    ]);
+
     // Get top 5 teachers by number of exams created
     const topTeachersAgg = await Exam.aggregate([
       { $group: { _id: "$teacher_id", exam_count: { $sum: 1 } } },
@@ -322,8 +346,13 @@ exports.getDashboardStats = async (req, res) => {
       totalExamsCreated,
       totalLiveExams,
       totalExamsDone,
+      totalEvents,
+      totalLiveEvents,
+      totalClosedEvents,
+      totalEventRegistrations,
       topTeachers: topTeachersAgg,
-      topStudents: topStudentsAgg
+      topStudents: topStudentsAgg,
+      topEvents: topEventsAgg
     });
   } catch (error) {
     console.error(error);

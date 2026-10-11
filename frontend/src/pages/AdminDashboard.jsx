@@ -31,6 +31,10 @@ import {
   Calendar,
   Camera,
   Scan,
+  Sparkles,
+  TrendingUp,
+  AlertCircle,
+  Clock,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import Papa from "papaparse";
@@ -85,6 +89,13 @@ export default function AdminDashboard() {
     totalLiveExams: 0,
     totalExamsCreated: 0,
     totalExamsDone: 0,
+    totalEvents: 0,
+    totalLiveEvents: 0,
+    totalClosedEvents: 0,
+    totalEventRegistrations: 0,
+    topTeachers: [],
+    topStudents: [],
+    topEvents: [],
   });
   const [profile, setProfile] = useState({
     name: "",
@@ -733,6 +744,75 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Event Ecosystem Statistics */}
+              <div className="mt-8 border-t border-gray-200 pt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                    <Calendar size={18} className="text-tomato-500" />
+                    <span>Event Ecosystem Statistics</span>
+                  </h4>
+                  <button
+                    onClick={() => setActiveTab("events")}
+                    className="text-xs font-bold text-tomato-600 hover:text-tomato-700 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    Manage Events &rarr;
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Events</p>
+                        <h4 className="text-2xl font-black text-gray-900 mt-1">{stats.totalEvents || 0}</h4>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                        <Calendar size={22} />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
+                      <span className="font-bold text-gray-700">{stats.totalLiveEvents || 0}</span> active / <span className="font-bold text-gray-700">{stats.totalClosedEvents || 0}</span> closed
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Live & Active Events</p>
+                        <h4 className="text-2xl font-black text-gray-900 mt-1 flex items-center gap-2">
+                          {stats.totalLiveEvents || 0}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            LIVE
+                          </span>
+                        </h4>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                        <Sparkles size={22} />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Currently open for student registration
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-indigo-700 uppercase tracking-wider">Total Registrations</p>
+                        <h4 className="text-2xl font-black text-gray-900 mt-1">{stats.totalEventRegistrations || 0}</h4>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                        <Users size={22} />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-1.5 text-xs text-indigo-700 font-medium">
+                      <TrendingUp size={14} />
+                      Total students enrolled across all events
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Top Teachers Table */}
               <div className="mt-8 border-t border-gray-200 pt-8">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -742,8 +822,8 @@ export default function AdminDashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="bg-tomato-50 text-xs uppercase text-tomato-800 border-b border-tomato-200">
-                        <tr>
+                      <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
+                        <tr className="border-b border-tomato-200">
                           <th className="px-6 py-4 font-bold">Rank</th>
                           <th className="px-6 py-4 font-bold">Teacher Name</th>
                           <th className="px-6 py-4 font-bold">Email</th>
@@ -785,8 +865,8 @@ export default function AdminDashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="bg-tomato-50 text-xs uppercase text-tomato-800 border-b border-tomato-200">
-                        <tr>
+                      <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
+                        <tr className="border-b border-tomato-200">
                           <th className="px-6 py-4 font-bold">Rank</th>
                           <th className="px-6 py-4 font-bold">Student Name</th>
                           <th className="px-6 py-4 font-bold">Email</th>
@@ -819,6 +899,65 @@ export default function AdminDashboard() {
                           <tr>
                             <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                               No data available
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Events by Registrations */}
+              <div className="mt-8 border-t border-gray-200 pt-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Calendar size={18} className="text-tomato-400" />
+                    <span>Top Events (By Participant Registrations)</span>
+                  </h3>
+                  <button
+                    onClick={() => setActiveTab("events")}
+                    className="text-xs font-bold text-tomato-600 hover:text-tomato-700 transition-colors cursor-pointer"
+                  >
+                    View & Manage Events &rarr;
+                  </button>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-gray-500">
+                      <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
+                        <tr className="border-b border-tomato-200">
+                          <th className="px-6 py-4 font-bold">Rank</th>
+                          <th className="px-6 py-4 font-bold">Event Title</th>
+                          <th className="px-6 py-4 font-bold">Event Date</th>
+                          <th className="px-6 py-4 font-bold text-center">Status</th>
+                          <th className="px-6 py-4 font-bold text-right">Registrations</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {stats?.topEvents?.map((event, index) => (
+                          <tr key={event.id} className="hover:bg-white transition-colors">
+                            <td className="px-6 py-4 font-semibold">
+                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
+                                {index + 1}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-gray-900">{event.title}</td>
+                            <td className="px-6 py-4 text-xs text-gray-500">{new Date(event.event_date).toLocaleString()}</td>
+                            <td className="px-6 py-4 text-center">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${event.status === 'live' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
+                                {event.status === 'live' ? 'LIVE' : 'CLOSED'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right font-black text-tomato-600">
+                              {event.registration_count}
+                            </td>
+                          </tr>
+                        ))}
+                        {(!stats?.topEvents || stats.topEvents.length === 0) && (
+                          <tr>
+                            <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                              No event registrations recorded yet.
                             </td>
                           </tr>
                         )}
@@ -879,6 +1018,69 @@ export default function AdminDashboard() {
           {/* TAB: USERS */}
           {activeTab === "users" && (
             <div className="animate-fade-in space-y-6">
+              {/* Users Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Teachers</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{teachers.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                      <UserCheck size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">
+                    {teachers.filter(t => t.status === "active" || t.status === "approved").length} active &bull; {teachers.filter(t => t.status === "pending").length} pending
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Students</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{students.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                      <Users size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-indigo-600 mt-2 font-medium">
+                    Enrolled candidate accounts
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-amber-50/40 border border-amber-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Pending Approvals</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{teachers.filter(t => t.status === "pending").length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center border border-amber-200">
+                      <AlertCircle size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-amber-700 mt-2 font-medium">
+                    Awaiting verification
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">System Admins</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{admins.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center">
+                      <Shield size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">
+                    Full security access
+                  </p>
+                </div>
+              </div>
+
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
                   <button
@@ -978,12 +1180,12 @@ export default function AdminDashboard() {
                   </div>
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-white border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">Student Info</th>
-                          <th className="p-4">Email</th>
-                          <th className="p-4 text-center">Exams Info</th>
-                          <th className="p-4 text-center">Actions</th>
+                      <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                        <tr className="border-b border-tomato-200 text-tomato-800 font-bold uppercase tracking-wider">
+                          <th className="p-4 font-bold text-tomato-800">Student Info</th>
+                          <th className="p-4 font-bold text-tomato-800">Email</th>
+                          <th className="p-4 text-center font-bold text-tomato-800">Exams Info</th>
+                          <th className="p-4 text-center font-bold text-tomato-800">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
@@ -1125,12 +1327,12 @@ export default function AdminDashboard() {
                   </div>
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-white border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">Teacher Info</th>
-                          <th className="p-4 text-center">Exams Info</th>
-                          <th className="p-4">Joined Date</th>
-                          <th className="p-4 text-center">Actions</th>
+                      <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                        <tr className="border-b border-tomato-200 text-tomato-800 font-bold uppercase tracking-wider">
+                          <th className="p-4 font-bold text-tomato-800">Teacher Info</th>
+                          <th className="p-4 text-center font-bold text-tomato-800">Exams Info</th>
+                          <th className="p-4 font-bold text-tomato-800">Joined Date</th>
+                          <th className="p-4 text-center font-bold text-tomato-800">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
@@ -1210,6 +1412,66 @@ export default function AdminDashboard() {
           {/* TAB: PROCTORING */}
           {activeTab === "proctoring" && (
             <div className="space-y-6 animate-fade-in">
+              {/* Proctoring Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{allExams.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                      <FileText size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Under proctoring system</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Live Monitored</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5 flex items-center gap-1.5">
+                        {allExams.filter(e => e.is_live).length}
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                      <Activity size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 mt-2 font-medium">Real-time candidate feeds</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-red-50/40 border border-red-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Cheating Incidents</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+                        {analytics?.cheatingStats?.reduce((sum, c) => sum + (c.count || 0), 0) || 0}
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center border border-red-200">
+                      <ShieldAlert size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-red-700 mt-2 font-medium">Flagged by AI vision/audio</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Proctor Engine</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-emerald-600 mt-0.5">ONLINE</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                      <ShieldCheck size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-indigo-600 mt-2 font-medium">AI monitoring active</p>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div className="flex items-center gap-6">
                   <h3 className="text-lg font-bold text-gray-900">
@@ -1232,13 +1494,13 @@ export default function AdminDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Exam Title</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Course & University</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">Date & Time</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-center">Status</th>
-                      <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">Actions</th>
+                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                    <tr className="border-b border-tomato-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Exam Title</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Course & University</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Date & Time</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-center">Status</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">Actions</th>
                     </tr>
                   </thead>
                     <tbody className="text-sm">
@@ -1364,6 +1626,32 @@ export default function AdminDashboard() {
 
           {activeTab === "settings" && (
             <div className="max-w-2xl animate-fade-in space-y-6">
+              {/* Settings Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Account Role</p>
+                  <h4 className="text-lg font-black text-gray-900 mt-0.5">
+                    {profile.is_super_admin ? "Super Admin" : "System Admin"}
+                  </h4>
+                  <p className="text-[11px] text-tomato-500 mt-1 font-semibold">Elevated Privileges</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">System Status</p>
+                  <h4 className="text-lg font-black text-gray-900 mt-0.5 flex items-center gap-1.5">
+                    Operational
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  </h4>
+                  <p className="text-[11px] text-emerald-700 mt-1 font-medium">MongoDB Connected</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-sm col-span-2 sm:col-span-1">
+                  <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Security Level</p>
+                  <h4 className="text-lg font-black text-gray-900 mt-0.5">256-bit JWT</h4>
+                  <p className="text-[11px] text-indigo-600 mt-1 font-medium">Encrypted Session</p>
+                </div>
+              </div>
+
               <h4 className="font-bold text-gray-900 mb-4">
                 Admin Profile Settings
               </h4>
@@ -1444,6 +1732,64 @@ export default function AdminDashboard() {
           {/* TAB: ALL EXAMS */}
           {activeTab === "exams" && (
             <div className="space-y-6 animate-fade-in">
+              {/* All Exams Lightweight Stats Banner */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-2">
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{allExams.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+                      <FileText size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Across all departments</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Active Live Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5 flex items-center gap-1.5">
+                        {allExams.filter(e => e.is_live).length}
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      </h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                      <Activity size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 mt-2 font-medium">In-progress with proctoring</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Offline Exams</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{allExams.filter(e => !e.is_live).length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200">
+                      <Clock size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2 font-medium">Draft or concluded tests</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Faculty Authors</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">{new Set(allExams.map(e => e.teacher_name).filter(Boolean)).size || teachers.length}</h4>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+                      <UserCheck size={20} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-indigo-600 mt-2 font-medium">Course teachers creating tests</p>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <FileText size={18} className="text-tomato-400" />
@@ -1463,13 +1809,13 @@ export default function AdminDashboard() {
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md shadow-gray-200/50">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="bg-white text-xs uppercase text-tomato-800 border-b border-gray-200">
-                      <tr>
-                        <th className="px-6 py-4 font-bold">Exam Title</th>
-                        <th className="px-6 py-4 font-bold">Teacher Name</th>
-                        <th className="px-6 py-4 font-bold">Date</th>
-                        <th className="px-6 py-4 font-bold">Duration</th>
-                        <th className="px-6 py-4 font-bold text-center">Status</th>
+                    <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
+                      <tr className="border-b border-tomato-200">
+                        <th className="px-6 py-4 font-bold text-tomato-800">Exam Title</th>
+                        <th className="px-6 py-4 font-bold text-tomato-800">Teacher Name</th>
+                        <th className="px-6 py-4 font-bold text-tomato-800">Date</th>
+                        <th className="px-6 py-4 font-bold text-tomato-800">Duration</th>
+                        <th className="px-6 py-4 font-bold text-tomato-800 text-center">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -1798,11 +2144,11 @@ export default function AdminDashboard() {
           ) : studentExamDetails.length > 0 ? (
             <div className="max-h-80 overflow-y-auto pr-2">
               <table className="w-full text-left text-sm text-gray-500">
-                <thead className="bg-tomato-50 text-xs uppercase text-tomato-800 sticky top-0">
-                  <tr>
-                    <th className="px-4 py-3 font-bold">Exam Title</th>
-                    <th className="px-4 py-3 font-bold">Date Finished</th>
-                    <th className="px-4 py-3 font-bold text-right">Score</th>
+                <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200 sticky top-0 z-10">
+                  <tr className="border-b border-tomato-200">
+                    <th className="px-4 py-3 font-bold text-tomato-800">Exam Title</th>
+                    <th className="px-4 py-3 font-bold text-tomato-800">Date Finished</th>
+                    <th className="px-4 py-3 font-bold text-tomato-800 text-right">Score</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">

@@ -262,7 +262,13 @@ exports.startExam = async (req, res) => {
     if (existingAttempts.length > 0) {
       const latest = existingAttempts[0];
       if (latest.status === 'completed' || latest.status === 'finished') {
-        const attempts = latest.attempts || 1;
+        const attemptsCount = existingAttempts.length;
+        if (attemptsCount >= max_attempts) {
+          return res.status(403).json({
+            message: 'You have reached the maximum number of allowed attempts for this exam.',
+            limit_reached: true
+          });
+        }
         
         const newAttempt = new StudentExam({
           student_id: req.user.id,
@@ -270,7 +276,7 @@ exports.startExam = async (req, res) => {
           started_at: new Date(),
           status: 'started',
           demerit_points: 0,
-          attempts: attempts + 1
+          attempts: attemptsCount + 1
         });
         await newAttempt.save();
         
@@ -315,11 +321,21 @@ exports.getExamQuestions = async (req, res) => {
       });
     }
 
-    const questions = await ExamQuestion.find({ exam_id: examId }).select('id type question_type marks question_text option_a option_b option_c option_d sort_order').sort({ sort_order: 1, _id: 1 });
+    const questions = await ExamQuestion.find({ exam_id: examId }).select('id type question_type marks question_text option_a option_b option_c option_d options sort_order').sort({ sort_order: 1, _id: 1 });
     const response = questions.map(q => {
       const obj = q.toObject();
       obj.id = obj._id;
-      obj.type = obj.type || obj.question_type;
+      let qType = obj.type || obj.question_type || 'MCQ';
+      if (qType.toLowerCase() === 'descriptive') qType = 'Written';
+      else if (qType.toLowerCase() === 'mcq') qType = 'MCQ';
+      obj.type = qType;
+
+      if (!obj.option_a && obj.options) {
+        obj.option_a = obj.options.a || obj.options.A || '';
+        obj.option_b = obj.options.b || obj.options.B || '';
+        obj.option_c = obj.options.c || obj.options.C || '';
+        obj.option_d = obj.options.d || obj.options.D || '';
+      }
       return obj;
     });
 

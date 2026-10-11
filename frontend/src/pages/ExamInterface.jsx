@@ -13,8 +13,8 @@ export default function ExamInterface() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Retrieve password from state or sessionStorage
-  const password = location.state?.password || sessionStorage.getItem(`exam_pwd_${examId}`) || '';
+  // Retrieve password from state, sessionStorage, or localStorage
+  const password = location.state?.password || sessionStorage.getItem(`exam_pwd_${examId}`) || localStorage.getItem(`exam_pwd_${examId}`) || '';
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 

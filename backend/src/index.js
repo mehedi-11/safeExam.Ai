@@ -52,7 +52,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 
-  // Background worker to auto-stop exams
+  // Background worker to auto-stop and auto-manage exams
   setInterval(async () => {
     try {
       const now = new Date();
@@ -61,8 +61,12 @@ app.listen(PORT, () => {
       let stoppedCount = 0;
       
       for (const exam of liveExams) {
-        // Calculate end time: exam_date + duration_minutes + 5 minutes
-        const endTime = new Date(exam.exam_date.getTime() + (exam.duration_minutes + 5) * 60000);
+        if (!exam.exam_date) continue;
+        const examTime = new Date(exam.exam_date).getTime();
+        if (isNaN(examTime)) continue;
+
+        const duration = exam.duration_minutes || 60;
+        const endTime = new Date(examTime + (duration + 5) * 60000);
         if (now > endTime) {
           exam.is_live = false;
           await exam.save();
@@ -74,16 +78,18 @@ app.listen(PORT, () => {
         console.log(`[Auto-Stop] Stopped ${stoppedCount} exam(s) that exceeded their duration.`);
       }
 
-      // Auto-start Event Exams
+      // Auto-start Event Exams within their scheduled active window
       const offlineEventExams = await Exam.find({ is_live: false, event_id: { $exists: true, $ne: null } }).populate('event_id');
       let startedCount = 0;
       
       for (const exam of offlineEventExams) {
-        if (exam.event_id && exam.event_id.end_date) {
-          const eventEndTime = new Date(exam.event_id.end_date);
-          if (now >= eventEndTime) {
+        if (exam.event_id && exam.event_id.status === 'live' && exam.event_id.event_date) {
+          const eventStartTime = new Date(exam.event_id.event_date);
+          const duration = exam.duration_minutes || 60;
+          const examEndTime = new Date(eventStartTime.getTime() + (duration + 5) * 60000);
+
+          if (now >= eventStartTime && now < examEndTime) {
             exam.is_live = true;
-            exam.exam_date = now; // Start the exam duration from now
             await exam.save();
             startedCount++;
           }
@@ -91,7 +97,7 @@ app.listen(PORT, () => {
       }
 
       if (startedCount > 0) {
-        console.log(`[Auto-Start] Started ${startedCount} event exam(s) because their events ended.`);
+        console.log(`[Auto-Start] Started ${startedCount} event exam(s) within active scheduled window.`);
       }
 
     } catch (err) {

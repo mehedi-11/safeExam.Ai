@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
 
@@ -145,7 +146,7 @@ exports.getEventRegistrations = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized: You can only view your own events' });
     }
 
-    const regs = await EventRegistration.find({ event_id: req.params.id }).populate('student_id', 'name email id');
+    const regs = await EventRegistration.find({ event_id: req.params.id }).sort({ registration_date: -1 });
     return res.json(regs);
   } catch (err) {
     console.error(err);
@@ -209,3 +210,46 @@ exports.deleteEvent = async (req, res) => {
     res.status(500).json({ message: 'Server error deleting event' });
   }
 };
+
+exports.getEventStats = async (req, res) => {
+  try {
+    let matchQuery = {};
+    if (req.user && req.user.role === 'teacher') {
+      matchQuery = { created_by: new mongoose.Types.ObjectId(req.user.id) };
+    }
+
+    const totalEvents = await Event.countDocuments(matchQuery);
+    const liveEvents = await Event.countDocuments({ ...matchQuery, status: 'live' });
+    const closedEvents = await Event.countDocuments({ ...matchQuery, status: 'closed' });
+
+    const events = await Event.find(matchQuery).sort({ created_at: -1 }).lean();
+    const eventIds = events.map(e => e._id);
+
+    const totalRegistrations = await EventRegistration.countDocuments({ event_id: { $in: eventIds } });
+    const totalAttended = await EventRegistration.countDocuments({ event_id: { $in: eventIds }, status: 'attended' });
+
+    const eventsWithStats = await Promise.all(events.map(async (evt) => {
+      const regCount = await EventRegistration.countDocuments({ event_id: evt._id });
+      const attendedCount = await EventRegistration.countDocuments({ event_id: evt._id, status: 'attended' });
+      return {
+        ...evt,
+        id: evt._id,
+        registration_count: regCount,
+        attended_count: attendedCount
+      };
+    }));
+
+    return res.json({
+      totalEvents,
+      liveEvents,
+      closedEvents,
+      totalRegistrations,
+      totalAttended,
+      events: eventsWithStats
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching event statistics' });
+  }
+};
+

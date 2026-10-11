@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Play, Image as ImageIcon, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Play, Image as ImageIcon, Edit, Trash2, Search, Calendar, Users, Clock, Sparkles, TrendingUp } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import api from '../api/axiosConfig';
@@ -193,9 +193,98 @@ const EventsManager = ({ isAdmin = false }) => {
 
   if (loading) return <div className="text-center py-10">Loading Events...</div>;
 
+  const totalEventsCount = events.length;
+  const liveEventsCount = events.filter((e) => e.status === 'live').length;
+  const closedEventsCount = events.filter((e) => e.status === 'closed').length;
+  const totalRegistrationsCount = events.reduce((sum, e) => sum + (e.registration_count || 0), 0);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+      {/* Event Statistics Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+        <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                {isAdmin ? "Total Events" : "My Events"}
+              </p>
+              <h4 className="text-2xl font-black text-gray-900 mt-1">
+                {totalEventsCount}
+              </h4>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-tomato-50 text-tomato-500 flex items-center justify-center border border-tomato-100">
+              <Calendar size={22} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
+            <span className="font-bold text-gray-700">{liveEventsCount}</span> active / <span className="font-bold text-gray-700">{closedEventsCount}</span> inactive
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                Active Events
+              </p>
+              <h4 className="text-2xl font-black text-gray-900 mt-1 flex items-center gap-2">
+                {liveEventsCount}
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  LIVE
+                </span>
+              </h4>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+              <Sparkles size={22} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Accepting registrations
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-white to-amber-50/40 border border-amber-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">
+                Inactive Events
+              </p>
+              <h4 className="text-2xl font-black text-gray-900 mt-1">
+                {closedEventsCount}
+              </h4>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center border border-amber-200">
+              <Clock size={22} />
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-amber-700 font-medium">
+            Archived or closed
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-white to-indigo-50/40 border border-indigo-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
+                Total Registrations
+              </p>
+              <h4 className="text-2xl font-black text-gray-900 mt-1">
+                {totalRegistrationsCount}
+              </h4>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200">
+              <Users size={22} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-indigo-700 font-medium">
+            <TrendingUp size={14} />
+            Across all {isAdmin ? "system" : "your"} events
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center flex-wrap gap-4 pt-2">
         <div className="flex items-center gap-6">
           <h3 className="text-lg font-bold text-gray-900">
             Manage Events
@@ -252,8 +341,8 @@ const EventsManager = ({ isAdmin = false }) => {
 
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-gray-200">
+          <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+            <tr className="border-b border-tomato-200">
               <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
                 Image
               </th>
@@ -430,8 +519,8 @@ const EventsManager = ({ isAdmin = false }) => {
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-tomato-50 text-tomato-800">
-                    <tr>
+                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
+                    <tr className="border-b border-tomato-200">
                       <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider sm:pl-6">Name</th>
                       <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Email</th>
                       <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Phone</th>

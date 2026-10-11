@@ -343,7 +343,18 @@ exports.verifyIdentifier = async (req, res) => {
     const Model = role === 'student' ? Student : role === 'teacher' ? Teacher : Admin;
     await Model.updateOne({ _id: user._id }, { $set: { reset_token: resetToken, reset_token_expiry: tokenExpiry } }, { strict: false });
     
-    return res.json({ email: user.email, name: user.name, message: 'OTP sent successfully (Check server console for OTP)' });
+    console.log(`\n==============================================`);
+    console.log(`[PASSWORD RESET OTP]`);
+    console.log(`Role: ${role} | Identifier: ${identifier} (${user.email || 'N/A'})`);
+    console.log(`OTP Code: ${resetToken}`);
+    console.log(`==============================================\n`);
+
+    return res.json({
+      email: user.email,
+      name: user.name,
+      otp: resetToken,
+      message: 'OTP sent successfully (Check server console or email)'
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server error verifying identifier' });
@@ -351,8 +362,10 @@ exports.verifyIdentifier = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-  const { role, identifier, newPassword, resetToken } = req.body;
-  if (!role || !identifier || !newPassword || !resetToken) {
+  const { role, identifier, newPassword, resetToken, otp } = req.body;
+  const tokenToVerify = resetToken || otp;
+
+  if (!role || !identifier || !newPassword || !tokenToVerify) {
     return res.status(400).json({ message: 'All fields including OTP are required' });
   }
 
@@ -378,7 +391,7 @@ exports.resetPassword = async (req, res) => {
     // Check reset token via raw object (since it might not be in schema)
     const rawUser = await Model.collection.findOne({ _id: user._id });
     
-    if (rawUser.reset_token !== resetToken || new Date() > new Date(rawUser.reset_token_expiry)) {
+    if (!rawUser || !rawUser.reset_token || rawUser.reset_token !== String(tokenToVerify).trim() || new Date() > new Date(rawUser.reset_token_expiry)) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 

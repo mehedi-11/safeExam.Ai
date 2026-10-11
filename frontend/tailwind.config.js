@@ -7,23 +7,25 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        'none': '4px',
-        'sm': '4px',
-        DEFAULT: '4px', 
-        'md': '4px',
-        'lg': '4px',
-        'xl': '4px',
-        '2xl': '4px',
-        '3xl': '4px',
-        'full': '50%', // Icons/Avatars 50%
+        'none': '0px',
+        'sm': '6px',
+        DEFAULT: '8px', 
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
       },
       boxShadow: {
-        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        DEFAULT: '0 1px 2px 0 rgb(0 0 0 / 0.05)', // Flatter shadows
-        'md': '0 2px 4px -1px rgb(0 0 0 / 0.05)',
-        'lg': '0 4px 6px -1px rgb(0 0 0 / 0.05)',
-        'xl': '0 4px 6px -1px rgb(0 0 0 / 0.05)',
-        '2xl': '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+        'sm': '0 2px 4px rgba(99, 102, 241, 0.06)',
+        DEFAULT: '0 4px 10px rgba(99, 102, 241, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
+        'md': '0 6px 14px -2px rgba(99, 102, 241, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)',
+        'lg': '0 12px 24px -4px rgba(99, 102, 241, 0.14), 0 4px 8px rgba(0, 0, 0, 0.04)',
+        'xl': '0 20px 30px -8px rgba(99, 102, 241, 0.16), 0 6px 12px rgba(0, 0, 0, 0.05)',
+        '2xl': '0 25px 50px -12px rgba(99, 102, 241, 0.2)',
+        'clay': '0 12px 24px -6px rgba(99, 102, 241, 0.14), inset 0 3px 6px rgba(255, 255, 255, 0.95), inset 0 -3px 6px rgba(99, 102, 241, 0.12)',
+        'clay-sm': '0 4px 8px -2px rgba(99, 102, 241, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(99, 102, 241, 0.14)',
       },
       colors: {
         gray: {
@@ -65,17 +67,30 @@ export default {
           800: '#496600',
           900: '#243300',
         },
+        /* Iris & Electric Indigo Claymorphic Theme (Primary System Theme) */
         tomato: {
-          50: '#fff0ec',
-          100: '#ffdcd3',
-          200: '#ffbfae',
-          300: '#ff987c',
-          400: '#ff6742',
-          500: '#ff4c24', // Tomato
-          600: '#e53610',
-          700: '#c0270a',
-          800: '#9f230d',
-          900: '#83220f',
+          50: '#f5f3ff',   // Softest lavender-indigo clay surface
+          100: '#ede9fe',  // Tinted clay highlight
+          200: '#c7d2fe',  // Soft clay border & bevel line
+          300: '#a5b4fc',  // Clay contour
+          400: '#818cf8',  // Soft primary clay accent
+          500: '#6366f1',  // Signature Iris / Indigo Clay
+          600: '#4f46e5',  // Vibrant 3D clay action
+          700: '#4338ca',  // Deep bevel shadow contour
+          800: '#3730a3',  // Rich contrast clay typography
+          900: '#312e81',  // Deep royal dark text
+        },
+        clay: {
+          50: '#f5f3ff',
+          100: '#ede9fe',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
         }
       },
     },

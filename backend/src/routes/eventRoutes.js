@@ -3,6 +3,9 @@ const router = express.Router();
 const eventController = require('../controllers/eventController');
 const { verifyToken, optionalAuth } = require('../middleware/authMiddleware');
 
+// Protected Stats Route
+router.get('/stats', verifyToken, eventController.getEventStats);
+
 // Public / Optional Auth Routes
 router.get('/:id', optionalAuth, eventController.getEventDetails);
 router.post('/:id/register', eventController.registerForEvent);

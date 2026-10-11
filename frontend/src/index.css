@@ -9,11 +9,11 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-white text-gray-900 font-sans antialiased overflow-x-hidden;
+    @apply bg-[#f4f5fb] text-gray-900 font-sans antialiased overflow-x-hidden;
   }
   
   ::selection {
-    background-color: #ff4c24; /* tomato-500 */
+    background-color: #6366f1; /* Iris / Indigo 500 */
     color: white;
   }
 }
@@ -25,15 +25,15 @@
   }
 
   .card-hover {
-    @apply border border-gray-200 rounded-none bg-white shadow-md shadow-gray-200/50 hover:shadow-md hover:border-tomato-300 smooth-transition;
+    @apply border border-indigo-100 rounded-2xl bg-white shadow-md shadow-indigo-100/60 hover:shadow-lg hover:border-indigo-300 smooth-transition;
   }
 
   .tomato-btn {
-    @apply bg-gray-900 hover:bg-tomato-400 text-white font-bold py-2 px-5 rounded-none shadow-md shadow-gray-200/50 hover:shadow smooth-transition inline-flex items-center justify-center gap-2;
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-xl shadow-md shadow-indigo-200/50 hover:shadow-lg smooth-transition inline-flex items-center justify-center gap-2;
   }
 
   .tomato-btn-outline {
-    @apply border border-gray-800 text-tomato-600 hover:bg-tomato-50 hover:text-tomato-700 font-medium py-2 px-5 rounded-none smooth-transition inline-flex items-center justify-center gap-2;
+    @apply border border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 font-medium py-2 px-5 rounded-xl smooth-transition inline-flex items-center justify-center gap-2;
   }
 
   .modal-backdrop {
@@ -41,19 +41,44 @@
   }
 
   .modal-content {
-    @apply bg-white rounded-none shadow-lg w-full border border-gray-300 overflow-hidden animate-fade-in;
+    @apply bg-white rounded-2xl shadow-xl w-full border border-gray-200 overflow-hidden animate-fade-in;
   }
 
-  /* Global Table Header Styling */
-  thead {
-    background-color: rgba(34, 197, 94, 0.4) !important; /* Green with 40% opacity as requested */
-    color: #14532d !important; /* Dark green text */
-    border-bottom: 1px solid rgba(22, 163, 74, 0.3) !important;
+  /* Global Table Header Claymorphism Styling - Iris & Indigo Tactile 3D Soft Clay */
+  thead, .clay-header {
+    background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%) !important;
+    border-bottom: 2px solid #c7d2fe !important;
   }
-  thead th, thead tr {
-    background-color: transparent !important;
-    color: inherit !important;
-    border-color: inherit !important;
+  thead tr, .clay-header tr {
+    background: transparent !important;
+    border-color: #c7d2fe !important;
+  }
+  thead th, .clay-header th {
+    background: linear-gradient(180deg, #faf8ff 0%, #ede9fe 100%) !important;
+    color: #3730a3 !important;
+    box-shadow: inset 0 3px 5px rgba(255, 255, 255, 0.95), inset 0 -3px 5px rgba(99, 102, 241, 0.22) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.95) !important;
+    border-bottom: 2px solid #c7d2fe !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    font-weight: 700 !important;
+  }
+
+  /* Claymorphism Utilities */
+  .clay-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f5f3ff 100%);
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.12), inset 0 3px 6px rgba(255, 255, 255, 0.95), inset 0 -3px 6px rgba(99, 102, 241, 0.12);
+    border: 1.5px solid rgba(199, 210, 254, 0.6);
+  }
+  .clay-header {
+    background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
+    border-bottom: 2px solid #c7d2fe;
+  }
+  .clay-pill {
+    background: linear-gradient(145deg, #ffffff 0%, #ede9fe 100%);
+    border-radius: 9999px;
+    box-shadow: 0 4px 10px -2px rgba(99, 102, 241, 0.16), inset 0 2px 4px rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(99, 102, 241, 0.18);
+    border: 1px solid #c7d2fe;
   }
 }
 
@@ -85,7 +110,7 @@
   @apply bg-white;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full hover:bg-tomato-300 transition-colors;
+  @apply bg-gray-300 rounded-full hover:bg-indigo-300 transition-colors;
 }
 
 /* Custom Quill Editor Height */

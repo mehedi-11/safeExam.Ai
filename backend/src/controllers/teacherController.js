@@ -156,11 +156,11 @@ exports.createExam = async (req, res) => {
         const event = await Event.findById(event_id);
         if (event) {
           const registrations = await EventRegistration.find({ event_id: event_id });
-          registrations.forEach(async (reg) => {
+          for (const reg of registrations) {
             if (reg.email) {
               await sendExamPasswordEmail(reg.email, reg.name, title, exam_password, event.title);
             }
-          });
+          }
         }
       } catch (emailError) {
         console.error('Failed to process password emails:', emailError);
