@@ -3,6 +3,8 @@ const Teacher = require('../models/Teacher');
 const Student = require('../models/Student');
 const LoginAttempt = require('../models/LoginAttempt');
 const AdminNotification = require('../models/AdminNotification');
+const Otp = require('../models/Otp');
+const { sendOtpEmail } = require('../utils/sendEmail');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -72,15 +74,73 @@ const handleSuccessfulLogin = async (identifier) => {
   await LoginAttempt.deleteOne({ identifier });
 };
 
-// Register Teacher
-exports.registerTeacher = async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
+// Send Registration OTP
+exports.sendRegistrationOtp = async (req, res) => {
+  const { role, email, name, id } = req.body;
+  if (!email || !name) {
+    return res.status(400).json({ message: 'Name and email are required' });
   }
 
+  const normalizedEmail = email.toLowerCase().trim();
+
   try {
-    const existingTeacher = await Teacher.findOne({ email });
+    if (role === 'teacher') {
+      const existingTeacher = await Teacher.findOne({ email: normalizedEmail });
+      if (existingTeacher) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+    } else if (role === 'student') {
+      if (id) {
+        const existingStudentId = await Student.findOne({ id: String(id).trim() });
+        if (existingStudentId) {
+          return res.status(400).json({ message: 'Student ID already exists' });
+        }
+      }
+      const existingStudentEmail = await Student.findOne({ email: normalizedEmail });
+      if (existingStudentEmail) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    await Otp.findOneAndUpdate(
+      { email: normalizedEmail, purpose: 'registration' },
+      { otp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    await sendOtpEmail(normalizedEmail, name, otp, 'Account Registration');
+
+    return res.json({
+      email: normalizedEmail,
+      name,
+      otp,
+      message: 'OTP has been sent to your email.'
+    });
+  } catch (error) {
+    console.error('Error sending registration OTP:', error);
+    return res.status(500).json({ message: 'Server error sending OTP' });
+  }
+};
+
+// Register Teacher
+exports.registerTeacher = async (req, res) => {
+  const { name, email, password, otp } = req.body;
+  if (!name || !email || !password || !otp) {
+    return res.status(400).json({ message: 'All fields including OTP are required' });
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+
+  try {
+    // Verify OTP
+    const storedOtp = await Otp.findOne({ email: normalizedEmail, purpose: 'registration' });
+    if (!storedOtp || storedOtp.otp !== String(otp).trim()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    const existingTeacher = await Teacher.findOne({ email: normalizedEmail });
     if (existingTeacher) {
       return res.status(400).json({ message: 'Email already registered' });
     }
@@ -88,18 +148,19 @@ exports.registerTeacher = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newTeacher = new Teacher({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
-      status: 'pending' // Note: Teacher model schema has enum ['active', 'blocked']. Let's assume pending is not in schema enum, so I'll need to use 'active' or modify schema later. Wait, earlier I set it to ['active', 'blocked']. I'll save it, mongoose might complain if strict. Let's fix schema if needed, but 'pending' is standard here. I'll bypass validation or assume it's fine for now, wait, I'll update schema if it complains.
+      status: 'pending',
+      joining_date: new Date()
     });
-    // Let's force it for now
-    await Teacher.collection.insertOne({
-      name, email, password: hashedPassword, status: 'pending', joining_date: new Date()
-    });
+    await newTeacher.save();
+
+    // Invalidate consumed OTP
+    await Otp.deleteMany({ email: normalizedEmail, purpose: 'registration' });
 
     const notif = new AdminNotification({
       title: 'New Teacher Registration',
-      message: `New teacher registered: ${name} (${email})`
+      message: `New teacher registered: ${name} (${normalizedEmail})`
     });
     await notif.save();
 
@@ -112,35 +173,47 @@ exports.registerTeacher = async (req, res) => {
 
 // Register Student
 exports.registerStudent = async (req, res) => {
-  const { id, name, email, password } = req.body; // id is Student ID
-  if (!id || !name || !email || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
+  const { id, name, email, password, otp } = req.body; // id is Student ID
+  if (!id || !name || !email || !password || !otp) {
+    return res.status(400).json({ message: 'All fields including OTP are required' });
   }
 
+  const normalizedEmail = email.toLowerCase().trim();
+  const normalizedId = String(id).trim();
+
   try {
-    const existingStudentId = await Student.findOne({ id });
+    // Verify OTP
+    const storedOtp = await Otp.findOne({ email: normalizedEmail, purpose: 'registration' });
+    if (!storedOtp || storedOtp.otp !== String(otp).trim()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    const existingStudentId = await Student.findOne({ id: normalizedId });
     if (existingStudentId) {
       return res.status(400).json({ message: 'Student ID already exists' });
     }
 
-    const existingStudentEmail = await Student.findOne({ email });
+    const existingStudentEmail = await Student.findOne({ email: normalizedEmail });
     if (existingStudentEmail) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newStudent = new Student({
-      id,
+      id: normalizedId,
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       status: 'active'
     });
     await newStudent.save();
 
+    // Invalidate consumed OTP
+    await Otp.deleteMany({ email: normalizedEmail, purpose: 'registration' });
+
     const notif = new AdminNotification({
       title: 'New Student Registration',
-      message: `New student registered: ${name} (${id})`
+      message: `New student registered: ${name} (${normalizedId})`
     });
     await notif.save();
 
@@ -343,21 +416,54 @@ exports.verifyIdentifier = async (req, res) => {
     const Model = role === 'student' ? Student : role === 'teacher' ? Teacher : Admin;
     await Model.updateOne({ _id: user._id }, { $set: { reset_token: resetToken, reset_token_expiry: tokenExpiry } }, { strict: false });
     
-    console.log(`\n==============================================`);
-    console.log(`[PASSWORD RESET OTP]`);
-    console.log(`Role: ${role} | Identifier: ${identifier} (${user.email || 'N/A'})`);
-    console.log(`OTP Code: ${resetToken}`);
-    console.log(`==============================================\n`);
+    await sendOtpEmail(user.email, user.name, resetToken, 'Password Reset');
 
     return res.json({
       email: user.email,
       name: user.name,
       otp: resetToken,
-      message: 'OTP sent successfully (Check server console or email)'
+      message: 'OTP has been sent to your registered email address.'
     });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server error verifying identifier' });
+  }
+};
+
+exports.verifyResetOtp = async (req, res) => {
+  const { role, identifier, otp } = req.body;
+  if (!role || !identifier || !otp) {
+    return res.status(400).json({ message: 'All fields including OTP are required' });
+  }
+
+  try {
+    let user = null;
+    let Model = null;
+    
+    if (role === 'student') {
+      Model = Student;
+      user = await Model.findOne({ id: identifier });
+    } else if (role === 'teacher') {
+      Model = Teacher;
+      user = await Model.findOne({ email: identifier });
+    } else if (role === 'admin') {
+      Model = Admin;
+      user = await Model.findOne({ email: identifier });
+    } else {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+
+    if (!user) return res.status(404).json({ message: 'Account not found' });
+
+    const rawUser = await Model.findById(user._id).lean();
+    if (!rawUser || !rawUser.reset_token || rawUser.reset_token !== String(otp).trim() || new Date() > new Date(rawUser.reset_token_expiry)) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    return res.json({ message: 'OTP verified successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error verifying OTP' });
   }
 };
 
@@ -388,16 +494,16 @@ exports.resetPassword = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: 'Account not found' });
     
-    // Check reset token via raw object (since it might not be in schema)
-    const rawUser = await Model.collection.findOne({ _id: user._id });
+    // Check reset token via lean document
+    const rawUser = await Model.findById(user._id).lean();
     
     if (!rawUser || !rawUser.reset_token || rawUser.reset_token !== String(tokenToVerify).trim() || new Date() > new Date(rawUser.reset_token_expiry)) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await Model.collection.updateOne(
-      { _id: user._id },
+    await Model.findByIdAndUpdate(
+      user._id,
       { $set: { password: hashedPassword }, $unset: { reset_token: "", reset_token_expiry: "" } }
     );
 

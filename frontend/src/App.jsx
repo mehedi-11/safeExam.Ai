@@ -64,6 +64,16 @@ function App() {
           } 
         />
 
+        {/* Student Subject Insights & Suggestions */}
+        <Route 
+          path="/dashboard/student/insights" 
+          element={
+            <ProtectedRoute allowedRole="student">
+              <StudentDashboard defaultTab="insights" />
+            </ProtectedRoute>
+          } 
+        />
+
         {/* Student Exam Workspace */}
         <Route 
           path="/exam/:examId" 

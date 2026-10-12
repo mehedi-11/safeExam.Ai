@@ -141,8 +141,7 @@ exports.createExam = async (req, res) => {
       max_attempts: max_attempts || 1,
       total_marks: 0
     });
-    // Use collection for extra fields not in schema if necessary
-    await Exam.collection.insertOne(newExam.toObject());
+    await newExam.save();
 
     const notif = new AdminNotification({
       title: 'New Exam Created',
@@ -195,9 +194,8 @@ exports.updateExam = async (req, res) => {
       max_attempts: max_attempts || 1
     };
     
-    // updateOne without strict mode to allow extra fields not explicitly in schema
-    const result = await Exam.collection.updateOne(
-      { _id: new (require('mongoose').Types.ObjectId)(id), teacher_id: new (require('mongoose').Types.ObjectId)(req.user.id) },
+    const result = await Exam.updateOne(
+      { _id: id, teacher_id: req.user.id },
       { $set: updateData }
     );
     
@@ -260,7 +258,7 @@ exports.toggleExamLive = async (req, res) => {
     if (is_live) exam.exam_password = exam_password;
     if (is_live) exam.exam_date = new Date();
     
-    await Exam.collection.updateOne({ _id: exam._id }, { $set: exam.toObject() }); // Bypass strict
+    await exam.save();
 
     const statusStr = is_live ? 'LIVE' : 'OFFLINE';
     const notif = new AdminNotification({
@@ -308,25 +306,21 @@ exports.createQuestion = async (req, res) => {
     const exam = await Exam.findOne({ _id: exam_id, teacher_id: req.user.id });
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const newQuestion = new ExamQuestion({
+    await ExamQuestion.create({
       exam_id,
-      question_type: type, // Schema expects question_type
+      type: type || 'MCQ',
+      question_type: type || 'MCQ',
       question_text,
-      marks
+      marks,
+      option_a: option_a || null,
+      option_b: option_b || null,
+      option_c: option_c || null,
+      option_d: option_d || null,
+      correct_option: correct_option || null
     });
     
-    const obj = newQuestion.toObject();
-    obj.type = type; // Support both for compatibility
-    obj.option_a = option_a || null;
-    obj.option_b = option_b || null;
-    obj.option_c = option_c || null;
-    obj.option_d = option_d || null;
-    obj.correct_option = correct_option || null;
-
-    await ExamQuestion.collection.insertOne(obj);
-    
     // Update total marks in Exam
-    await Exam.collection.updateOne({ _id: exam._id }, { $inc: { total_marks: marks } });
+    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: marks } });
 
     return res.status(201).json({ message: 'Question added successfully' });
   } catch (error) {
@@ -344,7 +338,7 @@ exports.updateQuestion = async (req, res) => {
   }
 
   try {
-    const question = await ExamQuestion.collection.findOne({ _id: new (require('mongoose').Types.ObjectId)(id) });
+    const question = await ExamQuestion.findById(id);
     if (!question) return res.status(404).json({ message: 'Question not found' });
     
     const exam = await Exam.findOne({ _id: question.exam_id, teacher_id: req.user.id });
@@ -352,15 +346,15 @@ exports.updateQuestion = async (req, res) => {
 
     const oldMarks = question.marks;
 
-    await ExamQuestion.collection.updateOne(
-      { _id: question._id },
+    await ExamQuestion.findByIdAndUpdate(
+      question._id,
       { $set: { type, question_type: type, question_text, marks, option_a: option_a||null, option_b: option_b||null, option_c: option_c||null, option_d: option_d||null, correct_option: correct_option||null } }
     );
     
     // Update total marks in exam
     const diff = marks - oldMarks;
     if (diff !== 0) {
-      await Exam.collection.updateOne({ _id: exam._id }, { $inc: { total_marks: diff } });
+      await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: diff } });
     }
 
     return res.json({ message: 'Question updated successfully' });
@@ -373,15 +367,15 @@ exports.updateQuestion = async (req, res) => {
 exports.deleteQuestion = async (req, res) => {
   const { id } = req.params;
   try {
-    const question = await ExamQuestion.collection.findOne({ _id: new (require('mongoose').Types.ObjectId)(id) });
+    const question = await ExamQuestion.findById(id);
     if (!question) return res.status(404).json({ message: 'Question not found' });
     
     const exam = await Exam.findOne({ _id: question.exam_id, teacher_id: req.user.id });
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    await ExamQuestion.collection.deleteOne({ _id: question._id });
+    await ExamQuestion.findByIdAndDelete(question._id);
     
-    await Exam.collection.updateOne({ _id: exam._id }, { $inc: { total_marks: -question.marks } });
+    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: -question.marks } });
 
     return res.json({ message: 'Question deleted successfully' });
   } catch (error) {
@@ -403,8 +397,8 @@ exports.reorderQuestions = async (req, res) => {
     if (!exam) return res.status(404).json({ message: 'Exam not found or unauthorized' });
 
     for (let i = 0; i < ordered_ids.length; i++) {
-      await ExamQuestion.collection.updateOne(
-        { _id: new (require('mongoose').Types.ObjectId)(ordered_ids[i]), exam_id: exam._id },
+      await ExamQuestion.updateOne(
+        { _id: ordered_ids[i], exam_id: exam._id },
         { $set: { sort_order: i } }
       );
     }
@@ -428,7 +422,7 @@ exports.togglePublishResults = async (req, res) => {
     const studentExam = await StudentExam.findOne({ exam_id: examId, student_id: studentId });
     if (!studentExam) return res.status(404).json({ message: 'Student exam record not found' });
 
-    await StudentExam.collection.updateOne({ _id: studentExam._id }, { $set: { results_published: results_published ? true : false } });
+    await StudentExam.updateOne({ _id: studentExam._id }, { $set: { results_published: results_published ? true : false } });
     return res.json({ message: 'Student results publish status updated successfully' });
   } catch (error) {
     console.error('Error toggling publish status:', error);
@@ -513,8 +507,8 @@ exports.getStudentAnswersheet = async (req, res) => {
     const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const questions = await ExamQuestion.collection.find({ exam_id: exam._id }).toArray();
-    const answers = await StudentAnswer.collection.find({ exam_id: exam._id, student_id: studentId }).toArray();
+    const questions = await ExamQuestion.find({ exam_id: exam._id }).lean();
+    const answers = await StudentAnswer.find({ exam_id: exam._id, student_id: studentId }).lean();
     
     const ansMap = {};
     answers.forEach(a => { ansMap[a.question_id.toString()] = a; });
@@ -553,8 +547,8 @@ exports.manualGradeAnswersheet = async (req, res) => {
 
     for (const [answer_id, marks_awarded] of Object.entries(grades)) {
       if (answer_id && answer_id !== 'null') {
-        await StudentAnswer.collection.updateOne(
-          { _id: new (require('mongoose').Types.ObjectId)(answer_id) },
+        await StudentAnswer.findByIdAndUpdate(
+          answer_id,
           { $set: { marks_awarded: Number(marks_awarded) } }
         );
       }
@@ -567,7 +561,7 @@ exports.manualGradeAnswersheet = async (req, res) => {
     
     const finalScore = answersAgg.length > 0 ? answersAgg[0].total : 0;
     
-    await StudentExam.collection.updateOne(
+    await StudentExam.updateOne(
       { exam_id: exam._id, student_id: studentId },
       { $set: { total_score: finalScore, score: finalScore } }
     );

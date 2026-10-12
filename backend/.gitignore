@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+*.env
+
+# Uploads & Proctoring logs
+uploads/
+proctoring/
+*.log
+cheating_activity.log

@@ -27,7 +27,6 @@ export default function Login() {
   const [resetIdentifier, setResetIdentifier] = useState('');
   const [resetEmail, setResetEmail] = useState('');
   const [resetName, setResetName] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [enteredOtp, setEnteredOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -115,20 +114,16 @@ export default function Login() {
 
     try {
       if (resetStep === 1) {
-        // Verify identifier and get email
+        // Verify identifier and request OTP from backend
         const res = await api.post('/auth/verify-identifier', { role, identifier: resetIdentifier });
         const { email, name, otp } = res.data;
         setResetEmail(email);
         setResetName(name);
 
-        // Use server OTP
-        const otpToSend = otp || Math.floor(100000 + Math.random() * 900000).toString();
-        setGeneratedOtp(otpToSend);
-
         const templateParams = {
           to_name: name,
           email: email,
-          otp: otpToSend
+          otp: otp
         };
 
         try {
@@ -138,20 +133,30 @@ export default function Login() {
             templateParams,
             { publicKey: 'bUF4GpGI4G1vouutS' }
           );
-          setSuccess('OTP has been sent to your registered email.');
+          setSuccess('OTP has been sent to your registered Gmail.');
         } catch (emailErr) {
-          console.warn('EmailJS error:', emailErr);
-          setSuccess('OTP generated successfully! (Check server console or email)');
+          console.warn('Browser EmailJS error:', emailErr);
+          setSuccess('OTP generated successfully! Check your email or server console.');
         }
+
         setResetStep(2);
       } else if (resetStep === 2) {
-        if (enteredOtp.trim() !== generatedOtp.trim()) {
-          setError('Invalid OTP. Please try again.');
-        } else {
-          setError('');
-          setSuccess('');
-          setResetStep(3);
+        if (!enteredOtp || enteredOtp.trim().length === 0) {
+          setError('Please enter the OTP sent to your email.');
+          setLoading(false);
+          return;
         }
+
+        // Verify OTP securely with backend
+        await api.post('/auth/verify-reset-otp', {
+          role,
+          identifier: resetIdentifier,
+          otp: enteredOtp.trim()
+        });
+
+        setError('');
+        setSuccess('');
+        setResetStep(3);
       } else if (resetStep === 3) {
         await api.post('/auth/reset-password', {
           role,

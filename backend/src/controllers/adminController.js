@@ -120,8 +120,7 @@ exports.addTeacher = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newTeacher = new Teacher({ name, email, password: hashedPassword, status: 'active', joining_date: new Date() });
-    await Teacher.collection.insertOne({ name, email, password: hashedPassword, status: 'approved', joining_date: new Date() }); // Using insertOne to bypass schema strictness for status='approved' since schema might be active/blocked
+    await Teacher.create({ name, email, password: hashedPassword, status: 'approved', joining_date: new Date() });
 
     return res.status(201).json({ message: 'Teacher added successfully' });
   } catch (error) {
@@ -137,7 +136,7 @@ exports.updateTeacherStatus = async (req, res) => {
     return res.status(400).json({ message: 'Invalid status' });
   }
   try {
-    await Teacher.collection.updateOne({ _id: new (require('mongoose').Types.ObjectId)(id) }, { $set: { status } });
+    await Teacher.findByIdAndUpdate(id, { status });
     return res.json({ message: `Teacher status updated to ${status}` });
   } catch (error) {
     console.error(error);
@@ -199,7 +198,7 @@ exports.addStudent = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await Student.collection.insertOne({ id, name, email, password: hashedPassword, status: 'approved' });
+    await Student.create({ id, name, email, password: hashedPassword, status: 'approved' });
 
     return res.status(201).json({ message: 'Student added successfully' });
   } catch (error) {
@@ -215,7 +214,7 @@ exports.updateStudentStatus = async (req, res) => {
     return res.status(400).json({ message: 'Invalid status' });
   }
   try {
-    await Student.collection.updateOne({ id }, { $set: { status } });
+    await Student.updateOne({ id }, { status });
     return res.json({ message: `Student status updated to ${status}` });
   } catch (error) {
     console.error(error);
@@ -373,7 +372,7 @@ exports.addBulkStudents = async (req, res) => {
         const existing = await Student.findOne({ $or: [{ id: student.id }, { email: student.email }] });
         if (!existing) {
           const hashedPassword = await bcrypt.hash(student.password, 10);
-          await Student.collection.insertOne({
+          await Student.create({
             id: student.id,
             name: student.name,
             email: student.email,
@@ -403,7 +402,7 @@ exports.addBulkTeachers = async (req, res) => {
         const existing = await Teacher.findOne({ email: teacher.email });
         if (!existing) {
           const hashedPassword = await bcrypt.hash(teacher.password, 10);
-          await Teacher.collection.insertOne({
+          await Teacher.create({
             name: teacher.name,
             email: teacher.email,
             password: hashedPassword,

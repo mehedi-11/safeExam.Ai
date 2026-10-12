@@ -315,7 +315,7 @@ export default function ExamInterface() {
         const model = await cocoSsd.load();
         modelRef.current = model;
         setModelReady(true);
-        console.log("Client-side TFJS Model loaded (Mocking YOLOv8)");
+        console.log("Agent ELI - The Real-time AI Proctoring Engine loaded");
       } catch (err) {
         console.error("Error loading TFJS model", err);
       }
@@ -331,7 +331,7 @@ export default function ExamInterface() {
     
     // Start capturing after 5 seconds delay to let user settle
     const startDelay = setTimeout(() => {
-      console.log('Started local AI Proctoring (Mock YOLOv8) Loop');
+      console.log('Started Agent ELI - The Real-time AI Proctoring Engine loop');
       
       // Frame capture and prediction loop (every 1.5s to save CPU)
       frameInterval = setInterval(async () => {
@@ -451,7 +451,7 @@ export default function ExamInterface() {
     };
   }, [examStarted, examDetails, webcamReady, modelReady]);
 
-  // Log a cheating event (Actual copy/paste or Simulated YOLOv8)
+  // Log a cheating event (Actual copy/paste or Agent ELI detection)
   const logCheating = async (activityType, details, overrideDemerits = undefined, forceSubmit = false) => {
     // Add to local console feed
     const now = new Date().toLocaleTimeString();
@@ -675,7 +675,7 @@ export default function ExamInterface() {
           )}
         </div>
 
-        {/* Right Side: Webcam, Demerits, and AI YOLOv8 Simulator */}
+        {/* Right Side: Webcam, Demerits, and Agent ELI Proctoring */}
         <div className="lg:col-span-1 space-y-6">
           
           {/* Live webcam component */}
@@ -741,7 +741,7 @@ export default function ExamInterface() {
           <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-md shadow-gray-200/50">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
               <Terminal size={14} className="text-tomato-400" />
-              <span>YOLOv8 AI Log Feed</span>
+              <span>Agent ELI - The Real-time AI Proctoring Engine</span>
             </h4>
             <div className="bg-white rounded-xl p-3 h-32 overflow-y-auto">
               {showLogFeed.length > 0 ? (

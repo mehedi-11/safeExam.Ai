@@ -6,6 +6,7 @@ const ExamQuestion = require('../models/ExamQuestion');
 const Event = require('../models/Event');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const geminiService = require('../services/geminiService');
 
 // Get Profile
 exports.getProfile = async (req, res) => {
@@ -77,30 +78,6 @@ exports.changePassword = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: 'Server error updating password' });
   }
-};
-
-// Get Enrolled Courses (Skipped/Mocked for MongoDB Migration since courses were legacy)
-exports.getCourses = async (req, res) => {
-  try {
-    // Legacy support: returning empty array if courses are not migrated
-    return res.json([]);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error fetching enrolled courses' });
-  }
-};
-
-exports.getAvailableCourses = async (req, res) => {
-  try {
-    return res.json([]);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error fetching available courses' });
-  }
-};
-
-exports.requestEnrollment = async (req, res) => {
-  return res.status(400).json({ message: 'Course enrollment is disabled in this version' });
 };
 
 // --- EXAM ATTENDANCE ---
@@ -453,5 +430,86 @@ exports.submitExam = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error submitting exam' });
+  }
+};
+
+// AI Subject Insights & Problem Diagnostic (Powered by Agent ELI)
+exports.getAiInsights = async (req, res) => {
+  try {
+    const student = await Student.findOne({ id: req.user.id }).lean();
+    const rawExams = await Exam.find().lean();
+    const studentExams = await StudentExam.find({ student_id: req.user.id }).lean();
+
+    const subjectMap = {};
+    let totalDemerits = 0;
+
+    for (const se of studentExams) {
+      const exam = rawExams.find(e => e._id.toString() === se.exam_id.toString());
+      if (exam) {
+        const subject = (exam.course_name || exam.course_code || 'General Studies').trim();
+        if (!subjectMap[subject]) {
+          subjectMap[subject] = {
+            subject,
+            code: exam.course_code || 'GEN-101',
+            totalExams: 0,
+            completedExams: 0,
+            scores: [],
+            totalScorePercentage: 0,
+            demerits: 0
+          };
+        }
+
+        subjectMap[subject].totalExams++;
+        totalDemerits += (se.demerit_points || 0);
+
+        if (se.status === 'completed' && se.score !== null && se.results_published) {
+          const maxMarks = exam.total_marks || 100;
+          const pct = Math.round(((Number(se.score) / maxMarks) * 100) * 10) / 10;
+          subjectMap[subject].completedExams++;
+          subjectMap[subject].scores.push({
+            title: exam.title,
+            score: se.score,
+            maxMarks,
+            percentage: pct,
+            demerits: se.demerit_points || 0
+          });
+          subjectMap[subject].totalScorePercentage += pct;
+          subjectMap[subject].demerits += (se.demerit_points || 0);
+        }
+      }
+    }
+
+    const processedSubjects = Object.values(subjectMap).map(s => {
+      const avgPercentage = s.completedExams > 0 
+        ? Math.round((s.totalScorePercentage / s.completedExams) * 10) / 10
+        : null;
+      return {
+        subject: s.subject,
+        code: s.code,
+        completedExams: s.completedExams,
+        totalExams: s.totalExams,
+        averagePercentage: avgPercentage,
+        demerits: s.demerits,
+        exams: s.scores
+      };
+    });
+
+    const aiAnalysis = await geminiService.analyzeStudentPerformance({
+      studentName: student?.name || req.user.name,
+      subjects: processedSubjects,
+      totalDemerits
+    });
+
+    return res.json({
+      success: true,
+      analysis: aiAnalysis,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("AI Insights Error:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Error generating AI insights' 
+    });
   }
 };

@@ -22,7 +22,6 @@ export default function Register() {
   
   // OTP States
   const [otpStep, setOtpStep] = useState(1); // 1 = Form, 2 = OTP Verification
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [enteredOtp, setEnteredOtp] = useState('');
 
   const handleChange = (e) => {
@@ -36,59 +35,77 @@ export default function Register() {
     setError('');
     setSuccess('');
 
-    // If in Step 1, generate OTP and send via EmailJS
+    // Step 1: Request OTP from backend & send via EmailJS
     if (otpStep === 1) {
       try {
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        setGeneratedOtp(otp);
+        const res = await api.post('/auth/send-registration-otp', {
+          role,
+          email: formData.email,
+          name: formData.name,
+          id: formData.id
+        });
+
+        const { email, name, otp } = res.data;
 
         const templateParams = {
-          to_name: formData.name,
-          to_email: formData.email,
-          email: formData.email, // Required by the "To Email" field in your template
+          to_name: name || formData.name,
+          to_email: email || formData.email,
+          email: email || formData.email,
           otp: otp
         };
 
-        await emailjs.send(
-          'service_1xya9pm',
-          'template_4db7mzc',
-          templateParams,
-          {
-            publicKey: 'bUF4GpGI4G1vouutS',
-          }
-        );
+        try {
+          await emailjs.send(
+            'service_1xya9pm',
+            'template_4db7mzc',
+            templateParams,
+            { publicKey: 'bUF4GpGI4G1vouutS' }
+          );
+          setSuccess('OTP has been sent to your registered Gmail.');
+        } catch (emailErr) {
+          console.warn('Browser EmailJS error:', emailErr);
+          setSuccess('OTP has been sent to your email.');
+        }
 
         setOtpStep(2);
-        // Do not set success here, otherwise it hides the OTP form!
       } catch (err) {
-        setError('Failed to send OTP. Please check your email or try again later.');
-        console.error('EmailJS Error:', err);
+        setError(err.response?.data?.message || 'Failed to send OTP. Please check your credentials or try again.');
+        console.error('Registration OTP Error:', err);
       } finally {
         setLoading(false);
       }
       return;
     }
 
-    // Verify OTP if in Step 2
+    // Step 2: Submit Registration with OTP verified by backend
     if (otpStep === 2) {
-      if (enteredOtp !== generatedOtp) {
-        setError('Invalid OTP. Please try again.');
+      if (!enteredOtp || enteredOtp.trim().length === 0) {
+        setError('Please enter the OTP sent to your email.');
         setLoading(false);
         return;
       }
-      setSuccess(''); // Clear success message from OTP step
     }
 
-    // Final API call for registration
     let endpoint = '';
     let payload = {};
 
     if (role === 'teacher') {
       endpoint = '/auth/register/teacher';
-      payload = { name: formData.name, email: formData.email, password: formData.password };
+      payload = { 
+        name: formData.name, 
+        email: formData.email, 
+        password: formData.password,
+        otp: enteredOtp.trim() 
+      };
     } else {
       endpoint = '/auth/register/student';
-      payload = { id: formData.id, name: formData.name, email: formData.email, password: formData.password };
+      payload = { 
+        id: formData.id, 
+        name: formData.name, 
+        email: formData.email, 
+        password: formData.password,
+        otp: enteredOtp.trim() 
+      };
     }
 
     try {

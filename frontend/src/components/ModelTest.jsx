@@ -134,7 +134,7 @@ export default function ModelTest() {
         <div>
           <h2 className="text-2xl font-black text-gray-900 tracking-tight">AI Model Tester</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Test the YOLOv11 object detection model in real-time.
+            Agent ELI - The Real-time AI Proctoring Engine
           </p>
         </div>
         

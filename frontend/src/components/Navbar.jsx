@@ -1,26 +1,13 @@
-import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
-import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, Shield, GraduationCap, User, X, Mail, Phone, MapPin, Send } from 'lucide-react';
+import React from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { LogOut, Shield, GraduationCap, User, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '../api/axiosConfig';
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  
-  const [showContact, setShowContact] = useState(false);
-  const [contactSuccess, setContactSuccess] = useState(false);
-
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    // Simulate sending message
-    setContactSuccess(true);
-    setTimeout(() => {
-      setContactSuccess(false);
-      setShowContact(false);
-    }, 3000);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -33,6 +20,8 @@ export default function Navbar() {
     if (user.role === 'teacher') return <GraduationCap size={18} className="text-tomato-400" />;
     return <User size={18} className="text-tomato-400" />;
   };
+
+  const isInsightsActive = location.pathname.includes('/student') && location.search.includes('tab=insights');
 
   return (
     <nav className="sticky top-0 bg-white border-b border-gray-100 z-40 px-6 py-4 flex justify-between items-center relative">
@@ -48,7 +37,28 @@ export default function Navbar() {
       </div>
 
       {token && user.role ? (
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3 sm:gap-5">
+          {user.role === 'student' && (
+            <Link
+              to="/dashboard/student?tab=insights"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm group ${
+                isInsightsActive
+                  ? 'bg-gray-900 text-white shadow-tomato-500/10'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:text-gray-900 hover:border-gray-900 hover:bg-gray-50'
+              }`}
+              title="Subject Insights & Suggestions"
+            >
+              <Sparkles 
+                size={15} 
+                className={`transition-transform group-hover:scale-110 ${
+                  isInsightsActive ? 'text-tomato-400' : 'text-tomato-500'
+                }`} 
+              />
+              <span className="hidden sm:inline">Subject Insights & Suggestions</span>
+              <span className="sm:hidden inline">Insights</span>
+            </Link>
+          )}
+
           <div className="flex items-center gap-3 bg-white border border-gray-200 py-1.5 px-3 rounded-xl">
             {user.profile_image ? (
               <img 
@@ -77,69 +87,9 @@ export default function Navbar() {
           </button>
         </div>
       ) : (
-        <>
-          <div className="w-[250px] flex justify-end ml-auto">
-            <button 
-              onClick={() => setShowContact(true)}
-              className="tomato-btn py-2 px-5 text-sm"
-            >
-              Contact Us
-            </button>
-          </div>
-        </>
-      )}
-
-      {/* Contact Modal */}
-      {showContact && createPortal(
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-gray-900 p-6 flex justify-between items-center text-white">
-              <h2 className="text-2xl font-bold">Contact Us</h2>
-              <button onClick={() => setShowContact(false)} className="hover:bg-white/20 p-2 rounded-full smooth-transition">
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="p-8 overflow-y-auto">
-              {contactSuccess ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Send size={32} />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
-                  <p className="text-gray-500">Thank you for reaching out. We will get back to you shortly.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name <span className="text-red-500 ml-1">*</span></label>
-                    <input type="text" required placeholder="John Doe" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
-                    <input type="email" required placeholder="john@example.com" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Message <span className="text-red-500 ml-1">*</span></label>
-                    <textarea required rows="4" placeholder="How can we help you?" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition resize-none"></textarea>
-                  </div>
-                  
-                  <div className="flex gap-4 items-center pt-4 border-t border-gray-100">
-                    <div className="flex-1 flex flex-col gap-2 text-xs text-gray-500">
-                      <span className="flex items-center gap-1.5"><Mail size={14}/> support@SExam.ai</span>
-                      <span className="flex items-center gap-1.5"><Phone size={14}/> +1 800 123 4567</span>
-                    </div>
-                    <button type="submit" className="tomato-btn py-2.5 px-6">
-                      Send Message
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>,
-        document.body
+        <div className="w-[250px]" />
       )}
     </nav>
   );
 }
+

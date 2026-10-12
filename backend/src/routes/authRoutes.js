@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 
 // Registration routes
+router.post('/send-registration-otp', authController.sendRegistrationOtp);
 router.post('/register/teacher', authController.registerTeacher);
 router.post('/register/student', authController.registerStudent);
 
@@ -13,6 +14,7 @@ router.post('/login/student', authController.studentLogin);
 
 // Reset Password routes
 router.post('/verify-identifier', authController.verifyIdentifier);
+router.post('/verify-reset-otp', authController.verifyResetOtp);
 router.post('/reset-password', authController.resetPassword);
 
 module.exports = router;
