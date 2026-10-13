@@ -24,6 +24,7 @@ export default function ExamInterface() {
   const canvasRef = useRef(null);
   const modelRef = useRef(null);
   const suspiciousTimersRef = useRef({});
+  const lastSeenRef = useRef({});
   const isOutOfScreenRef = useRef(false);
 
   // Exam state
@@ -44,6 +45,7 @@ export default function ExamInterface() {
   const [error, setError] = useState('');
   const [limitReached, setLimitReached] = useState(false);
   const [showLogFeed, setShowLogFeed] = useState([]); // Local log stream on exam screen
+  const [liveDetections, setLiveDetections] = useState([]); // Current frame detections in real-time
   const [processedFrame, setProcessedFrame] = useState(null); // Annotated image from backend
   const [showRulesModal, setShowRulesModal] = useState(false);
   
@@ -308,142 +310,194 @@ export default function ExamInterface() {
     }
   };
 
-  // Load TFJS COCO-SSD Model
+  // Normalizes COCO-SSD class names so cell phones, monitors/TVs/screens, books, and laptops are accurately detected
+  const normalizeDetectedClass = (rawClass) => {
+    const cls = String(rawClass || '').toLowerCase().trim();
+    if (cls === 'cell phone' || cls === 'remote' || cls === 'telephone' || cls === 'mobile') return 'cell phone';
+    if (cls === 'book' || cls === 'notebook') return 'book';
+    if (cls === 'laptop' || cls === 'tv' || cls === 'tvmonitor' || cls === 'monitor' || cls === 'screen') return 'monitor';
+    if (cls === 'person') return 'person';
+    return null;
+  };
+
+  // Load TFJS COCO-SSD Model (Using mobilenet_v2 for significantly higher accuracy and small object detection)
   useEffect(() => {
     const loadModel = async () => {
       try {
-        const model = await cocoSsd.load();
+        const model = await cocoSsd.load({ base: 'mobilenet_v2' });
         modelRef.current = model;
         setModelReady(true);
-        console.log("Agent ELI - The Real-time AI Proctoring Engine loaded");
+        console.log("Agent ELI - The Real-time AI Proctoring Engine loaded (mobilenet_v2)");
       } catch (err) {
-        console.error("Error loading TFJS model", err);
+        console.warn("Falling back to standard COCO-SSD model:", err);
+        try {
+          const fallbackModel = await cocoSsd.load();
+          modelRef.current = fallbackModel;
+          setModelReady(true);
+          console.log("Agent ELI - Fallback COCO-SSD model loaded");
+        } catch (fallbackErr) {
+          console.error("Error loading TFJS model", fallbackErr);
+        }
       }
     };
     loadModel();
   }, []);
 
-  // Client-side AI Detection Loop (Replacing WebSocket)
+  // Client-side AI Detection Loop
   useEffect(() => {
     if (!examStarted || !webcamReady || !examDetails || !modelReady) return;
 
     let frameInterval;
     
-    // Start capturing after 5 seconds delay to let user settle
+    // Start capturing after 3 seconds delay to let user settle
     const startDelay = setTimeout(() => {
-      console.log('Started Agent ELI - The Real-time AI Proctoring Engine loop');
+      console.log('Started Agent ELI - The Real-time AI Proctoring Engine loop (1 FPS)');
       
-      // Frame capture and prediction loop (every 1.5s to save CPU)
+      // Frame capture and prediction loop (1 FPS: every 1s / 1000ms)
       frameInterval = setInterval(async () => {
         if (modelRef.current && videoRef.current && videoRef.current.readyState === 4) {
           try {
-            const predictions = await modelRef.current.detect(videoRef.current, 50, 0.25);
-            
-            // Draw on canvas to create processedFrame base64
+            const video = videoRef.current;
             const canvas = canvasRef.current;
-            if (canvas) {
-              const ctx = canvas.getContext('2d');
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              
-              let detectedItems = new Set();
+            if (!video || !canvas) return;
 
-              predictions.forEach(prediction => {
-                // Scale coordinates
-                const [x, y, width, height] = prediction.bbox;
-                const scaleX = canvas.width / videoRef.current.videoWidth;
-                const scaleY = canvas.height / videoRef.current.videoHeight;
-                
-                // Only draw box if it's a relevant object or person
-                if (['cell phone', 'book', 'laptop', 'person'].includes(prediction.class)) {
-                  ctx.strokeStyle = '#ef4444'; // rose/red
-                  ctx.lineWidth = 2;
-                  ctx.strokeRect(x * scaleX, y * scaleY, width * scaleX, height * scaleY);
-                  ctx.fillStyle = '#ef4444';
-                  ctx.font = '12px Arial';
-                  ctx.fillText(`${prediction.class} (${Math.round(prediction.score*100)}%)`, x * scaleX, (y * scaleY) > 12 ? (y * scaleY) - 5 : 12);
-                }
-
-                if (['cell phone', 'book', 'laptop'].includes(prediction.class)) {
-                  detectedItems.add(prediction.class);
-                }
-              });
-
-              // Check for multiple people or no people
-              const persons = predictions.filter(p => p.class === 'person');
-              if (persons.length > 1) {
-                detectedItems.add('multiple persons');
-              } else if (persons.length === 0) {
-                detectedItems.add('no person visible');
-              }
-
-              const now = Date.now();
-              const timers = suspiciousTimersRef.current;
-              let itemsToLog = [];
-
-              // Check items and update timers (5 second rule)
-              detectedItems.forEach(item => {
-                if (!timers[item]) {
-                  timers[item] = now; // Start tracking
-                } else if (now - timers[item] > 5000) {
-                  // Has been present for >5 seconds
-                  if (item !== 'no person visible') {
-                    if (item === 'cell phone') {
-                      logCheating('AI Detection', 'Cell phone detected for > 5s', 0, true);
-                    } else if (item === 'book' || item === 'laptop' || item === 'multiple persons') {
-                      logCheating('AI Detection', `${item} detected for > 5s`, 2, false);
-                    }
-                    timers[item] = now; // Reset timer so it triggers again if held
-                  }
-                }
-              });
-
-              // Clear timers for items no longer detected
-              Object.keys(timers).forEach(item => {
-                if (item !== 'no person visible' && !detectedItems.has(item)) {
-                  delete timers[item];
-                }
-              });
-
-              // Special handling for out of screen returning
-              if (detectedItems.has('no person visible')) {
-                if (!timers['no person visible']) {
-                  timers['no person visible'] = now;
-                } else {
-                  const outDuration = now - timers['no person visible'];
-                  if (outDuration > 10000 && !isOutOfScreenRef.current) {
-                    isOutOfScreenRef.current = true;
-                    logCheating('AI Detection', 'Student left the screen for > 10s', 0, true);
-                  } else if (outDuration > 5000 && !isOutOfScreenRef.current) {
-                    isOutOfScreenRef.current = true;
-                    // Optional: log "left screen" event locally
-                  }
-                }
-              } else {
-                if (isOutOfScreenRef.current) {
-                  const outDuration = now - timers['no person visible'];
-                  isOutOfScreenRef.current = false;
-                  if (outDuration <= 10000) {
-                    logCheating('AI Detection', 'Student back to screen (away <10s)', 1, false);
-                  }
-                  delete timers['no person visible'];
-                } else {
-                  delete timers['no person visible'];
-                }
-              }
-
-              const base64Frame = canvas.toDataURL('image/jpeg', 0.6);
-              setProcessedFrame(base64Frame);
-
-              if (itemsToLog.length > 0) {
-                // UI feed fallback
+            // Ensure canvas resolution matches video native stream 1:1 for pixel-perfect bounding boxes
+            if (video.videoWidth && video.videoHeight) {
+              if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
               }
             }
+
+            // Detect objects (sensitivity threshold 0.12 to capture desktop monitors, laptops, and TVs reliably)
+            const predictions = await modelRef.current.detect(video, 30, 0.12);
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            let detectedItems = new Set();
+            let liveDetectedList = [];
+
+            predictions.forEach(prediction => {
+              const mappedClass = normalizeDetectedClass(prediction.class);
+              if (!mappedClass) return;
+
+              // Dynamic confidence filtering: persons require >= 0.25; monitors require >= 0.12; phones/books >= 0.18
+              if (mappedClass === 'person' && prediction.score < 0.25) return;
+              if (mappedClass === 'cell phone' && prediction.score < 0.18) return;
+              if (mappedClass === 'book' && prediction.score < 0.18) return;
+              if (mappedClass === 'monitor' && prediction.score < 0.12) return;
+
+              const [x, y, width, height] = prediction.bbox;
+              const scorePercent = Math.round(prediction.score * 100);
+              const isSuspicious = (mappedClass !== 'person');
+
+              // Draw high-visibility bounding box
+              ctx.strokeStyle = isSuspicious ? '#ef4444' : '#10b981';
+              ctx.lineWidth = Math.max(3, Math.round(canvas.width / 400));
+              ctx.strokeRect(x, y, width, height);
+
+              // Draw clear pill badge with object name and score
+              const displayTitle = mappedClass === 'cell phone' ? 'Cell Phone' :
+                                   mappedClass === 'book' ? 'Book / Notes' :
+                                   mappedClass === 'monitor' ? 'Monitor / Screen' : 'Person';
+              const label = `${displayTitle} ${scorePercent}%`;
+              ctx.font = 'bold 16px sans-serif';
+              const textWidth = ctx.measureText(label).width;
+              
+              ctx.fillStyle = isSuspicious ? '#ef4444' : '#10b981';
+              ctx.fillRect(x, Math.max(0, y - 26), textWidth + 14, 26);
+              ctx.fillStyle = '#ffffff';
+              ctx.fillText(label, x + 7, Math.max(18, y - 8));
+
+              if (isSuspicious) {
+                detectedItems.add(mappedClass);
+                liveDetectedList.push(`${displayTitle} (${scorePercent}%)`);
+              }
+            });
+
+            // Person verification
+            const persons = predictions.filter(p => normalizeDetectedClass(p.class) === 'person' && p.score >= 0.25);
+            if (persons.length > 1) {
+              detectedItems.add('multiple persons');
+              liveDetectedList.push(`Multiple Persons (${persons.length})`);
+            } else if (persons.length === 0) {
+              detectedItems.add('no person visible');
+              liveDetectedList.push('No Person Visible');
+            } else {
+              if (liveDetectedList.length === 0) {
+                liveDetectedList.push('1 Person Verified');
+              }
+            }
+
+            setLiveDetections(liveDetectedList);
+
+            const now = Date.now();
+            const timers = suspiciousTimersRef.current;
+            const lastSeen = lastSeenRef.current;
+
+            // Track timers with grace period (doesn't wipe out on single frame drop)
+            detectedItems.forEach(item => {
+              lastSeen[item] = now;
+              if (!timers[item]) {
+                timers[item] = now; // Start tracking
+              } else if (now - timers[item] >= 4000) {
+                // Present for >4 seconds
+                if (item !== 'no person visible') {
+                  if (item === 'cell phone') {
+                    logCheating('AI Detection', 'Cell phone detected in camera', 0, true);
+                  } else if (item === 'book' || item === 'laptop' || item === 'monitor' || item === 'multiple persons') {
+                    const itemName = item === 'monitor' ? 'Secondary Monitor / Screen' : item;
+                    logCheating('AI Detection', `${itemName} detected in camera`, 2, false);
+                  }
+                  timers[item] = now; // Reset timer so it doesn't spam every second
+                }
+              }
+            });
+
+            // Clear timers only if item hasn't been seen for > 2.5 seconds (resilient to motion blur)
+            Object.keys(timers).forEach(item => {
+              if (item !== 'no person visible') {
+                if (now - (lastSeen[item] || 0) > 2500) {
+                  delete timers[item];
+                }
+              }
+            });
+
+            // Special handling for out of screen returning
+            if (detectedItems.has('no person visible')) {
+              if (!timers['no person visible']) {
+                timers['no person visible'] = now;
+              } else {
+                const outDuration = now - timers['no person visible'];
+                if (outDuration > 10000 && !isOutOfScreenRef.current) {
+                  isOutOfScreenRef.current = true;
+                  logCheating('AI Detection', 'Student left the screen for > 10s', 0, true);
+                } else if (outDuration > 4000 && !isOutOfScreenRef.current) {
+                  isOutOfScreenRef.current = true;
+                }
+              }
+            } else {
+              if (isOutOfScreenRef.current) {
+                const outDuration = now - (timers['no person visible'] || now);
+                isOutOfScreenRef.current = false;
+                if (outDuration <= 10000) {
+                  logCheating('AI Detection', 'Student back to screen (away <10s)', 1, false);
+                }
+                delete timers['no person visible'];
+              } else {
+                delete timers['no person visible'];
+              }
+            }
+
+            const base64Frame = canvas.toDataURL('image/jpeg', 0.6);
+            setProcessedFrame(base64Frame);
           } catch (err) {
             console.warn("Detection error", err);
           }
         }
-      }, 1500); // 1.5 FPS
-    }, 5000);
+      }, 1000); // 1 FPS (1000ms)
+    }, 3000);
 
     return () => {
       clearTimeout(startDelay);
@@ -619,7 +673,7 @@ export default function ExamInterface() {
                     Question {idx + 1}: {q.question_text}
                   </h4>
                   <div className="mt-4">
-                    {q.type === 'Written' ? (
+                    {(q.type === 'Written' || String(q.type || q.question_type || '').toLowerCase() === 'written' || String(q.type || q.question_type || '').toLowerCase() === 'descriptive') ? (
                       <textarea
                         value={answers[q.id] || ''}
                         onChange={(e) => handleOptionChange(q.id, e.target.value)}
@@ -693,7 +747,7 @@ export default function ExamInterface() {
                 className="w-full h-full object-cover"
               />
 
-              <canvas ref={canvasRef} width="320" height="240" className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />
+              <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />
               {!streamRef.current && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                   <div className="w-10 h-10 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center mb-2 animate-bounce">
@@ -702,6 +756,25 @@ export default function ExamInterface() {
                   <span className="text-[10px] font-bold text-gray-500">Webcam Inactive / Denied</span>
                 </div>
               )}
+            </div>
+
+            {/* Live AI Status Pill */}
+            <div className="w-full mt-3 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[10px]">
+              <span className="font-bold text-gray-700 flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${
+                  liveDetections.some(d => d.includes('Cell Phone') || d.includes('Book') || d.includes('Multiple') || d.includes('Screen'))
+                    ? 'bg-red-500 animate-ping'
+                    : 'bg-green-500'
+                }`} />
+                AI Vision Live:
+              </span>
+              <span className={`font-mono font-bold truncate max-w-[200px] ${
+                liveDetections.some(d => d.includes('Cell Phone') || d.includes('Book') || d.includes('Multiple') || d.includes('Screen'))
+                  ? 'text-red-600'
+                  : 'text-gray-800'
+              }`}>
+                {liveDetections.length > 0 ? liveDetections.join(', ') : 'Initializing AI...'}
+              </span>
             </div>
           </div>
 

@@ -302,10 +302,10 @@ exports.getExamQuestions = async (req, res) => {
     const response = questions.map(q => {
       const obj = q.toObject();
       obj.id = obj._id;
-      let qType = obj.type || obj.question_type || 'MCQ';
-      if (qType.toLowerCase() === 'descriptive') qType = 'Written';
-      else if (qType.toLowerCase() === 'mcq') qType = 'MCQ';
+      const rawQType = String(obj.type || obj.question_type || '').trim().toLowerCase();
+      const qType = (rawQType === 'written' || rawQType === 'descriptive') ? 'Written' : 'MCQ';
       obj.type = qType;
+      obj.question_type = qType;
 
       if (!obj.option_a && obj.options) {
         obj.option_a = obj.options.a || obj.options.A || '';
@@ -392,8 +392,8 @@ exports.submitExam = async (req, res) => {
       let marksAwarded = null; 
 
       if (studentAnswer) {
-        const type = q.type || q.question_type;
-        if (type.toUpperCase() === 'MCQ') {
+        const type = String(q.type || q.question_type || '').trim().toLowerCase();
+        if (type === 'mcq') {
           if (studentAnswer.toUpperCase() === (q.correct_option || q.correct_answer || '').toUpperCase()) {
             marksAwarded = q.marks;
             totalScore += q.marks;

@@ -35,10 +35,11 @@ exports.logIncident = async (req, res) => {
       demeritPoints = 0;
       const lowerDetails = (details || '').toLowerCase();
       
-      if (lowerDetails.includes('multiple persons detected')) demeritPoints += 1;
+      if (lowerDetails.includes('multiple persons detected') || lowerDetails.includes('multiple persons')) demeritPoints += 1;
       if (lowerDetails.includes('cell phone')) isInstantBlock = true;
       if (/\bbook\b/.test(lowerDetails)) demeritPoints += 1;
       if (/\bnotebook\b/.test(lowerDetails)) demeritPoints += 1;
+      if (lowerDetails.includes('monitor') || lowerDetails.includes('screen') || lowerDetails.includes('laptop')) demeritPoints += 2;
     }
   }
 

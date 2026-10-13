@@ -220,6 +220,10 @@ exports.deleteExam = async (req, res) => {
     const exam = await Exam.findOne({ _id: id, teacher_id: req.user.id });
     if (!exam) return res.status(404).json({ message: 'Exam not found or unauthorized' });
     
+    if (exam.is_live) {
+      return res.status(400).json({ message: 'Live exam cannot be deleted. Please stop the exam first.' });
+    }
+
     const examTitle = exam.title;
     await Exam.deleteOne({ _id: id });
     await ExamQuestion.deleteMany({ exam_id: id });
@@ -307,7 +311,8 @@ exports.createQuestion = async (req, res) => {
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
     const numMarks = Number(marks) || 1;
-    const qType = (type || 'MCQ').toUpperCase();
+    const rawType = String(type || '').trim().toLowerCase();
+    const qType = (rawType === 'written' || rawType === 'descriptive') ? 'Written' : 'MCQ';
 
     await ExamQuestion.create({
       exam_id,
@@ -349,7 +354,8 @@ exports.updateQuestion = async (req, res) => {
 
     const oldMarks = Number(question.marks) || 0;
     const numMarks = Number(marks) || 1;
-    const qType = (type || 'MCQ').toUpperCase();
+    const rawType = String(type || '').trim().toLowerCase();
+    const qType = (rawType === 'written' || rawType === 'descriptive') ? 'Written' : 'MCQ';
 
     await ExamQuestion.findByIdAndUpdate(
       question._id,
@@ -527,7 +533,7 @@ exports.getStudentAnswersheet = async (req, res) => {
         student_answer: ans ? ans.answer_text : null,
         marks_awarded: ans ? ans.marks_awarded : 0,
         question_id: eq._id,
-        type: eq.type || eq.question_type,
+        type: (String(eq.type || eq.question_type || '').toLowerCase() === 'written' || String(eq.type || eq.question_type || '').toLowerCase() === 'descriptive') ? 'Written' : 'MCQ',
         question_text: eq.question_text,
         max_marks: eq.marks,
         option_a: eq.option_a,

@@ -307,6 +307,11 @@ export default function TeacherDashboard() {
   };
 
   const handleDeleteExam = async (id) => {
+    const targetExam = exams.find((e) => (e.id === id || e._id === id));
+    if (targetExam?.is_live) {
+      setError("Live exam cannot be deleted. Please stop the exam first.");
+      return;
+    }
     if (
       !window.confirm(
         "Delete this exam? This will wipe all its questions and grades.",
@@ -326,7 +331,7 @@ export default function TeacherDashboard() {
         setSelectedResultExamId("");
       }
     } catch (err) {
-      setError("Error deleting exam");
+      setError(err.response?.data?.message || "Error deleting exam");
     }
   };
 
@@ -1246,7 +1251,13 @@ export default function TeacherDashboard() {
                             </button>
                             <button
                               onClick={() => handleDeleteExam(exam.id)}
-                              className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              disabled={exam.is_live}
+                              title={exam.is_live ? "Live exam cannot be deleted" : "Delete Exam"}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                exam.is_live
+                                  ? "text-gray-300 cursor-not-allowed opacity-40"
+                                  : "text-gray-500 hover:text-red-500 hover:bg-red-50"
+                              }`}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -2341,7 +2352,8 @@ export default function TeacherDashboard() {
                     <div className="absolute top-4 right-4 flex gap-2">
                       <button
                         onClick={() => {
-                          setQuestionTab(q.type);
+                          const isWritten = String(q.type || '').toLowerCase() === 'written' || String(q.type || '').toLowerCase() === 'descriptive';
+                          setQuestionTab(isWritten ? "Written" : "MCQ");
                           setQuestionForm({
                             id: q.id,
                             question_text: q.question_text,
@@ -2379,7 +2391,7 @@ export default function TeacherDashboard() {
                       </p>
                     </div>
 
-                    {q.type === "MCQ" && (
+                    {String(q.type || '').toLowerCase() === "mcq" && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3 pl-20">
                         {["A", "B", "C", "D"].map((opt) => (
                           <div
@@ -2391,7 +2403,7 @@ export default function TeacherDashboard() {
                         ))}
                       </div>
                     )}
-                    {q.type === "Written" && (
+                    {(String(q.type || '').toLowerCase() === "written" || String(q.type || '').toLowerCase() === "descriptive") && (
                       <div className="pl-20">
                         <div className="bg-white border border-dashed border-gray-200 rounded-lg p-4 text-xs text-gray-500 italic">
                           Students will type their answer in a text box.
@@ -2600,7 +2612,7 @@ export default function TeacherDashboard() {
                         </div>
                       </div>
 
-                      {ans.type === "MCQ" && (
+                      {String(ans.type || '').toLowerCase() === "mcq" && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3">
                           {["A", "B", "C", "D"].map((opt) => (
                             <div
@@ -2624,7 +2636,7 @@ export default function TeacherDashboard() {
                         </div>
                       )}
 
-                      {ans.type === "Written" && (
+                      {(String(ans.type || '').toLowerCase() === "written" || String(ans.type || '').toLowerCase() === "descriptive") && (
                         <div>
                           <p className="text-xs font-bold text-gray-500 mb-1">
                             Student's Answer:

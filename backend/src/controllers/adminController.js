@@ -256,7 +256,17 @@ exports.getAllExams = async (req, res) => {
 exports.deleteExam = async (req, res) => {
   const { id } = req.params;
   try {
+    const exam = await Exam.findById(id);
+    if (!exam) return res.status(404).json({ message: 'Exam not found' });
+
+    if (exam.is_live) {
+      return res.status(400).json({ message: 'Live exam cannot be deleted. Please stop the exam first.' });
+    }
+
     await Exam.findByIdAndDelete(id);
+    await ExamQuestion.deleteMany({ exam_id: id });
+    await StudentExam.deleteMany({ exam_id: id });
+    await StudentAnswer.deleteMany({ exam_id: id });
     return res.json({ message: 'Exam deleted successfully' });
   } catch (error) {
     console.error(error);

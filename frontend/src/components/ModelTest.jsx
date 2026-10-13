@@ -11,21 +11,29 @@ export default function ModelTest() {
   const [isDetecting, setIsDetecting] = useState(false);
 
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const modelRef = useRef(null);
   const loopRef = useRef(null);
   const logContainerRef = useRef(null);
 
-  // Load Model
+  // Load Model (Using mobilenet_v2 for higher detection precision)
   const loadModel = async () => {
     setLoadingModel(true);
     try {
-      const model = await cocoSsd.load();
+      const model = await cocoSsd.load({ base: 'mobilenet_v2' });
       modelRef.current = model;
       setModelReady(true);
     } catch (err) {
-      console.error("Error loading TFJS model", err);
-      alert("Failed to load TensorFlow model. Check your internet connection.");
+      console.warn("Falling back to standard COCO-SSD:", err);
+      try {
+        const fallbackModel = await cocoSsd.load();
+        modelRef.current = fallbackModel;
+        setModelReady(true);
+      } catch (fallbackErr) {
+        console.error("Error loading TFJS model", fallbackErr);
+        alert("Failed to load TensorFlow model. Check your internet connection.");
+      }
     } finally {
       setLoadingModel(false);
     }
@@ -66,6 +74,10 @@ export default function ModelTest() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
     setIsCameraActive(false);
     stopDetectionLoop();
   };
@@ -73,7 +85,7 @@ export default function ModelTest() {
   const startDetectionLoop = () => {
     setIsDetecting(true);
     setTimeout(() => {
-      loopRef.current = setInterval(detectFrame, 1500); // 1.5s interval
+      loopRef.current = setInterval(detectFrame, 1000); // 1 FPS (1000ms)
     }, 1000);
   };
 
@@ -83,31 +95,83 @@ export default function ModelTest() {
       clearInterval(loopRef.current);
       loopRef.current = null;
     }
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
   };
 
   const detectFrame = async () => {
     if (modelRef.current && videoRef.current && videoRef.current.readyState === 4) {
       try {
-        const predictions = await modelRef.current.detect(videoRef.current, 50, 0.25);
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        if (!video) return;
+
+        if (canvas && video.videoWidth && video.videoHeight) {
+          if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+          }
+        }
+
+        const predictions = await modelRef.current.detect(video, 30, 0.12);
         
         let currentObjects = new Set();
-        
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        if (ctx && canvas) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
         const allowedItems = {
           'person': 'Person',
           'cell phone': 'Mobile',
+          'remote': 'Mobile',
+          'telephone': 'Mobile',
           'mobile': 'Mobile',
           'calculator': 'Calculator',
-          'book': 'Book/Notebook',
-          'notebook': 'Book/Notebook',
+          'book': 'Book / Notes',
+          'notebook': 'Book / Notes',
+          'laptop': 'Monitor / Screen',
+          'tv': 'Monitor / Screen',
+          'tvmonitor': 'Monitor / Screen',
+          'monitor': 'Monitor / Screen',
+          'screen': 'Monitor / Screen',
           'wearing-earphones': 'Wearing-Earphones',
           'headphone': 'Headphone'
         };
 
         predictions.forEach(prediction => {
           const className = prediction.class.toLowerCase();
-          
-          if (allowedItems[className]) {
-             currentObjects.add(allowedItems[className]);
+          const mappedName = allowedItems[className];
+
+          if (mappedName) {
+            const isPerson = (className === 'person');
+            const isMonitor = (mappedName === 'Monitor / Screen');
+
+            if (isPerson && prediction.score < 0.25) return;
+            if (isMonitor && prediction.score < 0.12) return;
+            if (!isPerson && !isMonitor && prediction.score < 0.18) return;
+
+            currentObjects.add(`${mappedName} (${Math.round(prediction.score * 100)}%)`);
+
+            if (ctx && canvas) {
+              const [x, y, width, height] = prediction.bbox;
+              const isPerson = (className === 'person');
+
+              ctx.strokeStyle = isPerson ? '#10b981' : '#ef4444';
+              ctx.lineWidth = Math.max(3, Math.round(canvas.width / 400));
+              ctx.strokeRect(x, y, width, height);
+
+              const label = `${mappedName} ${Math.round(prediction.score * 100)}%`;
+              ctx.font = 'bold 16px sans-serif';
+              const textWidth = ctx.measureText(label).width;
+
+              ctx.fillStyle = isPerson ? '#10b981' : '#ef4444';
+              ctx.fillRect(x, Math.max(0, y - 26), textWidth + 14, 26);
+              ctx.fillStyle = '#ffffff';
+              ctx.fillText(label, x + 7, Math.max(18, y - 8));
+            }
           }
         });
 
@@ -194,6 +258,10 @@ export default function ModelTest() {
                 playsInline 
                 muted 
                 className="w-full h-full object-cover relative z-10"
+              />
+              <canvas 
+                ref={canvasRef} 
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none z-15"
               />
               
               {!isCameraActive && (
