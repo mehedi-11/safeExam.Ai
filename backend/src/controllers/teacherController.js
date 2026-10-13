@@ -306,12 +306,15 @@ exports.createQuestion = async (req, res) => {
     const exam = await Exam.findOne({ _id: exam_id, teacher_id: req.user.id });
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
+    const numMarks = Number(marks) || 1;
+    const qType = (type || 'MCQ').toUpperCase();
+
     await ExamQuestion.create({
       exam_id,
-      type: type || 'MCQ',
-      question_type: type || 'MCQ',
+      type: qType,
+      question_type: qType,
       question_text,
-      marks,
+      marks: numMarks,
       option_a: option_a || null,
       option_b: option_b || null,
       option_c: option_c || null,
@@ -320,11 +323,11 @@ exports.createQuestion = async (req, res) => {
     });
     
     // Update total marks in Exam
-    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: marks } });
+    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: numMarks } });
 
     return res.status(201).json({ message: 'Question added successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Error adding question:', error);
     return res.status(500).json({ message: 'Server error adding question' });
   }
 };
@@ -344,22 +347,24 @@ exports.updateQuestion = async (req, res) => {
     const exam = await Exam.findOne({ _id: question.exam_id, teacher_id: req.user.id });
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const oldMarks = question.marks;
+    const oldMarks = Number(question.marks) || 0;
+    const numMarks = Number(marks) || 1;
+    const qType = (type || 'MCQ').toUpperCase();
 
     await ExamQuestion.findByIdAndUpdate(
       question._id,
-      { $set: { type, question_type: type, question_text, marks, option_a: option_a||null, option_b: option_b||null, option_c: option_c||null, option_d: option_d||null, correct_option: correct_option||null } }
+      { $set: { type: qType, question_type: qType, question_text, marks: numMarks, option_a: option_a||null, option_b: option_b||null, option_c: option_c||null, option_d: option_d||null, correct_option: correct_option||null } }
     );
     
     // Update total marks in exam
-    const diff = marks - oldMarks;
+    const diff = numMarks - oldMarks;
     if (diff !== 0) {
       await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: diff } });
     }
 
     return res.json({ message: 'Question updated successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Error updating question:', error);
     return res.status(500).json({ message: 'Server error updating question' });
   }
 };
@@ -373,13 +378,15 @@ exports.deleteQuestion = async (req, res) => {
     const exam = await Exam.findOne({ _id: question.exam_id, teacher_id: req.user.id });
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
+    const questionMarks = Number(question.marks) || 0;
+
     await ExamQuestion.findByIdAndDelete(question._id);
     
-    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: -question.marks } });
+    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: -questionMarks } });
 
     return res.json({ message: 'Question deleted successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Error deleting question:', error);
     return res.status(500).json({ message: 'Server error deleting question' });
   }
 };

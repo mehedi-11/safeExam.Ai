@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import emailjs from '@emailjs/browser';
 import { KeyRound, Mail, UserSquare, ShieldAlert, ArrowLeft, Eye, EyeOff, Lock, CheckCircle2 } from 'lucide-react';
 
 export default function Login() {
@@ -85,6 +84,20 @@ export default function Login() {
 
     try {
       const response = await api.post(endpoint, payload);
+
+      if (response.data.success === false) {
+        if (response.data.blocked_until) {
+          const blockEnd = new Date(response.data.blocked_until).getTime();
+          const now = new Date().getTime();
+          const diff = Math.floor((blockEnd - now) / 1000);
+          if (diff > 0) {
+            setBlockTimeLeft(diff);
+          }
+        }
+        setError(response.data.message || 'Invalid credentials');
+        return;
+      }
+
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('role', role);
@@ -114,31 +127,16 @@ export default function Login() {
 
     try {
       if (resetStep === 1) {
-        // Verify identifier and request OTP from backend
+        // Verify identifier and request OTP from backend (Backend sends 1 email)
         const res = await api.post('/auth/verify-identifier', { role, identifier: resetIdentifier });
-        const { email, name, otp } = res.data;
-        setResetEmail(email);
-        setResetName(name);
-
-        const templateParams = {
-          to_name: name,
-          email: email,
-          otp: otp
-        };
-
-        try {
-          await emailjs.send(
-            'service_1xya9pm',
-            'template_tex9fhq',
-            templateParams,
-            { publicKey: 'bUF4GpGI4G1vouutS' }
-          );
-          setSuccess('OTP has been sent to your registered Gmail.');
-        } catch (emailErr) {
-          console.warn('Browser EmailJS error:', emailErr);
-          setSuccess('OTP generated successfully! Check your email or server console.');
+        if (res.data.success === false) {
+          setError(res.data.message || 'Account not found');
+          return;
         }
 
+        setResetEmail(res.data.email);
+        setResetName(res.data.name);
+        setSuccess('OTP has been sent to your registered Gmail.');
         setResetStep(2);
       } else if (resetStep === 2) {
         if (!enteredOtp || enteredOtp.trim().length === 0) {
@@ -148,22 +146,33 @@ export default function Login() {
         }
 
         // Verify OTP securely with backend
-        await api.post('/auth/verify-reset-otp', {
+        const res = await api.post('/auth/verify-reset-otp', {
           role,
           identifier: resetIdentifier,
           otp: enteredOtp.trim()
         });
 
+        if (res.data.success === false) {
+          setError(res.data.message || 'Invalid or expired OTP');
+          return;
+        }
+
         setError('');
         setSuccess('');
         setResetStep(3);
       } else if (resetStep === 3) {
-        await api.post('/auth/reset-password', {
+        const res = await api.post('/auth/reset-password', {
           role,
           identifier: resetIdentifier,
           newPassword,
           resetToken: enteredOtp.trim()
         });
+
+        if (res.data.success === false) {
+          setError(res.data.message || 'Error resetting password');
+          return;
+        }
+
         setSuccess('Password reset successfully! You can now sign in.');
         setTimeout(() => {
           setResetMode(false);
@@ -176,7 +185,6 @@ export default function Login() {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -397,12 +405,20 @@ export default function Login() {
             </form>
           )}
 
-          {!resetMode && role !== 'admin' && (
+          {!resetMode && (
             <div className="text-center mt-6">
-              <span className="text-xs text-gray-500">Don't have an account? </span>
-              <Link to={`/register/${role}`} className="text-xs font-semibold text-tomato-400 hover:text-tomato-600 hover:underline smooth-transition">
-                Register Request
-              </Link>
+              {role !== 'admin' ? (
+                <>
+                  <span className="text-xs text-gray-500">Don't have an account? </span>
+                  <Link to={`/register/${role}`} className="text-xs font-semibold text-tomato-400 hover:text-tomato-600 hover:underline smooth-transition">
+                    Register Request
+                  </Link>
+                </>
+              ) : (
+                <span className="text-xs text-gray-500">
+                  Don't have an account? <span className="font-semibold text-gray-600">Contact system administrator</span>
+                </span>
+              )}
             </div>
           )}
 

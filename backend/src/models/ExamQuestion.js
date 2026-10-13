@@ -15,13 +15,12 @@ const examQuestionSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Auto-sync question_type and type before saving
-examQuestionSchema.pre('save', function(next) {
+examQuestionSchema.pre('save', function() {
   if (this.type && !this.question_type) {
     this.question_type = this.type;
   } else if (this.question_type && !this.type) {
     this.type = this.question_type;
   }
-  next();
 });
 
 module.exports = mongoose.model('ExamQuestion', examQuestionSchema);

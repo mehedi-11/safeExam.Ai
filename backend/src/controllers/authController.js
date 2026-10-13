@@ -228,28 +228,28 @@ exports.registerStudent = async (req, res) => {
 exports.adminLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+    return res.json({ success: false, message: 'Email and password are required' });
   }
 
   try {
     const rateLimit = await checkRateLimit(email, 'admin');
     if (rateLimit.blocked) {
-      return res.status(403).json({ message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
+      return res.json({ success: false, message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
     }
 
     const admin = await Admin.findOne({ email });
     if (!admin) {
       await handleFailedLogin(email, 'admin');
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
       const blockUntil = await handleFailedLogin(email, 'admin');
       if (blockUntil) {
-        return res.status(403).json({ message: 'Too many failed attempts. Account blocked.', blocked_until: blockUntil });
+        return res.json({ success: false, message: 'Too many failed attempts. Account blocked.', blocked_until: blockUntil });
       }
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     await handleSuccessfulLogin(email);
@@ -261,12 +261,13 @@ exports.adminLogin = async (req, res) => {
     );
 
     return res.json({
+      success: true,
       token,
       user: { id: admin._id, email: admin.email, name: admin.name, role: 'admin' }
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error during admin login' });
+    return res.status(500).json({ success: false, message: 'Server error during admin login' });
   }
 };
 
@@ -274,35 +275,35 @@ exports.adminLogin = async (req, res) => {
 exports.teacherLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+    return res.json({ success: false, message: 'Email and password are required' });
   }
 
   try {
     const rateLimit = await checkRateLimit(email, 'teacher');
     if (rateLimit.blocked) {
-      return res.status(403).json({ message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
+      return res.json({ success: false, message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
     }
 
     const teacher = await Teacher.findOne({ email });
     if (!teacher) {
       await handleFailedLogin(email, 'teacher');
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     if (teacher.status === 'pending') {
-      return res.status(403).json({ message: 'Your account is pending admin approval' });
+      return res.json({ success: false, message: 'Your account is pending admin approval' });
     }
     if (teacher.status === 'blocked' || teacher.status === 'suspended') {
-      return res.status(403).json({ message: 'Your account has been suspended. Contact support.' });
+      return res.json({ success: false, message: 'Your account has been suspended. Contact support.' });
     }
 
     const isMatch = await bcrypt.compare(password, teacher.password);
     if (!isMatch) {
       const suspendStatus = await handleFailedLogin(email, 'teacher');
       if (suspendStatus === 'suspended') {
-        return res.status(403).json({ message: 'Your account has been suspended due to multiple failed login attempts. Contact support.' });
+        return res.json({ success: false, message: 'Your account has been suspended due to multiple failed login attempts. Contact support.' });
       }
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     await handleSuccessfulLogin(email);
@@ -314,6 +315,7 @@ exports.teacherLogin = async (req, res) => {
     );
 
     return res.json({
+      success: true,
       token,
       user: {
         id: teacher._id,
@@ -326,7 +328,7 @@ exports.teacherLogin = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error during teacher login' });
+    return res.status(500).json({ success: false, message: 'Server error during teacher login' });
   }
 };
 
@@ -334,36 +336,36 @@ exports.teacherLogin = async (req, res) => {
 exports.studentLogin = async (req, res) => {
   const { studentId, password } = req.body;
   if (!studentId || !password) {
-    return res.status(400).json({ message: 'StudentID and password are required' });
+    return res.json({ success: false, message: 'StudentID and password are required' });
   }
   const passwordStr = String(password);
 
   try {
     const rateLimit = await checkRateLimit(studentId, 'student');
     if (rateLimit.blocked) {
-      return res.status(403).json({ message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
+      return res.json({ success: false, message: 'Account blocked due to too many failed attempts.', blocked_until: rateLimit.blocked_until });
     }
 
     const student = await Student.findOne({ id: studentId });
     if (!student) {
       await handleFailedLogin(studentId, 'student');
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     if (student.status === 'pending') {
-      return res.status(403).json({ message: 'Your account is pending admin approval' });
+      return res.json({ success: false, message: 'Your account is pending admin approval' });
     }
     if (student.status === 'blocked' || student.status === 'suspended') {
-      return res.status(403).json({ message: 'Your account has been suspended. Contact support.' });
+      return res.json({ success: false, message: 'Your account has been suspended. Contact support.' });
     }
 
     const isMatch = await bcrypt.compare(passwordStr, student.password || '');
     if (!isMatch) {
       const suspendStatus = await handleFailedLogin(studentId, 'student');
       if (suspendStatus === 'suspended') {
-        return res.status(403).json({ message: 'Your account has been suspended due to multiple failed login attempts. Contact support.' });
+        return res.json({ success: false, message: 'Your account has been suspended due to multiple failed login attempts. Contact support.' });
       }
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     await handleSuccessfulLogin(studentId);
@@ -375,6 +377,7 @@ exports.studentLogin = async (req, res) => {
     );
 
     return res.json({
+      success: true,
       token,
       user: {
         id: student.id,
@@ -386,7 +389,7 @@ exports.studentLogin = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error during student login' });
+    return res.status(500).json({ success: false, message: 'Server error during student login' });
   }
 };
 
@@ -403,37 +406,37 @@ exports.verifyIdentifier = async (req, res) => {
     } else if (role === 'admin') {
       user = await Admin.findOne({ email: identifier });
     } else {
-      return res.status(400).json({ message: 'Invalid role' });
+      return res.json({ success: false, message: 'Invalid role' });
     }
 
-    if (!user) return res.status(404).json({ message: 'Account not found' });
+    if (!user) return res.json({ success: false, message: 'Account not found' });
     
     const resetToken = crypto.randomInt(100000, 999999).toString();
     const tokenExpiry = new Date();
     tokenExpiry.setMinutes(tokenExpiry.getMinutes() + 15);
     
-    // We update using collection to bypass schema strictness if reset_token isn't in schema
     const Model = role === 'student' ? Student : role === 'teacher' ? Teacher : Admin;
     await Model.updateOne({ _id: user._id }, { $set: { reset_token: resetToken, reset_token_expiry: tokenExpiry } }, { strict: false });
     
+    // Send email securely from backend (Single email sent via EmailJS REST API)
     await sendOtpEmail(user.email, user.name, resetToken, 'Password Reset');
 
     return res.json({
+      success: true,
       email: user.email,
       name: user.name,
-      otp: resetToken,
       message: 'OTP has been sent to your registered email address.'
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Server error verifying identifier' });
+    return res.status(500).json({ success: false, message: 'Server error verifying identifier' });
   }
 };
 
 exports.verifyResetOtp = async (req, res) => {
   const { role, identifier, otp } = req.body;
   if (!role || !identifier || !otp) {
-    return res.status(400).json({ message: 'All fields including OTP are required' });
+    return res.json({ success: false, message: 'All fields including OTP are required' });
   }
 
   try {
@@ -450,20 +453,20 @@ exports.verifyResetOtp = async (req, res) => {
       Model = Admin;
       user = await Model.findOne({ email: identifier });
     } else {
-      return res.status(400).json({ message: 'Invalid role' });
+      return res.json({ success: false, message: 'Invalid role' });
     }
 
-    if (!user) return res.status(404).json({ message: 'Account not found' });
+    if (!user) return res.json({ success: false, message: 'Account not found' });
 
     const rawUser = await Model.findById(user._id).lean();
     if (!rawUser || !rawUser.reset_token || rawUser.reset_token !== String(otp).trim() || new Date() > new Date(rawUser.reset_token_expiry)) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+      return res.json({ success: false, message: 'Invalid or expired OTP' });
     }
 
-    return res.json({ message: 'OTP verified successfully' });
+    return res.json({ success: true, message: 'OTP verified successfully' });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Server error verifying OTP' });
+    return res.status(500).json({ success: false, message: 'Server error verifying OTP' });
   }
 };
 
@@ -472,7 +475,7 @@ exports.resetPassword = async (req, res) => {
   const tokenToVerify = resetToken || otp;
 
   if (!role || !identifier || !newPassword || !tokenToVerify) {
-    return res.status(400).json({ message: 'All fields including OTP are required' });
+    return res.json({ success: false, message: 'All fields including OTP are required' });
   }
 
   try {
@@ -489,16 +492,16 @@ exports.resetPassword = async (req, res) => {
       Model = Admin;
       user = await Model.findOne({ email: identifier });
     } else {
-      return res.status(400).json({ message: 'Invalid role' });
+      return res.json({ success: false, message: 'Invalid role' });
     }
 
-    if (!user) return res.status(404).json({ message: 'Account not found' });
+    if (!user) return res.json({ success: false, message: 'Account not found' });
     
     // Check reset token via lean document
     const rawUser = await Model.findById(user._id).lean();
     
     if (!rawUser || !rawUser.reset_token || rawUser.reset_token !== String(tokenToVerify).trim() || new Date() > new Date(rawUser.reset_token_expiry)) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+      return res.json({ success: false, message: 'Invalid or expired OTP' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -509,9 +512,9 @@ exports.resetPassword = async (req, res) => {
 
     await handleSuccessfulLogin(identifier);
 
-    return res.json({ message: 'Password reset successfully. You can now login.' });
+    return res.json({ success: true, message: 'Password reset successfully. You can now login.' });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Server error resetting password' });
+    return res.status(500).json({ success: false, message: 'Server error resetting password' });
   }
 };
