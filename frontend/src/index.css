@@ -44,23 +44,28 @@
     @apply bg-white rounded-2xl shadow-xl w-full border border-gray-200 overflow-hidden animate-fade-in;
   }
 
-  /* Global Table Header Claymorphism Styling - Iris & Indigo Tactile 3D Soft Clay */
+  /* Global Table Styling - Bold Headers, No color, Unbold Body */
   thead, .clay-header {
-    background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%) !important;
-    border-bottom: 2px solid #c7d2fe !important;
+    background: transparent !important;
+    border-bottom: 1px solid #e5e7eb !important;
   }
   thead tr, .clay-header tr {
     background: transparent !important;
-    border-color: #c7d2fe !important;
+    border-color: #e5e7eb !important;
   }
-  thead th, .clay-header th {
-    background: linear-gradient(180deg, #faf8ff 0%, #ede9fe 100%) !important;
-    color: #3730a3 !important;
-    box-shadow: inset 0 3px 5px rgba(255, 255, 255, 0.95), inset 0 -3px 5px rgba(99, 102, 241, 0.22) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.95) !important;
-    border-bottom: 2px solid #c7d2fe !important;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  thead th, .clay-header th, th {
+    background: transparent !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    text-shadow: none !important;
     font-weight: 700 !important;
+  }
+
+  /* No text under table head should be bold */
+  table tbody, table tbody tr, table tbody td, table tbody td * {
+    font-weight: 400 !important;
   }
 
   /* Claymorphism Utilities */
@@ -71,8 +76,8 @@
     border: 1.5px solid rgba(199, 210, 254, 0.6);
   }
   .clay-header {
-    background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
-    border-bottom: 2px solid #c7d2fe;
+    background: transparent;
+    border-bottom: 1px solid #e5e7eb;
   }
   .clay-pill {
     background: linear-gradient(145deg, #ffffff 0%, #ede9fe 100%);

@@ -660,13 +660,13 @@ export default function StudentDashboard({ defaultTab }) {
               ) : viewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
                   <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="clay-header text-xs text-tomato-800 uppercase border-b border-tomato-200">
-                      <tr className="border-b border-tomato-200">
-                        <th className="px-6 py-4 font-bold">Exam Title</th>
-                        <th className="px-6 py-4 font-bold">Course Details</th>
-                        <th className="px-6 py-4 font-bold">Schedule</th>
-                        <th className="px-6 py-4 font-bold">Status</th>
-                        <th className="px-6 py-4 text-center font-bold">Action</th>
+                    <thead className="text-xs text-gray-900 uppercase border-b border-gray-200">
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-4 font-bold text-left">Exam Title</th>
+                        <th className="px-6 py-4 font-bold text-left">Course Details</th>
+                        <th className="px-6 py-4 font-bold text-left">Schedule</th>
+                        <th className="px-6 py-4 font-bold text-left">Status</th>
+                        <th className="px-6 py-4 font-bold text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-150">
@@ -677,12 +677,12 @@ export default function StudentDashboard({ defaultTab }) {
                         return (
                           <tr key={exam.unique_id || exam.id} className="hover:bg-white transition-colors">
                             <td className="px-6 py-4">
-                              <h4 className="font-bold text-gray-900">{exam.title}</h4>
+                              <h4 className="text-gray-900">{exam.title}</h4>
                             </td>
                             <td className="px-6 py-4">
-                              {exam.university_name && <p className="text-xs text-tomato-600 font-semibold">{exam.university_name}</p>}
+                              {exam.university_name && <p className="text-xs text-tomato-600">{exam.university_name}</p>}
                               {(exam.course_name || exam.course_code) && (
-                                <p className="text-[11px] text-gray-500 font-medium">
+                                <p className="text-[11px] text-gray-500">
                                   {exam.course_name} {exam.course_code && `(${exam.course_code})`}
                                 </p>
                               )}
@@ -695,18 +695,18 @@ export default function StudentDashboard({ defaultTab }) {
                             </td>
                             <td className="px-6 py-4">
                               {exam.exam_status === 'completed' ? (
-                                <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-2.5 py-0.5 rounded text-[10px] font-bold">Score: {exam.score}</span>
+                                <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-2.5 py-0.5 rounded text-[10px]">Score: {exam.score}</span>
                               ) : isBlocked ? (
-                                <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold flex items-center w-fit gap-1 animate-pulse">
+                                <span className="bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded text-[10px] flex items-center w-fit gap-1 animate-pulse">
                                   <ShieldAlert size={12} /> Locked
                                 </span>
                               ) : (
-                                <span className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold">Scheduled</span>
+                                <span className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2.5 py-0.5 rounded text-[10px]">Scheduled</span>
                               )}
                             </td>
                             <td className="px-6 py-4 text-center">
                               {isFinished ? (
-                                <span className="text-xs font-semibold text-tomato-700">Completed</span>
+                                <span className="text-xs text-tomato-700">Completed</span>
                               ) : (
                                 <button
                                   onClick={() => handleOpenPasswordModal(exam.id)}
@@ -810,11 +810,11 @@ export default function StudentDashboard({ defaultTab }) {
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="clay-header text-xs text-tomato-800 uppercase border-b border-tomato-200">
-                        <tr className="border-b border-tomato-200">
-                          <th className="px-6 py-4 font-bold">Exam Title</th>
-                          <th className="px-6 py-4 font-bold">Course Details</th>
-                          <th className="px-6 py-4 font-bold">Completed On</th>
+                      <thead className="text-xs text-gray-900 uppercase border-b border-gray-200">
+                        <tr className="border-b border-gray-200">
+                          <th className="px-6 py-4 font-bold text-left">Exam Title</th>
+                          <th className="px-6 py-4 font-bold text-left">Course Details</th>
+                          <th className="px-6 py-4 font-bold text-left">Completed On</th>
                           <th className="px-6 py-4 font-bold text-center">Score</th>
                         </tr>
                       </thead>
@@ -825,12 +825,12 @@ export default function StudentDashboard({ defaultTab }) {
                           return (
                             <tr key={exam.unique_id || exam.id} className="hover:bg-white transition-colors">
                               <td className="px-6 py-4">
-                                <h4 className="font-bold text-gray-900">{exam.title}</h4>
+                                <h4 className="text-gray-900">{exam.title}</h4>
                               </td>
                               <td className="px-6 py-4">
-                                {exam.university_name && <p className="text-xs text-tomato-600 font-semibold">{exam.university_name}</p>}
+                                {exam.university_name && <p className="text-xs text-tomato-600">{exam.university_name}</p>}
                                 {(exam.course_name || exam.course_code) && (
-                                  <p className="text-[11px] text-gray-500 font-medium">
+                                  <p className="text-[11px] text-gray-500">
                                     {exam.course_name} {exam.course_code && `(${exam.course_code})`}
                                   </p>
                                 )}
@@ -842,11 +842,11 @@ export default function StudentDashboard({ defaultTab }) {
                               </td>
                               <td className="px-6 py-4 text-center">
                                 {isPublished ? (
-                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs font-bold shadow-md shadow-gray-200/50">
+                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs shadow-md shadow-gray-200/50">
                                     {exam.score}
                                   </span>
                                 ) : (
-                                  <span className="bg-orange-50 text-orange-600 border border-orange-200 px-2 py-1 rounded text-[10px] font-bold">
+                                  <span className="bg-orange-50 text-orange-600 border border-orange-200 px-2 py-1 rounded text-[10px]">
                                     Pending Publish
                                   </span>
                                 )}

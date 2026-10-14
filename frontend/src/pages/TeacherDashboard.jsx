@@ -1066,24 +1066,24 @@ export default function TeacherDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                    <tr className="border-b border-tomato-200">
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                  <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                    <tr className="border-b border-gray-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">
                         Exam Title
                       </th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">
                         Course & University
                       </th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">
                         Date & Time
                       </th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-center">
+                      <th className="py-3.5 px-4 font-bold text-xs text-center">
                         Duration
                       </th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">
                         Status
                       </th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">
+                      <th className="py-3.5 px-4 font-bold text-xs text-right">
                         Actions
                       </th>
                     </tr>
@@ -1143,7 +1143,7 @@ export default function TeacherDashboard() {
                           key={exam.id}
                           className="border-b border-gray-100 hover:bg-white"
                         >
-                          <td className="py-3 px-4 font-bold text-sm text-gray-900">
+                          <td className="py-3 px-4 text-sm text-gray-900">
                             {exam.title}
                           </td>
                           <td className="py-3 px-4 text-xs text-gray-500">
@@ -1158,19 +1158,19 @@ export default function TeacherDashboard() {
                             {new Date(exam.exam_date).toLocaleString()}
                           </td>
                           <td className="py-3 px-4 text-center">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-xs font-semibold text-gray-700">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-xs text-gray-700">
                               <Clock size={12} className="text-gray-500" />
                               {exam.duration_minutes}m
                             </span>
                           </td>
                           <td className="py-3 px-4">
                             {exam.is_live ? (
-                              <span className="px-2.5 py-1 bg-tomato-100 text-tomato-700 text-[10px] font-bold rounded-full flex items-center gap-1 w-max">
+                              <span className="px-2.5 py-1 bg-tomato-100 text-tomato-700 text-[10px] rounded-full flex items-center gap-1 w-max">
                                 <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                                 LIVE
                               </span>
                             ) : (
-                              <span className="px-2.5 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full w-max">
+                              <span className="px-2.5 py-1 bg-gray-100 text-gray-500 text-[10px] rounded-full w-max">
                                 OFFLINE
                               </span>
                             )}
@@ -1179,7 +1179,7 @@ export default function TeacherDashboard() {
                             {exam.is_live && (
                               <button
                                 onClick={() => navigate(`/teacher/proctoring/${exam.id}`)}
-                                className="px-3 py-1.5 bg-tomato-100 text-tomato-700 hover:bg-tomato-200 rounded-lg text-xs font-bold transition-colors"
+                                className="px-3 py-1.5 bg-tomato-100 text-tomato-700 hover:bg-tomato-200 rounded-lg text-xs transition-colors"
                                 title="Proctor Exam"
                               >
                                 <ShieldCheck size={14} className="inline mr-1" /> Proctor
@@ -1404,21 +1404,21 @@ export default function TeacherDashboard() {
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse">
-                        <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                          <tr className="border-b border-tomato-200">
-                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                        <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                          <tr className="border-b border-gray-200">
+                            <th className="py-3.5 px-4 font-bold text-xs text-left">
                               Student Name & ID
                             </th>
-                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                            <th className="py-3.5 px-4 font-bold text-xs text-left">
                               Status
                             </th>
-                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                            <th className="py-3.5 px-4 font-bold text-xs text-left">
                               Demerit Points
                             </th>
-                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">
+                            <th className="py-3.5 px-4 font-bold text-xs text-left">
                               Marks / Score
                             </th>
-                            <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">
+                            <th className="py-3.5 px-4 font-bold text-xs text-right">
                               Actions
                             </th>
                           </tr>
@@ -1430,7 +1430,7 @@ export default function TeacherDashboard() {
                             className="border-b border-gray-100 hover:bg-white"
                           >
                             <td className="py-3 px-4">
-                              <p className="font-bold text-sm text-gray-900">
+                              <p className="text-sm text-gray-900">
                                 {res.name}
                               </p>
                               <p className="text-[10px] text-gray-500 font-mono">
@@ -1439,25 +1439,25 @@ export default function TeacherDashboard() {
                             </td>
                             <td className="py-3 px-4 text-xs">
                               {res.status === "completed" ? (
-                                <span className="text-tomato-600 font-bold bg-tomato-50 px-2 py-1 rounded-lg">
+                                <span className="text-tomato-600 bg-tomato-50 px-2 py-1 rounded-lg">
                                   Completed
                                 </span>
                               ) : (
-                                <span className="text-orange-500 font-bold bg-orange-50 px-2 py-1 rounded-lg capitalize">
+                                <span className="text-orange-500 bg-orange-50 px-2 py-1 rounded-lg capitalize">
                                   {res.status}
                                 </span>
                               )}
                             </td>
                             <td className="py-3 px-4">
                               {res.demerit_points > 0 ? (
-                                <span className="text-red-500 font-bold text-sm">
+                                <span className="text-red-500 text-sm">
                                   {res.demerit_points} pts
                                 </span>
                               ) : (
                                 <span className="text-gray-500 text-sm">0</span>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-sm font-bold text-gray-900">
+                            <td className="py-3 px-4 text-sm text-gray-900">
                               {res.score !== null ? (
                                 res.score
                               ) : (
@@ -1472,7 +1472,7 @@ export default function TeacherDashboard() {
                                 onClick={() =>
                                   handleViewAnswers(res.student_id, res.name)
                                 }
-                                className="px-3 py-1.5 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 rounded-lg text-[11px] font-bold transition-colors"
+                                className="px-3 py-1.5 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 rounded-lg text-[11px] transition-colors"
                               >
                                 View Answersheet
                               </button>
@@ -1581,13 +1581,13 @@ export default function TeacherDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                    <tr className="border-b border-tomato-200">
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Exam Title</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Course & University</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Date & Time</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-center">Status</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">Actions</th>
+                  <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                    <tr className="border-b border-gray-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">Exam Title</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">Course & University</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">Date & Time</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-center">Status</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-right">Actions</th>
                     </tr>
                   </thead>
                     <tbody className="text-sm">
@@ -1631,10 +1631,10 @@ export default function TeacherDashboard() {
 
                           return (
                             <tr key={eId} className="border-b border-gray-100 hover:bg-white">
-                              <td className="py-3 px-4 font-bold text-sm text-gray-900">
+                              <td className="py-3 px-4 text-sm text-gray-900">
                                 {exam.title}
                                 {exam.event_id && (
-                                  <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px] font-bold">Event Exam</span>
+                                  <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px]">Event Exam</span>
                                 )}
                               </td>
                               <td className="py-3 px-4 text-xs text-gray-500">
@@ -1648,12 +1648,12 @@ export default function TeacherDashboard() {
                               </td>
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max uppercase tracking-wider">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max uppercase tracking-wider">
                                     <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                                     Online
                                   </span>
                                 ) : (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200 w-max uppercase tracking-wider">
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-gray-100 text-gray-500 border border-gray-200 w-max uppercase tracking-wider">
                                     Offline
                                   </span>
                                 )}
@@ -2727,17 +2727,17 @@ export default function TeacherDashboard() {
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                    <tr className="border-b border-tomato-200">
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider sm:pl-6">Name</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Email</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Phone</th>
+                  <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                    <tr className="border-b border-gray-200">
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold uppercase tracking-wider sm:pl-6">Name</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Phone</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {selectedEventRegistrations.map((reg) => (
                       <tr key={reg._id} className="hover:bg-white transition-colors">
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-6">{reg.name}</td>
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">{reg.name}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.phone || 'N/A'}</td>
                       </tr>

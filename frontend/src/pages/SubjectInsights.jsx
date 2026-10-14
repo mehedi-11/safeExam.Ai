@@ -1079,20 +1079,20 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
 
                 <div className="border border-gray-200 rounded-xl overflow-hidden text-xs">
                   <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b border-gray-200 font-bold text-gray-500">
+                    <thead className="border-b border-gray-200 text-gray-900">
                       <tr>
-                        <th className="p-3">Exam Title</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Score</th>
-                        <th className="p-3">Demerits</th>
+                        <th className="p-3 font-bold text-left">Exam Title</th>
+                        <th className="p-3 font-bold text-left">Status</th>
+                        <th className="p-3 font-bold text-left">Score</th>
+                        <th className="p-3 font-bold text-left">Demerits</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {selectedSubjectModal.examsList.map((ex, i) => (
                         <tr key={i} className="hover:bg-gray-50/50">
-                          <td className="p-3 font-semibold text-gray-900">{ex.title}</td>
+                          <td className="p-3 text-gray-900">{ex.title}</td>
                           <td className="p-3">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] ${
                               ex.exam_status === 'completed' 
                                 ? 'bg-emerald-100 text-emerald-800' 
                                 : 'bg-gray-100 text-gray-700'
@@ -1100,14 +1100,14 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
                               {ex.exam_status}
                             </span>
                           </td>
-                          <td className="p-3 font-bold text-gray-900">
+                          <td className="p-3 text-gray-900">
                             {ex.score !== null && !isNaN(ex.score) && ex.results_published
                               ? `${ex.score} / ${ex.total_marks || 100}`
                               : 'Pending'
                             }
                           </td>
                           <td className="p-3">
-                            <span className={ex.demerit_points > 0 ? 'text-red-600 font-bold' : 'text-gray-400'}>
+                            <span className={ex.demerit_points > 0 ? 'text-red-600' : 'text-gray-400'}>
                               {ex.demerit_points || 0}
                             </span>
                           </td>

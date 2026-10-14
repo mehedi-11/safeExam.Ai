@@ -150,6 +150,9 @@ export default function ExamInterface() {
       }
     }, 30000);
 
+    // [TEMPORARY DEV COMMENT-OUT]: Refresh auto-submit disabled during development.
+    // REMEMBER TO RE-ENABLE BEFORE PRODUCTION!
+    /*
     // 6. Detect page close/refresh
     const handleBeforeUnload = (e) => {
       e.preventDefault();
@@ -180,13 +183,16 @@ export default function ExamInterface() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('unload', handleUnload);
     window.addEventListener('offline', handleOffline);
+    */
 
     return () => {
       clearInterval(timer);
       clearInterval(autoSaveTimer);
+      /*
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('unload', handleUnload);
       window.removeEventListener('offline', handleOffline);
+      */
     };
   }, [examStarted, isBlocked, timeLeft, answers, examId]);
 

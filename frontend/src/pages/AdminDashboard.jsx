@@ -822,25 +822,25 @@ export default function AdminDashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
-                        <tr className="border-b border-tomato-200">
-                          <th className="px-6 py-4 font-bold">Rank</th>
-                          <th className="px-6 py-4 font-bold">Teacher Name</th>
-                          <th className="px-6 py-4 font-bold">Email</th>
+                      <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
+                        <tr className="border-b border-gray-200">
+                          <th className="px-6 py-4 font-bold text-left">Rank</th>
+                          <th className="px-6 py-4 font-bold text-left">Teacher Name</th>
+                          <th className="px-6 py-4 font-bold text-left">Email</th>
                           <th className="px-6 py-4 font-bold text-right">Exams Created</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topTeachers?.map((teacher, index) => (
                           <tr key={teacher.id} className="hover:bg-white transition-colors">
-                            <td className="px-6 py-4 font-semibold">
+                            <td className="px-6 py-4">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-semibold text-gray-900">{teacher.name}</td>
+                            <td className="px-6 py-4 text-gray-900">{teacher.name}</td>
                             <td className="px-6 py-4 text-xs">{teacher.email}</td>
-                            <td className="px-6 py-4 text-right font-bold text-tomato-400">{teacher.exam_count}</td>
+                            <td className="px-6 py-4 text-right text-tomato-400">{teacher.exam_count}</td>
                           </tr>
                         ))}
                         {(!stats?.topTeachers || stats.topTeachers.length === 0) && (
@@ -865,11 +865,11 @@ export default function AdminDashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
-                        <tr className="border-b border-tomato-200">
-                          <th className="px-6 py-4 font-bold">Rank</th>
-                          <th className="px-6 py-4 font-bold">Student Name</th>
-                          <th className="px-6 py-4 font-bold">Email</th>
+                      <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
+                        <tr className="border-b border-gray-200">
+                          <th className="px-6 py-4 font-bold text-left">Rank</th>
+                          <th className="px-6 py-4 font-bold text-left">Student Name</th>
+                          <th className="px-6 py-4 font-bold text-left">Email</th>
                           <th className="px-6 py-4 font-bold text-center">Avg Score</th>
                           <th className="px-6 py-4 font-bold text-right">Actions</th>
                         </tr>
@@ -877,18 +877,18 @@ export default function AdminDashboard() {
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topStudents?.map((student, index) => (
                           <tr key={student.id} className="hover:bg-white transition-colors">
-                            <td className="px-6 py-4 font-semibold">
+                            <td className="px-6 py-4">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-semibold text-gray-900">{student.name}</td>
+                            <td className="px-6 py-4 text-gray-900">{student.name}</td>
                             <td className="px-6 py-4 text-xs">{student.email}</td>
-                            <td className="px-6 py-4 text-center font-bold text-tomato-600">{Number(student.average_score).toFixed(2)}%</td>
+                            <td className="px-6 py-4 text-center text-tomato-600">{Number(student.average_score).toFixed(2)}%</td>
                             <td className="px-6 py-4 text-right">
                               <button
                                 onClick={() => handleOpenStudentExamsModal(student)}
-                                className="px-3 py-1.5 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 rounded-lg text-xs font-bold transition-colors"
+                                className="px-3 py-1.5 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 rounded-lg text-xs transition-colors"
                               >
                                 View Details
                               </button>
@@ -925,11 +925,11 @@ export default function AdminDashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
-                        <tr className="border-b border-tomato-200">
-                          <th className="px-6 py-4 font-bold">Rank</th>
-                          <th className="px-6 py-4 font-bold">Event Title</th>
-                          <th className="px-6 py-4 font-bold">Event Date</th>
+                      <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
+                        <tr className="border-b border-gray-200">
+                          <th className="px-6 py-4 font-bold text-left">Rank</th>
+                          <th className="px-6 py-4 font-bold text-left">Event Title</th>
+                          <th className="px-6 py-4 font-bold text-left">Event Date</th>
                           <th className="px-6 py-4 font-bold text-center">Status</th>
                           <th className="px-6 py-4 font-bold text-right">Registrations</th>
                         </tr>
@@ -937,19 +937,19 @@ export default function AdminDashboard() {
                       <tbody className="divide-y divide-gray-100">
                         {stats?.topEvents?.map((event, index) => (
                           <tr key={event.id} className="hover:bg-white transition-colors">
-                            <td className="px-6 py-4 font-semibold">
+                            <td className="px-6 py-4">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {index + 1}
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-semibold text-gray-900">{event.title}</td>
+                            <td className="px-6 py-4 text-gray-900">{event.title}</td>
                             <td className="px-6 py-4 text-xs text-gray-500">{new Date(event.event_date).toLocaleString()}</td>
                             <td className="px-6 py-4 text-center">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${event.status === 'live' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs ${event.status === 'live' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
                                 {event.status === 'live' ? 'LIVE' : 'CLOSED'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-right font-black text-tomato-600">
+                            <td className="px-6 py-4 text-right text-tomato-600">
                               {event.registration_count}
                             </td>
                           </tr>
@@ -1180,12 +1180,12 @@ export default function AdminDashboard() {
                   </div>
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
-                      <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                        <tr className="border-b border-tomato-200 text-tomato-800 font-bold uppercase tracking-wider">
-                          <th className="p-4 font-bold text-tomato-800">Student Info</th>
-                          <th className="p-4 font-bold text-tomato-800">Email</th>
-                          <th className="p-4 text-center font-bold text-tomato-800">Exams Info</th>
-                          <th className="p-4 text-center font-bold text-tomato-800">Actions</th>
+                      <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                        <tr className="border-b border-gray-200 font-bold uppercase tracking-wider">
+                          <th className="p-4 font-bold text-left">Student Info</th>
+                          <th className="p-4 font-bold text-left">Email</th>
+                          <th className="p-4 font-bold text-center">Exams Info</th>
+                          <th className="p-4 font-bold text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
@@ -1205,12 +1205,12 @@ export default function AdminDashboard() {
                               className="hover:bg-white"
                             >
                               <td className="p-4">
-                                <div className="font-bold text-gray-900">{student.name}</div>
+                                <div className="text-gray-900">{student.name}</div>
                                 <div className="text-gray-500 text-[11px] font-mono mt-0.5">{student.id}</div>
                               </td>
                               <td className="p-4">{student.email}</td>
                               <td className="p-4 text-center">
-                                <div className="font-semibold text-gray-900">{student.totalExams || 0}</div>
+                                <div className="text-gray-900">{student.totalExams || 0}</div>
                                 <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
                               </td>
                               <td className="p-4 flex justify-center gap-2">
@@ -1221,7 +1221,7 @@ export default function AdminDashboard() {
                                       student.status,
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 ${student.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
+                                  className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${student.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
                                 >
                                   {student.status === "approved" ? (
                                     <UserMinus size={13} />
@@ -1327,12 +1327,12 @@ export default function AdminDashboard() {
                   </div>
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
-                      <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                        <tr className="border-b border-tomato-200 text-tomato-800 font-bold uppercase tracking-wider">
-                          <th className="p-4 font-bold text-tomato-800">Teacher Info</th>
-                          <th className="p-4 text-center font-bold text-tomato-800">Exams Info</th>
-                          <th className="p-4 font-bold text-tomato-800">Joined Date</th>
-                          <th className="p-4 text-center font-bold text-tomato-800">Actions</th>
+                      <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                        <tr className="border-b border-gray-200 font-bold uppercase tracking-wider">
+                          <th className="p-4 font-bold text-left">Teacher Info</th>
+                          <th className="p-4 font-bold text-center">Exams Info</th>
+                          <th className="p-4 font-bold text-left">Joined Date</th>
+                          <th className="p-4 font-bold text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
@@ -1356,11 +1356,11 @@ export default function AdminDashboard() {
                               className="hover:bg-white"
                             >
                               <td className="p-4">
-                                <div className="font-bold text-gray-900">{teacher.name}</div>
+                                <div className="text-gray-900">{teacher.name}</div>
                                 <div className="text-gray-500 text-[11px] mt-0.5">{teacher.email}</div>
                               </td>
                               <td className="p-4 text-center">
-                                <div className="font-semibold text-gray-900">{tExams.length} <span className="text-gray-500 font-normal mx-1">/</span> {completedCount}</div>
+                                <div className="text-gray-900">{tExams.length} <span className="text-gray-500 font-normal mx-1">/</span> {completedCount}</div>
                                 <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
                               </td>
                               <td className="p-4">
@@ -1376,7 +1376,7 @@ export default function AdminDashboard() {
                                       teacher.status,
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 ${teacher.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
+                                  className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${teacher.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
                                 >
                                   {teacher.status === "approved" ? (
                                     <UserMinus size={13} />
@@ -1494,13 +1494,13 @@ export default function AdminDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                    <tr className="border-b border-tomato-200">
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Exam Title</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Course & University</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider">Date & Time</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-center">Status</th>
-                      <th className="py-3.5 px-4 font-bold text-xs text-tomato-800 tracking-wider text-right">Actions</th>
+                  <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                    <tr className="border-b border-gray-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">Exam Title</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">Course & University</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-left">Date & Time</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-center">Status</th>
+                      <th className="py-3.5 px-4 font-bold text-xs text-right">Actions</th>
                     </tr>
                   </thead>
                     <tbody className="text-sm">
@@ -1544,10 +1544,10 @@ export default function AdminDashboard() {
 
                           return (
                             <tr key={eId} className="border-b border-gray-100 hover:bg-white">
-                              <td className="py-3 px-4 font-bold text-sm text-gray-900">
+                              <td className="py-3 px-4 text-sm text-gray-900">
                                 {exam.title}
                                 {exam.event_id && (
-                                  <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px] font-bold">Event Exam</span>
+                                  <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px]">Event Exam</span>
                                 )}
                               </td>
                               <td className="py-3 px-4 text-xs text-gray-500">
@@ -1561,16 +1561,16 @@ export default function AdminDashboard() {
                               </td>
                               <td className="py-3 px-4 text-center">
                                 {isLive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
                                     <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                                     Live Now
                                   </span>
                                 ) : isEnded ? (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200 w-max">
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-gray-100 text-gray-500 border border-gray-200 w-max">
                                     Ended
                                   </span>
                                 ) : (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
+                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
                                     Upcoming
                                   </span>
                                 )}
@@ -1580,7 +1580,7 @@ export default function AdminDashboard() {
                                   {isLive && (
                                     <button
                                       onClick={() => navigate(`/admin/proctoring/${eId}`)}
-                                      className="px-3 py-1.5 text-xs font-bold text-tomato-600 bg-tomato-50 border border-tomato-200 rounded-lg hover:bg-tomato-100 transition-colors flex items-center gap-1.5"
+                                      className="px-3 py-1.5 text-xs text-tomato-600 bg-tomato-50 border border-tomato-200 rounded-lg hover:bg-tomato-100 transition-colors flex items-center gap-1.5"
                                     >
                                       <Camera size={14} />
                                       View Live
@@ -1809,13 +1809,13 @@ export default function AdminDashboard() {
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md shadow-gray-200/50">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200">
-                      <tr className="border-b border-tomato-200">
-                        <th className="px-6 py-4 font-bold text-tomato-800">Exam Title</th>
-                        <th className="px-6 py-4 font-bold text-tomato-800">Teacher Name</th>
-                        <th className="px-6 py-4 font-bold text-tomato-800">Date</th>
-                        <th className="px-6 py-4 font-bold text-tomato-800">Duration</th>
-                        <th className="px-6 py-4 font-bold text-tomato-800 text-center">Status</th>
+                    <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-4 font-bold text-left">Exam Title</th>
+                        <th className="px-6 py-4 font-bold text-left">Teacher Name</th>
+                        <th className="px-6 py-4 font-bold text-left">Date</th>
+                        <th className="px-6 py-4 font-bold text-left">Duration</th>
+                        <th className="px-6 py-4 font-bold text-center">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -1829,12 +1829,12 @@ export default function AdminDashboard() {
                         return filteredExams.length > 0 ? (
                           filteredExams.map((exam) => (
                             <tr key={exam.id || exam._id} className="hover:bg-white transition-colors">
-                              <td className="px-6 py-4 font-semibold text-gray-900">{exam.title}</td>
+                              <td className="px-6 py-4 text-gray-900">{exam.title}</td>
                               <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
                               <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
                               <td className="px-6 py-4">{exam.duration_minutes} mins</td>
                               <td className="px-6 py-4 text-center">
-                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${exam.is_live ? "bg-tomato-100 text-tomato-700 border border-tomato-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                <span className={`inline-block px-3 py-1 rounded-full text-xs ${exam.is_live ? "bg-tomato-100 text-tomato-700 border border-tomato-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
                                   {exam.is_live ? "Live" : "Not Live"}
                                 </span>
                               </td>
@@ -2144,19 +2144,19 @@ export default function AdminDashboard() {
           ) : studentExamDetails.length > 0 ? (
             <div className="max-h-80 overflow-y-auto pr-2">
               <table className="w-full text-left text-sm text-gray-500">
-                <thead className="clay-header text-xs uppercase text-tomato-800 border-b border-tomato-200 sticky top-0 z-10">
-                  <tr className="border-b border-tomato-200">
-                    <th className="px-4 py-3 font-bold text-tomato-800">Exam Title</th>
-                    <th className="px-4 py-3 font-bold text-tomato-800">Date Finished</th>
-                    <th className="px-4 py-3 font-bold text-tomato-800 text-right">Score</th>
+                <thead className="text-xs uppercase text-gray-900 border-b border-gray-200 sticky top-0 z-10">
+                  <tr className="border-b border-gray-200">
+                    <th className="px-4 py-3 font-bold text-left">Exam Title</th>
+                    <th className="px-4 py-3 font-bold text-left">Date Finished</th>
+                    <th className="px-4 py-3 font-bold text-right">Score</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {studentExamDetails.map((exam, idx) => (
                     <tr key={idx} className="hover:bg-white">
-                      <td className="px-4 py-3 font-semibold text-gray-900">{exam.title}</td>
+                      <td className="px-4 py-3 text-gray-900">{exam.title}</td>
                       <td className="px-4 py-3 text-xs">{new Date(exam.finished_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-right font-bold text-tomato-400">{exam.score}%</td>
+                      <td className="px-4 py-3 text-right text-tomato-400">{exam.score}%</td>
                     </tr>
                   ))}
                 </tbody>

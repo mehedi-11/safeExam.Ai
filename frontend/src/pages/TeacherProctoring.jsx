@@ -128,12 +128,12 @@ export default function TeacherProctoring() {
             
             <div className="flex-1 overflow-y-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="clay-header text-tomato-800 border-b border-tomato-200 sticky top-0 z-10">
-                  <tr className="border-b border-tomato-200">
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Student</th>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Time (Join - Submit)</th>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Demerits</th>
-                    <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Status</th>
+                <thead className="text-gray-900 border-b border-gray-200 sticky top-0 z-10">
+                  <tr className="border-b border-gray-200">
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Student</th>
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Time (Join - Submit)</th>
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Demerits</th>
+                    <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Status</th>
                   </tr>
                 </thead>
                 <tbody className="text-xs">
@@ -145,7 +145,7 @@ export default function TeacherProctoring() {
                     [...(stats.students || [])].sort((a, b) => new Date(a.started_at) - new Date(b.started_at)).map((student, idx) => (
                       <tr key={idx} className="border-b border-gray-100 hover:bg-white">
                         <td className="py-2.5 px-4">
-                          <div className="font-bold text-gray-900">{student.student_name}</div>
+                          <div className="text-gray-900">{student.student_name}</div>
                           <div className="text-gray-500 font-mono text-[10px]">{student.student_id}</div>
                         </td>
                         <td className="py-2.5 px-4 text-gray-500 font-mono text-[10px]">
@@ -153,12 +153,12 @@ export default function TeacherProctoring() {
                           <div>Out: {student.completed_at ? new Date(student.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
                         </td>
                         <td className="py-2.5 px-4">
-                          <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${student.demerit_points > 0 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-tomato-50 text-tomato-600 border border-tomato-100'}`}>
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] ${student.demerit_points > 0 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-tomato-50 text-tomato-600 border border-tomato-100'}`}>
                             {student.demerit_points}
                           </span>
                         </td>
                         <td className="py-2.5 px-4">
-                          <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                          <span className={`px-2 py-1 rounded-full text-[9px] uppercase tracking-wider ${
                             ['completed', 'finished'].includes(student.status) ? 'bg-tomato-100 text-tomato-700' :
                             ['started', 'in_progress'].includes(student.status) ? 'bg-tomato-100 text-tomato-700' :
                             'bg-red-100 text-red-700'
@@ -186,11 +186,11 @@ export default function TeacherProctoring() {
             
             <div className="flex-1 overflow-y-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead className="clay-header text-tomato-800 border-b border-tomato-200 sticky top-0 z-10">
-                    <tr className="border-b border-tomato-200">
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Time</th>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Student</th>
-                      <th className="py-2.5 px-4 font-bold text-[10px] text-tomato-800 uppercase tracking-widest border-b border-tomato-200">Incident Detail</th>
+                  <thead className="text-gray-900 border-b border-gray-200 sticky top-0 z-10">
+                    <tr className="border-b border-gray-200">
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Time</th>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Student</th>
+                      <th className="py-2.5 px-4 font-bold text-[10px] text-left uppercase tracking-widest border-b border-gray-200">Incident Detail</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs">
@@ -227,11 +227,11 @@ export default function TeacherProctoring() {
                           <tr key={idx} className="border-b border-gray-100 hover:bg-red-50/30 transition-colors">
                             <td className="py-3 px-4 font-mono text-gray-500 whitespace-nowrap">{time}</td>
                             <td className="py-3 px-4">
-                              <div className="font-bold text-gray-900">{name}</div>
+                              <div className="text-gray-900">{name}</div>
                               <div className="text-gray-500 font-mono text-[10px]">{id}</div>
                             </td>
                             <td className="py-3 px-4">
-                              <span className="text-red-600 font-medium bg-red-50 px-2 py-1 rounded-md">{incident}</span>
+                              <span className="text-red-600 bg-red-50 px-2 py-1 rounded-md">{incident}</span>
                             </td>
                           </tr>
                         );

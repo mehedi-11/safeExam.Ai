@@ -341,24 +341,24 @@ const EventsManager = ({ isAdmin = false }) => {
 
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
-          <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-            <tr className="border-b border-tomato-200">
-              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+          <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+            <tr className="border-b border-gray-200">
+              <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-left">
                 Image
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+              <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-left">
                 Event Title
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+              <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-left">
                 Date & Time
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-center">
+              <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-center">
                 Registrations
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest">
+              <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-left">
                 Status
               </th>
-              <th className="py-3 px-4 font-bold text-xs text-tomato-800 uppercase tracking-widest text-right">
+              <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-right">
                 Actions
               </th>
             </tr>
@@ -391,7 +391,7 @@ const EventsManager = ({ isAdmin = false }) => {
                       </div>
                     )}
                   </td>
-                  <td className="py-3 px-4 font-bold text-sm text-gray-900">
+                  <td className="py-3 px-4 text-sm text-gray-900">
                     {evt.title}
                   </td>
                   <td className="py-3 px-4 text-xs text-gray-500">
@@ -400,7 +400,7 @@ const EventsManager = ({ isAdmin = false }) => {
                   <td className="py-3 px-4 text-center">
                     <button 
                       onClick={() => fetchRegistrations(evt._id, evt.title)}
-                      className="inline-flex items-center justify-center px-3 py-1 bg-tomato-50 text-tomato-700 font-bold rounded-lg border border-tomato-200 hover:bg-tomato-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center justify-center px-3 py-1 bg-tomato-50 text-tomato-700 rounded-lg border border-tomato-200 hover:bg-tomato-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       title="View Registrations"
                       disabled={!evt.registration_count}
                     >
@@ -425,7 +425,7 @@ const EventsManager = ({ isAdmin = false }) => {
                           }`}
                         />
                       </button>
-                      <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${isActive ? 'text-tomato-600' : 'text-gray-500'}`}>
+                      <span className={`ml-2 text-xs uppercase tracking-wider ${isActive ? 'text-tomato-600' : 'text-gray-500'}`}>
                         {isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -519,17 +519,17 @@ const EventsManager = ({ isAdmin = false }) => {
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden border border-gray-200 sm:rounded-xl">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="clay-header text-xs font-bold uppercase tracking-wider text-tomato-800 border-b border-tomato-200">
-                    <tr className="border-b border-tomato-200">
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider sm:pl-6">Name</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Email</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold text-tomato-800 uppercase tracking-wider">Phone</th>
+                  <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
+                    <tr className="border-b border-gray-200">
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-bold uppercase tracking-wider sm:pl-6">Name</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Phone</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {selectedEventRegistrations.map((reg) => (
                       <tr key={reg._id} className="hover:bg-white transition-colors">
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-6">{reg.name}</td>
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">{reg.name}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.phone || 'N/A'}</td>
                       </tr>
