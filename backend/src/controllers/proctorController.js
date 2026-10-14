@@ -124,6 +124,24 @@ exports.logIncident = async (req, res) => {
         currentAttempt.finished_at = new Date();
         currentAttempt.completed_at = new Date();
         await currentAttempt.save();
+
+        try {
+          const submissionReason = isInstantBlock
+            ? `Auto-Submitted: ${details || activityType}`
+            : 'Auto-Submitted: Exceeded 20 demerit points threshold';
+
+          const submissionLog = new ProctoringLog({
+            student_id: studentId,
+            student_name: studentName,
+            exam_id: examId,
+            activity_type: 'Exam Submission',
+            details: submissionReason,
+            demerit_points: 0
+          });
+          await submissionLog.save();
+        } catch (logErr) {
+          console.error('Error saving submission log in proctor controller:', logErr);
+        }
       } else {
         currentAttempt.demerit_points = newDemerits;
         currentAttempt.status = newStatus;

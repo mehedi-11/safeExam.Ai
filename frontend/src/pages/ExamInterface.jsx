@@ -132,7 +132,7 @@ export default function ExamInterface() {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmitExam(true); // Auto-submit when time is up
+          handleSubmitExam(true, 'Auto-Submitted: Time is up (Exam duration expired)'); // Auto-submit when time is up
           return 0;
         }
         return prev - 1;
@@ -200,7 +200,7 @@ export default function ExamInterface() {
   useEffect(() => {
     if (examStarted && demerits >= 20) {
       alert("You have reached 20 demerit points. Your exam is being automatically submitted.");
-      handleSubmitExam(true);
+      handleSubmitExam(true, 'Auto-Submitted: Exceeded 20 demerit points threshold');
     }
   }, [demerits, examStarted]);
 
@@ -538,10 +538,15 @@ export default function ExamInterface() {
   };
 
   // Submit Exam
-  const handleSubmitExam = async (isAuto = false) => {
+  const handleSubmitExam = async (isAuto = false, reason = null) => {
     try {
-      const res = await api.post(`/student/exams/${examId}/submit`, { answers });
-      alert(isAuto ? 'Time is up! Your exam has been auto-submitted.' : 'Exam submitted successfully.');
+      const submissionReason = reason || (isAuto ? 'Auto-Submitted: Exam time expired' : 'Exam submitted manually by student');
+      const res = await api.post(`/student/exams/${examId}/submit`, { 
+        answers,
+        reason: submissionReason,
+        isAuto
+      });
+      alert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted successfully.');
       navigate('/dashboard/student');
     } catch (err) {
       alert('Error submitting exam: ' + (err.response?.data?.message || 'Server error'));
@@ -720,7 +725,7 @@ export default function ExamInterface() {
 
               {!isBlocked && questions.length > 0 && (
                 <button 
-                  onClick={() => handleSubmitExam(false)}
+                  onClick={() => handleSubmitExam(false, 'Exam submitted manually by student')}
                   className="tomato-btn w-full py-3.5 text-sm flex items-center justify-center gap-2"
                 >
                   <CheckSquare size={18} />

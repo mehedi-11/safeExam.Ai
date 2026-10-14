@@ -672,7 +672,7 @@ exports.getLiveProctoringLogs = async (req, res) => {
   try {
     const { examId } = req.params;
     const logs = await ProctoringLog.find({ exam_id: examId })
-      .sort({ timestamp: -1 })
+      .sort({ timestamp: -1, _id: -1 })
       .limit(100);
     
     // Format to match requirements: time - student name - student id - feed

@@ -4,6 +4,7 @@ const StudentExam = require('../models/StudentExam');
 const StudentAnswer = require('../models/StudentAnswer');
 const ExamQuestion = require('../models/ExamQuestion');
 const Event = require('../models/Event');
+const ProctoringLog = require('../models/ProctoringLog');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const geminiService = require('../services/geminiService');
@@ -186,10 +187,41 @@ exports.startExam = async (req, res) => {
 
     const existingAttempts = await StudentExam.find({ student_id: req.user.id, exam_id: examId }).sort({ started_at: -1 });
     
+    const logStudentJoin = async (attemptNumber, isResume = false) => {
+      try {
+        const recentJoin = await ProctoringLog.findOne({
+          student_id: req.user.id,
+          exam_id: examId,
+          activity_type: 'Student Join',
+          timestamp: { $gte: new Date(Date.now() - 60000) }
+        });
+        if (!recentJoin) {
+          const student = await Student.findOne({ id: req.user.id });
+          const studentName = student ? student.name : 'Unknown Student';
+          const detailMsg = isResume 
+            ? 'Student re-entered / resumed exam session' 
+            : `Student joined the exam assessment${attemptNumber > 1 ? ` (Attempt ${attemptNumber})` : ''}`;
+
+          const joinLog = new ProctoringLog({
+            student_id: req.user.id,
+            student_name: studentName,
+            exam_id: examId,
+            activity_type: 'Student Join',
+            details: detailMsg,
+            demerit_points: 0
+          });
+          await joinLog.save();
+        }
+      } catch (err) {
+        console.error('Error logging student join:', err);
+      }
+    };
+
     if (existingAttempts.length > 0) {
       const latest = existingAttempts[0];
       // If there's an ongoing attempt, allow resuming regardless of actualIsLive
       if (latest.status !== 'completed' && latest.status !== 'finished') {
+        await logStudentJoin(latest.attempts || 1, true);
         return res.json(latest);
       }
     }
@@ -249,6 +281,7 @@ exports.startExam = async (req, res) => {
         await newAttempt.save();
         
         await StudentAnswer.deleteMany({ student_id: req.user.id, exam_id: examId });
+        await logStudentJoin(attemptsCount + 1, false);
         
         return res.json(newAttempt);
       }
@@ -263,6 +296,7 @@ exports.startExam = async (req, res) => {
       attempts: 1
     });
     await newAttempt.save();
+    await logStudentJoin(1, false);
 
     return res.status(201).json(newAttempt);
   } catch (error) {
@@ -365,7 +399,7 @@ exports.autoSaveExam = async (req, res) => {
 
 exports.submitExam = async (req, res) => {
   const { examId } = req.params;
-  const { answers } = req.body;
+  const { answers, reason } = req.body;
 
   try {
     const attempts = await StudentExam.find({ student_id: req.user.id, exam_id: examId }).sort({ started_at: -1 });
@@ -412,6 +446,24 @@ exports.submitExam = async (req, res) => {
     attempt.finished_at = new Date();
     attempt.status = 'completed';
     await attempt.save();
+
+    try {
+      const submissionReason = reason || 'Exam submitted manually by student';
+      const student = await Student.findOne({ id: req.user.id });
+      const studentName = student ? student.name : 'Unknown Student';
+
+      const submissionLog = new ProctoringLog({
+        student_id: req.user.id,
+        student_name: studentName,
+        exam_id: examId,
+        activity_type: 'Exam Submission',
+        details: submissionReason,
+        demerit_points: 0
+      });
+      await submissionLog.save();
+    } catch (logErr) {
+      console.error('Error logging exam submission:', logErr);
+    }
 
     return res.json({ 
       message: 'Exam submitted successfully', 

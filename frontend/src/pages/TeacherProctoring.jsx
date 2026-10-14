@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
-import { ArrowLeft, Camera, RefreshCw, ShieldAlert, Users, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, Camera, RefreshCw, ShieldAlert, Users, CheckCircle, Clock, LogIn } from "lucide-react";
 
 export default function TeacherProctoring() {
   const { examId } = useParams();
@@ -213,7 +213,7 @@ export default function TeacherProctoring() {
                         </td>
                       </tr>
                     ) : (
-                      logs.slice().reverse().map((logStr, idx) => {
+                      logs.map((logStr, idx) => {
                         const regex = /^\[(.*?)\]\s*-\s*(.*?)\s*-\s*(.*?)\s*-\s*(.*)$/;
                         const match = logStr.match(regex);
                         let time = '-', name = 'System', id = '-', incident = logStr;
@@ -223,15 +223,41 @@ export default function TeacherProctoring() {
                           id = match[3];
                           incident = match[4];
                         }
+
+                        const isSubmission = incident.toLowerCase().includes('submission') || incident.toLowerCase().includes('submitted');
+                        const isJoin = incident.toLowerCase().includes('join') || incident.toLowerCase().includes('joined');
+
+                        let rowBg = 'hover:bg-red-50/30';
+                        if (isSubmission) {
+                          rowBg = 'hover:bg-emerald-50/40 bg-emerald-50/15';
+                        } else if (isJoin) {
+                          rowBg = 'hover:bg-blue-50/40 bg-blue-50/15';
+                        }
+
                         return (
-                          <tr key={idx} className="border-b border-gray-100 hover:bg-red-50/30 transition-colors">
+                          <tr key={idx} className={`border-b border-gray-100 transition-colors ${rowBg}`}>
                             <td className="py-3 px-4 font-mono text-gray-500 whitespace-nowrap">{time}</td>
                             <td className="py-3 px-4">
                               <div className="text-gray-900">{name}</div>
                               <div className="text-gray-500 font-mono text-[10px]">{id}</div>
                             </td>
                             <td className="py-3 px-4">
-                              <span className="text-red-600 bg-red-50 px-2 py-1 rounded-md">{incident}</span>
+                              {isSubmission ? (
+                                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-medium">
+                                  <CheckCircle size={12} className="text-emerald-600 shrink-0" />
+                                  <span>{incident}</span>
+                                </span>
+                              ) : isJoin ? (
+                                <span className="text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-medium">
+                                  <LogIn size={12} className="text-blue-600 shrink-0" />
+                                  <span>{incident}</span>
+                                </span>
+                              ) : (
+                                <span className="text-red-600 bg-red-50 border border-red-100 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-normal">
+                                  <ShieldAlert size={12} className="text-red-500 shrink-0" />
+                                  <span>{incident}</span>
+                                </span>
+                              )}
                             </td>
                           </tr>
                         );
