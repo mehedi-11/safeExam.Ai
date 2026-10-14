@@ -9,7 +9,7 @@ import {
   Calendar, BookOpen, KeyRound, CheckCircle2, ShieldAlert, 
   Hourglass, Play, RefreshCw, GraduationCap, Clock,
   Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings, X, Edit, User, Search,
-  Sparkles, ArrowRight
+  Sparkles, ArrowRight, RotateCcw
 } from 'lucide-react';
 import Loader from '../components/Loader';
 
@@ -521,7 +521,13 @@ export default function StudentDashboard({ defaultTab }) {
                         {completedExams.sort((a, b) => new Date(b.finished_at) - new Date(a.finished_at)).slice(0, 3).map(exam => (
                           <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-md shadow-gray-200/50">
                             <div className="min-w-0 pr-4">
-                              <h5 className="font-bold text-gray-900 text-sm truncate">{exam.title}</h5>
+                              <div className="flex items-center gap-2">
+                                <h5 className="font-bold text-gray-900 text-sm truncate">{exam.title}</h5>
+                                <span className="bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded text-[9px] font-medium inline-flex items-center gap-0.5 shrink-0">
+                                  <RotateCcw size={9} />
+                                  {exam.attempts || 1} {exam.attempts === 1 ? 'Attempt' : 'Attempts'}
+                                </span>
+                              </div>
                               <p className="text-[11px] text-gray-500 mt-0.5">{new Date(exam.finished_at).toLocaleDateString()}</p>
                             </div>
                             <div className="shrink-0 bg-tomato-50 text-tomato-700 font-black text-sm px-3 py-1.5 rounded-lg border border-tomato-200">
@@ -671,13 +677,27 @@ export default function StudentDashboard({ defaultTab }) {
                     </thead>
                     <tbody className="divide-y divide-gray-150">
                       {filteredExams.map(exam => {
-                        const isFinished = exam.exam_status === 'completed' && (exam.attempts || 1) >= (exam.max_attempts || 1);
+                        const isFinished = exam.exam_status === 'completed' && (exam.attempts ?? 0) >= (exam.max_attempts || 1);
                         const isBlocked = exam.block_until && new Date(exam.block_until) > new Date();
                         
                         return (
                           <tr key={exam.unique_id || exam.id} className="hover:bg-white transition-colors">
                             <td className="px-6 py-4">
-                              <h4 className="text-gray-900">{exam.title}</h4>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="text-gray-900">{exam.title}</h4>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium border inline-flex items-center gap-1 ${
+                                  (exam.attempts || 0) > 0
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                    : 'bg-gray-50 text-gray-500 border-gray-200'
+                                }`}>
+                                  <RotateCcw size={10} className="shrink-0" />
+                                  <span>
+                                    {(exam.attempts || 0) > 0
+                                      ? `${exam.attempts} ${exam.attempts === 1 ? 'Attempt' : 'Attempts'}${exam.max_attempts ? ` / ${exam.max_attempts}` : ''}`
+                                      : `0 Attempts${exam.max_attempts ? ` / ${exam.max_attempts}` : ''}`}
+                                  </span>
+                                </span>
+                              </div>
                             </td>
                             <td className="px-6 py-4">
                               {exam.university_name && <p className="text-xs text-tomato-600">{exam.university_name}</p>}
@@ -727,27 +747,42 @@ export default function StudentDashboard({ defaultTab }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredExams.map(exam => {
                     const isUpcoming = new Date(exam.exam_date) > new Date();
-                    const isFinished = exam.exam_status === 'completed' && (exam.attempts || 1) >= (exam.max_attempts || 1);
+                    const isFinished = exam.exam_status === 'completed' && (exam.attempts ?? 0) >= (exam.max_attempts || 1);
                     const isBlocked = exam.block_until && new Date(exam.block_until) > new Date();
 
                     return (
                       <div key={exam.unique_id || exam.id} className="border border-gray-200 p-5 rounded-2xl flex flex-col justify-between bg-white relative hover:shadow-md smooth-transition">
                         <div>
-                          <div className="flex justify-end items-start mb-3">
-                            {exam.exam_status === 'completed' ? (
-                              <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-2.5 py-0.5 rounded text-[10px] font-bold">
-                                Score: {exam.score}
+                          <div className="flex justify-between items-center mb-3 gap-2">
+                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-medium border inline-flex items-center gap-1.5 ${
+                              (exam.attempts || 0) > 0
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-gray-50 text-gray-500 border-gray-200'
+                            }`}>
+                              <RotateCcw size={11} className="shrink-0" />
+                              <span>
+                                {(exam.attempts || 0) > 0
+                                  ? `${exam.attempts} ${exam.attempts === 1 ? 'Attempt' : 'Attempts'}${exam.max_attempts ? ` / ${exam.max_attempts}` : ''}`
+                                  : `0 Attempts${exam.max_attempts ? ` / ${exam.max_attempts}` : ''}`}
                               </span>
-                            ) : isBlocked ? (
-                              <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 animate-pulse">
-                                <ShieldAlert size={12} />
-                                <span>Locked</span>
-                              </span>
-                            ) : (
-                              <span className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold">
-                                Scheduled
-                              </span>
-                            )}
+                            </span>
+
+                            <div className="flex items-center gap-1.5">
+                              {exam.exam_status === 'completed' ? (
+                                <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-2.5 py-0.5 rounded text-[10px] font-bold">
+                                  Score: {exam.score}
+                                </span>
+                              ) : isBlocked ? (
+                                <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 animate-pulse">
+                                  <ShieldAlert size={12} />
+                                  <span>Locked</span>
+                                </span>
+                              ) : (
+                                <span className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                  Scheduled
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           <h4 className="font-bold text-gray-900 text-sm mb-2">{exam.title}</h4>
@@ -815,6 +850,7 @@ export default function StudentDashboard({ defaultTab }) {
                           <th className="px-6 py-4 font-bold text-left">Exam Title</th>
                           <th className="px-6 py-4 font-bold text-left">Course Details</th>
                           <th className="px-6 py-4 font-bold text-left">Completed On</th>
+                          <th className="px-6 py-4 font-bold text-center">Attempts</th>
                           <th className="px-6 py-4 font-bold text-center">Score</th>
                         </tr>
                       </thead>
@@ -839,6 +875,12 @@ export default function StudentDashboard({ defaultTab }) {
                                 <div className="space-y-1 text-xs text-gray-500">
                                   <p className="flex items-center gap-1.5"><Calendar size={13} /> {new Date(exam.finished_at).toLocaleString()}</p>
                                 </div>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded text-[10px] font-medium inline-flex items-center gap-1">
+                                  <RotateCcw size={10} className="shrink-0" />
+                                  {exam.attempts || 1} {exam.attempts === 1 ? 'Attempt' : 'Attempts'}{exam.max_attempts ? ` / ${exam.max_attempts}` : ''}
+                                </span>
                               </td>
                               <td className="px-6 py-4 text-center">
                                 {isPublished ? (

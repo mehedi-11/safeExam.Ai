@@ -316,12 +316,11 @@ export default function ExamInterface() {
     }
   };
 
-  // Normalizes COCO-SSD class names so cell phones, monitors/TVs/screens, books, and laptops are accurately detected
+  // Normalizes COCO-SSD class names so cell phones, notebook/books, and persons are accurately detected
   const normalizeDetectedClass = (rawClass) => {
     const cls = String(rawClass || '').toLowerCase().trim();
     if (cls === 'cell phone' || cls === 'remote' || cls === 'telephone' || cls === 'mobile') return 'cell phone';
     if (cls === 'book' || cls === 'notebook') return 'book';
-    if (cls === 'laptop' || cls === 'tv' || cls === 'tvmonitor' || cls === 'monitor' || cls === 'screen') return 'monitor';
     if (cls === 'person') return 'person';
     return null;
   };
@@ -375,8 +374,8 @@ export default function ExamInterface() {
               }
             }
 
-            // Detect objects (sensitivity threshold 0.12 to capture desktop monitors, laptops, and TVs reliably)
-            const predictions = await modelRef.current.detect(video, 30, 0.12);
+            // Detect objects (sensitivity threshold 0.18 for phones and notebooks)
+            const predictions = await modelRef.current.detect(video, 30, 0.18);
             
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -388,11 +387,10 @@ export default function ExamInterface() {
               const mappedClass = normalizeDetectedClass(prediction.class);
               if (!mappedClass) return;
 
-              // Dynamic confidence filtering: persons require >= 0.25; monitors require >= 0.12; phones/books >= 0.18
+              // Dynamic confidence filtering: persons require >= 0.25; phones/notebooks >= 0.18
               if (mappedClass === 'person' && prediction.score < 0.25) return;
               if (mappedClass === 'cell phone' && prediction.score < 0.18) return;
               if (mappedClass === 'book' && prediction.score < 0.18) return;
-              if (mappedClass === 'monitor' && prediction.score < 0.12) return;
 
               const [x, y, width, height] = prediction.bbox;
               const scorePercent = Math.round(prediction.score * 100);
@@ -405,8 +403,7 @@ export default function ExamInterface() {
 
               // Draw clear pill badge with object name and score
               const displayTitle = mappedClass === 'cell phone' ? 'Cell Phone' :
-                                   mappedClass === 'book' ? 'Book / Notes' :
-                                   mappedClass === 'monitor' ? 'Monitor / Screen' : 'Person';
+                                   mappedClass === 'book' ? 'Notebook / Notes' : 'Person';
               const label = `${displayTitle} ${scorePercent}%`;
               ctx.font = 'bold 16px sans-serif';
               const textWidth = ctx.measureText(label).width;
@@ -452,8 +449,8 @@ export default function ExamInterface() {
                 if (item !== 'no person visible') {
                   if (item === 'cell phone') {
                     logCheating('AI Detection', 'Cell phone detected in camera', 0, true);
-                  } else if (item === 'book' || item === 'laptop' || item === 'monitor' || item === 'multiple persons') {
-                    const itemName = item === 'monitor' ? 'Secondary Monitor / Screen' : item;
+                  } else if (item === 'book' || item === 'multiple persons') {
+                    const itemName = item === 'book' ? 'Notebook / Notes' : item;
                     logCheating('AI Detection', `${itemName} detected in camera`, 2, false);
                   }
                   timers[item] = now; // Reset timer so it doesn't spam every second
@@ -611,8 +608,7 @@ export default function ExamInterface() {
                 <li><span className="font-bold">Exit Attempt (Page Refresh/Close):</span> Auto-submit immediately.</li>
                 <li><span className="font-bold">Network Disconnect (Offline):</span> Auto-submit immediately.</li>
                 <li><span className="font-bold">Mobile Phone Detected (&gt;5s):</span> Auto-submit immediately.</li>
-                <li><span className="font-bold">Book Detected (&gt;5s):</span> 2 demerit points.</li>
-                <li><span className="font-bold">Laptop Detected (&gt;5s):</span> 2 demerit points.</li>
+                <li><span className="font-bold">Notebook / Book Detected (&gt;5s):</span> 2 demerit points.</li>
                 <li><span className="font-bold">Multiple Persons Detected (&gt;5s):</span> 2 demerit points.</li>
                 <li><span className="font-bold">Left Screen (&gt;5s):</span> If away &gt;10s, auto-submit.</li>
                 <li><span className="font-bold">Returned to Screen (&lt;10s):</span> 1 demerit point.</li>

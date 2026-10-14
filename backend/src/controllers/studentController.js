@@ -114,68 +114,59 @@ exports.getExams = async (req, res) => {
 
     const studentExams = await StudentExam.find({ student_id: req.user.id }).lean();
     
-    const examsMap = new Map();
     const result = [];
-    
-    // Process attempted exams
-    for (const se of studentExams) {
-      const exam = exams.find(e => e._id.toString() === se.exam_id.toString());
-      if (exam) {
-        let count = examsMap.get(exam._id.toString()) || 0;
-        count++;
-        examsMap.set(exam._id.toString(), count);
-        
-        let title = exam.title;
-        if (count > 1) title = `${exam.title} (${count})`;
-        
-        result.push({
-          ...exam,
-          id: exam._id,
-          unique_id: `${exam._id}-${se._id}`,
-          title: title,
-          attempt_id: se._id,
-          score: se.total_score || se.score,
-          started_at: se.started_at,
-          finished_at: se.completed_at || se.finished_at,
-          exam_status: se.status,
-          demerit_points: se.demerit_points,
-          block_until: se.block_until,
-          results_published: se.results_published || false,
-          attempts: se.attempts || 1,
-          latest_attempt_time: se.started_at
-        });
-      }
-    }
-
-    // Process unattempted exams
     for (const exam of exams) {
-      const attempts = studentExams.filter(se => se.exam_id.toString() === exam._id.toString());
-      if (attempts.length === 0) {
+      const attempts = studentExams.filter(se => se.exam_id && se.exam_id.toString() === exam._id.toString());
+      const attemptsCount = attempts.length;
+
+      if (attemptsCount === 0) {
         result.push({
           ...exam,
           id: exam._id,
-          unique_id: `${exam._id}-0`
+          unique_id: exam._id.toString(),
+          title: exam.title,
+          attempt_id: null,
+          score: null,
+          started_at: null,
+          finished_at: null,
+          exam_status: null,
+          demerit_points: 0,
+          block_until: null,
+          results_published: false,
+          attempts: 0,
+          max_attempts: exam.max_attempts || 1,
+          latest_attempt_time: null
         });
       } else {
-        // Find latest attempt
-        const latestAttempt = attempts.sort((a, b) => new Date(b.started_at) - new Date(a.started_at))[0];
-        if (exam.is_live && new Date(latestAttempt.started_at) < new Date(exam.exam_date)) {
-          const nextCount = (examsMap.get(exam._id.toString()) || 0) + 1;
-          result.push({
-            ...exam,
-            id: exam._id,
-            unique_id: `${exam._id}-new`,
-            title: nextCount > 1 ? `${exam.title} (${nextCount})` : exam.title,
-            attempt_id: null,
-            score: null,
-            started_at: null,
-            finished_at: null,
-            exam_status: null,
-            demerit_points: null,
-            block_until: null,
-            attempts: null
-          });
-        }
+        // Sort latest attempt first (started_at descending)
+        attempts.sort((a, b) => new Date(b.started_at || 0) - new Date(a.started_at || 0));
+        const latest = attempts[0];
+
+        // If an attempt is currently ongoing or blocked, prioritize it
+        const activeAttempt = attempts.find(a => a.status === 'started' || a.status === 'in_progress' || a.status === 'blocked');
+        const currentAttempt = activeAttempt || latest;
+
+        const effectiveScore = (currentAttempt.total_score !== undefined && currentAttempt.total_score !== null)
+          ? currentAttempt.total_score
+          : currentAttempt.score;
+
+        result.push({
+          ...exam,
+          id: exam._id,
+          unique_id: exam._id.toString(),
+          title: exam.title,
+          attempt_id: currentAttempt._id,
+          score: effectiveScore,
+          started_at: currentAttempt.started_at,
+          finished_at: currentAttempt.completed_at || currentAttempt.finished_at,
+          exam_status: currentAttempt.status,
+          demerit_points: currentAttempt.demerit_points || 0,
+          block_until: currentAttempt.block_until,
+          results_published: currentAttempt.results_published || false,
+          attempts: attemptsCount,
+          max_attempts: exam.max_attempts || 1,
+          latest_attempt_time: currentAttempt.started_at
+        });
       }
     }
 

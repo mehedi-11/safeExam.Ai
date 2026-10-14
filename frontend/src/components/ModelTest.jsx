@@ -130,13 +130,8 @@ export default function ModelTest() {
           'telephone': 'Mobile',
           'mobile': 'Mobile',
           'calculator': 'Calculator',
-          'book': 'Book / Notes',
-          'notebook': 'Book / Notes',
-          'laptop': 'Monitor / Screen',
-          'tv': 'Monitor / Screen',
-          'tvmonitor': 'Monitor / Screen',
-          'monitor': 'Monitor / Screen',
-          'screen': 'Monitor / Screen',
+          'book': 'Notebook / Notes',
+          'notebook': 'Notebook / Notes',
           'wearing-earphones': 'Wearing-Earphones',
           'headphone': 'Headphone'
         };
@@ -147,11 +142,9 @@ export default function ModelTest() {
 
           if (mappedName) {
             const isPerson = (className === 'person');
-            const isMonitor = (mappedName === 'Monitor / Screen');
 
             if (isPerson && prediction.score < 0.25) return;
-            if (isMonitor && prediction.score < 0.12) return;
-            if (!isPerson && !isMonitor && prediction.score < 0.18) return;
+            if (!isPerson && prediction.score < 0.18) return;
 
             currentObjects.add(`${mappedName} (${Math.round(prediction.score * 100)}%)`);
 
