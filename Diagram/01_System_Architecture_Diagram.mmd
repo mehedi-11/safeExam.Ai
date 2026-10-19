@@ -1,0 +1,48 @@
+graph TB
+    subgraph Client_Layer [Presentation & Edge AI Tier]
+        StudentUI[Student Exam Interface: ExamInterface.jsx]
+        WebRTC[WebRTC Webcam Stream 1 FPS]
+        YOLO[Agent ELI: Custom Trained YOLOv11 Model]
+        Guards[Browser Event Guards: Shortcuts, Reload, Focus]
+        HoldModal[Unclosable 5-Min Offline Hold Modal]
+        TeacherUI[Teacher Surveillance Console: TeacherProctoring.jsx]
+        RosterTabs[Interactive Student Tab Cards]
+        LogFeed[Categorized AI Incident Log Feed]
+        StatusBadge[Live Offline Badge & Demerit Counter]
+    end
+
+    subgraph Backend_Layer [Application & Controller Tier - Node.js & Express]
+        Gateway[REST API Gateway & JWT Middleware]
+        ProctorCtrl[Proctor Controller: Atomic Demerit Scoring Max 10]
+        HeartbeatMonitor[Heartbeat Monitor & 5-Min Offline Scanner]
+        StudentCtrl[Student Controller: Auto MCQ & Written Submissions]
+        TeacherCtrl[Teacher Controller: Live Aggregator & Log Streams]
+    end
+
+    subgraph Database_Layer [Persistence & Audit Tier - MongoDB Atlas]
+        Users[(Users: Students & Teachers)]
+        Exams[(Exams & ExamQuestions Catalog)]
+        StudentExams[(StudentExams: Attempts, Demerits, Last Heartbeat)]
+        ProctoringLogs[(ProctoringLogs: Immutable Audit Feed)]
+    end
+
+    StudentUI --> WebRTC
+    WebRTC --> YOLO
+    StudentUI --> Guards
+    Guards --> HoldModal
+    StudentUI -- "Heartbeats / Answers / Beacon" --> Gateway
+    TeacherUI --> RosterTabs
+    TeacherUI --> LogFeed
+    TeacherUI -- "3s Live Polling" --> Gateway
+    Gateway --> ProctorCtrl
+    Gateway --> HeartbeatMonitor
+    Gateway --> StudentCtrl
+    Gateway --> TeacherCtrl
+    ProctorCtrl --> ProctoringLogs
+    ProctorCtrl --> StudentExams
+    HeartbeatMonitor --> StudentExams
+    StudentCtrl --> StudentExams
+    StudentCtrl --> Exams
+    TeacherCtrl --> StudentExams
+    TeacherCtrl --> ProctoringLogs
+    TeacherCtrl --> Users

@@ -1,0 +1,49 @@
+flowchart TD
+    Start([Start Exam Session]) --> Login[Enter Credentials & Passcode]
+    Login --> Consent[Accept 10-Demerit Rules & Grant Camera]
+    Consent --> InitModel[Initialize Agent ELI YOLOv11 & Browser Traps]
+    InitModel --> ExamLoop[Active Examination Loop]
+
+    ExamLoop --> CheckEvent{Event Triggered?}
+    
+    CheckEvent -->|Shortcut Pressed| ShortcutDecision{1st Time Attempt?}
+    ShortcutDecision -->|Yes| WarnModal[Show Warning Modal 0 pts]
+    ShortcutDecision -->|No| Add1Pt[+1 Demerit Point]
+    WarnModal --> ExamLoop
+    Add1Pt --> CheckDemerits
+
+    CheckEvent -->|Page Reload F5 / Ctrl+R| ReloadSubmit[Instant Auto-Submit via Beacon API]
+    
+    CheckEvent -->|Tab Switch or Blur| TabPenalty[+2 Demerit Points]
+    TabPenalty --> AwayCheck{Away > 10 Seconds?}
+    AwayCheck -->|Yes| TabCountdown[5s Countdown Auto-Submit Modal]
+    AwayCheck -->|No| CheckDemerits
+    TabCountdown -->|Dismissed or Timeout| TabSubmit[Instant Auto-Submit]
+    TabCountdown -->|Returned within 5s| CheckDemerits
+
+    CheckEvent -->|Phone Visible >= 5s| PhoneModal[5s Confirmation Modal]
+    PhoneModal -->|Unconfirmed| PhoneSubmit[Auto-Submit Exam]
+    PhoneModal -->|Confirmed Removed| CheckDemerits
+
+    CheckEvent -->|Book or Notes Detected| BookPenalty[+1 Demerit Point per 5s]
+    BookPenalty --> CheckDemerits
+
+    CheckEvent -->|Network Disconnected| NetHold[Lock Answering & Show 5-Min Hold Modal]
+    NetHold --> NetCheck{Restored within 5 Min?}
+    NetCheck -->|Yes| ResumeExam[Resume Answering & Log Network Restored]
+    NetCheck -->|No > 5 Min| NetSubmit[Auto-Submit Exam]
+    ResumeExam --> ExamLoop
+
+    CheckDemerits{Total Demerits >= 10?}
+    CheckDemerits -->|Yes| CeilingSubmit[Immediate Auto-Submit on 10 Demerits]
+    CheckDemerits -->|No| Answering[Continue Answering 30s Auto-Save]
+    Answering --> UserSubmit{User Clicked Submit or Timer Expired?}
+    UserSubmit -->|Yes| NormalSubmit[Submit Completed Answers]
+    UserSubmit -->|No| ExamLoop
+
+    ReloadSubmit --> End([Exam Finalized & Locked])
+    TabSubmit --> End
+    PhoneSubmit --> End
+    NetSubmit --> End
+    CeilingSubmit --> End
+    NormalSubmit --> End

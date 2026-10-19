@@ -1,0 +1,38 @@
+flowchart TD
+    Candidate[Candidate Taking Exam] --> Detection{Agent ELI / Browser Trap}
+
+    Detection -->|Shortcut Ctrl+C/V/X/A| SC_Check{First Violation?}
+    SC_Check -->|Yes| SC_Warn[Warning Modal 0 Demerits]
+    SC_Check -->|No| SC_Demerit[Add +1 Demerit Point]
+    SC_Warn --> Resume[Candidate Resumes Session]
+    SC_Demerit --> DemeritPool
+
+    Detection -->|Page Reload F5/Ctrl+R| ReloadAction[Direct Auto-Submit Beacon API]
+    ReloadAction --> Terminate[Exam Auto-Submitted & Locked]
+
+    Detection -->|Tab Switch or Window Blur| TabAction[Add +2 Demerits & Start 10s Timer]
+    TabAction --> TabTimer{Away > 10 Seconds?}
+    TabTimer -->|No| DemeritPool
+    TabTimer -->|Yes| TabModal[5s Countdown Modal]
+    TabModal -->|Dismissed or Timeout| Terminate
+    TabModal -->|Returned in 5s| DemeritPool
+
+    Detection -->|Mobile Phone Detected| PhoneTimer{Visible >= 5 Seconds?}
+    PhoneTimer -->|No| Resume
+    PhoneTimer -->|Yes| PhoneModal[5s Confirmation Modal]
+    PhoneModal -->|Unconfirmed| Terminate
+    PhoneModal -->|Confirmed Removed| Resume
+
+    Detection -->|Book or Notebook| BookAction[Add +1 Demerit per 5 Seconds]
+    BookAction --> DemeritPool
+
+    Detection -->|Network Disconnected| NetAction[Exam On Hold 5-Min Countdown Modal]
+    NetAction --> NetTimer{Offline > 5 Minutes?}
+    NetTimer -->|No Returned| NetRestore[Dismiss Modal & Resume Exam]
+    NetTimer -->|Yes Exceeded| Terminate
+    NetRestore --> Resume
+
+    DemeritPool[Demerit Points Accumulator] --> ThresholdCheck{Demerit Points >= 10?}
+    ThresholdCheck -->|No| UpdateMeter[Update Live UI Demerit Bar]
+    UpdateMeter --> Resume
+    ThresholdCheck -->|Yes| Terminate

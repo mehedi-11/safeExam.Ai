@@ -1,0 +1,40 @@
+usecaseDiagram
+    actor Student as "Student (Candidate)"
+    actor Teacher as "Teacher (Invigilator)"
+    actor AgentELI as "Agent ELI (YOLOv11 Engine)"
+
+    package "safeExam.Ai Platform" {
+        usecase UC1 as "UC-01: Login & Verify Passcode"
+        usecase UC2 as "UC-02: Acknowledge 10-Demerit Rules"
+        usecase UC3 as "UC-03: Take MCQ & Written Exam"
+        usecase UC4 as "UC-04: View Live Demerit Points Meter"
+        usecase UC5 as "UC-05: Receive Warning & Countdown Modals"
+        usecase UC6 as "UC-06: Manual or Auto-Submit Exam"
+        usecase UC7 as "UC-07: Create & Manage Exam Questions"
+        usecase UC8 as "UC-08: Live Surveillance Student Tabs"
+        usecase UC9 as "UC-09: Filter AI Incident Feed"
+        usecase UC10 as "UC-10: Grade Written & Export CSV"
+        usecase UC11 as "UC-11: 1 FPS Edge Vision Inference"
+        usecase UC12 as "UC-12: Trap Shortcuts (1st Warn, 2nd +1 pt)"
+        usecase UC13 as "UC-13: Trap Reload (Instant Auto-Submit)"
+        usecase UC14 as "UC-14: Enforce 5-Min Offline Hold"
+        usecase UC15 as "UC-15: Trigger Auto-Submit on 10 Demerits"
+    }
+
+    Student --> UC1
+    Student --> UC2
+    Student --> UC3
+    Student --> UC4
+    Student --> UC5
+    Student --> UC6
+
+    Teacher --> UC7
+    Teacher --> UC8
+    Teacher --> UC9
+    Teacher --> UC10
+
+    AgentELI --> UC11
+    AgentELI --> UC12
+    AgentELI --> UC13
+    AgentELI --> UC14
+    AgentELI --> UC15

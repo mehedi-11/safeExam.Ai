@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 950" width="1400" height="950" style="background:#0B1120; font-family:'Segoe UI', Roboto, Helvetica, sans-serif;">
+  <defs>
+    <linearGradient id="dfGradNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <filter id="dfShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="dfArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="dfArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#EF4444"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <rect x="50" y="25" width="1300" height="70" rx="12" fill="url(#dfGradNavy)" stroke="#334155" stroke-width="1.5" filter="url(#dfShadow)"/>
+  <text x="80" y="55" fill="#38BDF8" font-size="12" font-weight="700" letter-spacing="2">SAFEEXAM.AI DECISION TREE &amp; PENALTY MATRIX</text>
+  <text x="80" y="78" fill="#FFFFFF" font-size="20" font-weight="700">Violation Classification, Modal Triggers &amp; Submission Thresholds</text>
+
+  <!-- ROOT: Candidate Takes Exam -->
+  <rect x="525" y="120" width="350" height="50" rx="10" fill="#1E293B" stroke="#3B82F6" stroke-width="2" filter="url(#dfShadow)"/>
+  <text x="700" y="151" fill="#FFFFFF" font-size="14" font-weight="700" text-anchor="middle">Student Active in Exam Interface</text>
+
+  <line x1="700" y1="170" x2="700" y2="210" stroke="#38BDF8" stroke-width="2" marker-end="url(#dfArrow)"/>
+
+  <!-- CENTRAL BRANCHING NODE -->
+  <rect x="475" y="210" width="450" height="40" rx="8" fill="#334155"/>
+  <text x="700" y="235" fill="#F8FAFC" font-size="13" font-weight="600" text-anchor="middle">Agent ELI &amp; Browser Interceptors Detect Event</text>
+
+  <!-- 5 BRANCH LINES -->
+  <line x1="700" y1="250" x2="160" y2="300" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="700" y1="250" x2="430" y2="300" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="700" y1="250" x2="700" y2="300" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="700" y1="250" x2="970" y2="300" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="700" y1="250" x2="1240" y2="300" stroke="#38BDF8" stroke-width="2"/>
+
+  <!-- BRANCH 1: KEYBOARD SHORTCUTS -->
+  <rect x="50" y="300" width="220" height="130" rx="8" fill="#1E293B" stroke="#8B5CF6"/>
+  <text x="160" y="325" fill="#DDD6FE" font-size="13" font-weight="700" text-anchor="middle">Shortcut / Click</text>
+  <text x="160" y="350" fill="#94A3B8" font-size="11" text-anchor="middle">Ctrl+C, Ctrl+V, Select-All</text>
+  <line x1="160" y1="365" x2="160" y2="390" stroke="#8B5CF6" stroke-width="1.5"/>
+  <text x="160" y="405" fill="#FCD34D" font-size="11" text-anchor="middle">1st Attempt: Warning (0 pts)</text>
+  <text x="160" y="420" fill="#FCA5A5" font-size="11" font-weight="700" text-anchor="middle">2nd+: +1 Demerit Point</text>
+
+  <!-- BRANCH 2: BROWSER RELOAD -->
+  <rect x="320" y="300" width="220" height="130" rx="8" fill="#1E293B" stroke="#EF4444"/>
+  <text x="430" y="325" fill="#FCA5A5" font-size="13" font-weight="700" text-anchor="middle">Page Reload / F5</text>
+  <text x="430" y="350" fill="#94A3B8" font-size="11" text-anchor="middle">F5, Ctrl+R, Refresh Button</text>
+  <line x1="430" y1="365" x2="430" y2="390" stroke="#EF4444" stroke-width="1.5"/>
+  <rect x="330" y="390" width="200" height="30" rx="4" fill="#7F1D1D"/>
+  <text x="430" y="410" fill="#FECACA" font-size="11" font-weight="700" text-anchor="middle">Instant Auto-Submit (Beacon)</text>
+
+  <!-- BRANCH 3: TAB SWITCH / BLUR -->
+  <rect x="590" y="300" width="220" height="130" rx="8" fill="#1E293B" stroke="#F59E0B"/>
+  <text x="700" y="325" fill="#FDE68A" font-size="13" font-weight="700" text-anchor="middle">Tab Switch / Blur</text>
+  <text x="700" y="350" fill="#94A3B8" font-size="11" text-anchor="middle">Focus lost from exam page</text>
+  <line x1="700" y1="365" x2="700" y2="390" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="700" y="405" fill="#FCD34D" font-size="11" text-anchor="middle">+2 Demerit Points</text>
+  <text x="700" y="420" fill="#FCA5A5" font-size="11" font-weight="700" text-anchor="middle">>10s: 5s Countdown Auto-Submit</text>
+
+  <!-- BRANCH 4: NETWORK DISCONNECT -->
+  <rect x="860" y="300" width="220" height="130" rx="8" fill="#1E293B" stroke="#38BDF8"/>
+  <text x="970" y="325" fill="#93C5FD" font-size="13" font-weight="700" text-anchor="middle">Network Disconnected</text>
+  <text x="970" y="350" fill="#94A3B8" font-size="11" text-anchor="middle">Offline event or ping loss</text>
+  <line x1="970" y1="365" x2="970" y2="390" stroke="#38BDF8" stroke-width="1.5"/>
+  <text x="970" y="405" fill="#38BDF8" font-size="11" text-anchor="middle">Screen on Hold (Answering locked)</text>
+  <text x="970" y="420" fill="#FCA5A5" font-size="11" font-weight="700" text-anchor="middle">>5 Min: Auto-Submit Triggered</text>
+
+  <!-- BRANCH 5: YOLOv11 VISION DETECTION -->
+  <rect x="1130" y="300" width="220" height="130" rx="8" fill="#1E293B" stroke="#10B981"/>
+  <text x="1240" y="325" fill="#6EE7B7" font-size="13" font-weight="700" text-anchor="middle">YOLOv11 Objects</text>
+  <text x="1240" y="350" fill="#94A3B8" font-size="11" text-anchor="middle">Phone, Book, Absence</text>
+  <line x1="1240" y1="365" x2="1240" y2="390" stroke="#10B981" stroke-width="1.5"/>
+  <text x="1240" y="405" fill="#FCA5A5" font-size="11" text-anchor="middle">Phone (>=5s): 5s Confirm Modal</text>
+  <text x="1240" y="420" fill="#FCD34D" font-size="11" font-weight="700" text-anchor="middle">Book: +1 pt / 5s | Absence >10s</text>
+
+  <!-- ACCUMULATION HUB -->
+  <line x1="160" y1="430" x2="160" y2="520"/>
+  <line x1="700" y1="430" x2="700" y2="520"/>
+  <line x1="1240" y1="430" x2="1240" y2="520"/>
+  <line x1="160" y1="520" x2="1240" y2="520" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="700" y1="520" x2="700" y2="560" stroke="#38BDF8" stroke-width="2" marker-end="url(#dfArrow)"/>
+
+  <!-- CRITICAL DECISION -->
+  <polygon points="700,560 840,620 700,680 560,620" fill="#1E293B" stroke="#EF4444" stroke-width="2"/>
+  <text x="700" y="615" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">Check Cumulative Demerits</text>
+  <text x="700" y="635" fill="#FCA5A5" font-size="12" text-anchor="middle">Total Score >= 10 Points?</text>
+
+  <!-- CRITICAL YES -->
+  <line x1="840" y1="620" x2="1050" y2="620" stroke="#EF4444" stroke-width="2.5" marker-end="url(#dfArrowRed)"/>
+  <text x="910" y="610" fill="#EF4444" font-size="12" font-weight="700">YES</text>
+
+  <!-- DIRECT AUTO-SUBMIT FROM RELOAD -->
+  <path d="M 430 430 L 430 730 L 1050 730" stroke="#EF4444" stroke-width="2.5" stroke-dasharray="6,4" fill="none" marker-end="url(#dfArrowRed)"/>
+  <text x="440" y="720" fill="#EF4444" font-size="11" font-weight="600">Direct Auto-Submit (Bypasses Demerit Accumulator)</text>
+
+  <!-- AUTO-SUBMIT END CARD -->
+  <rect x="1050" y="585" width="280" height="175" rx="12" fill="#7F1D1D" stroke="#EF4444" stroke-width="2" filter="url(#dfShadow)"/>
+  <text x="1190" y="615" fill="#FFFFFF" font-size="15" font-weight="700" text-anchor="middle">AUTO-SUBMIT EXAM</text>
+  <line x1="1070" y1="625" x2="1310" y2="625" stroke="#FCA5A5" stroke-width="1"/>
+  <text x="1080" y="650" fill="#FECACA" font-size="11">• Status updated to 'finished'</text>
+  <text x="1080" y="670" fill="#FECACA" font-size="11">• Answering permanently locked</text>
+  <text x="1080" y="690" fill="#FECACA" font-size="11">• Exact infraction logged to MongoDB</text>
+  <text x="1080" y="710" fill="#FECACA" font-size="11">• Teacher feed alerts invigilator</text>
+  <text x="1080" y="730" fill="#FECACA" font-size="11">• Auto-submits answers recorded so far</text>
+
+  <!-- CRITICAL NO -->
+  <line x1="560" y1="620" x2="350" y2="620" stroke="#10B981" stroke-width="2.5"/>
+  <line x1="350" y1="620" x2="350" y2="780" stroke="#10B981" stroke-width="2.5" marker-end="url(#dfArrow)"/>
+  <text x="440" y="610" fill="#10B981" font-size="12" font-weight="700">NO (&lt; 10 Points)</text>
+
+  <rect x="230" y="780" width="240" height="80" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+  <text x="350" y="810" fill="#6EE7B7" font-size="13" font-weight="700" text-anchor="middle">Candidate Retains Session</text>
+  <text x="350" y="830" fill="#94A3B8" font-size="11" text-anchor="middle">• Live Demerit Bar shows progress</text>
+  <text x="350" y="848" fill="#94A3B8" font-size="11">• Continues proctoring loop</text>
+
+  <path d="M 230 820 L 100 820 L 100 145 L 525 145" stroke="#10B981" stroke-width="2" stroke-dasharray="6,4" fill="none" marker-end="url(#dfArrow)"/>
+  <text x="110" y="470" fill="#10B981" font-size="11" font-weight="600" transform="rotate(-90 110,470)">Resume Exam Answering</text>
+
+</svg>

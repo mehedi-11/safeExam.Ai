@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    actor Candidate as Student Browser
+    participant Agent as Agent ELI & Modals
+    participant Backend as Express API Gateway
+    actor Teacher as Teacher Console
+
+    rect rgb(20, 30, 45)
+    note over Candidate, Teacher: Phase 1: Healthy Online Session
+    Candidate->>Backend: POST /exams/:id/heartbeat (Every 10s)
+    Backend-->>Candidate: 200 OK (Updates last_heartbeat)
+    Teacher->>Backend: GET /exams/:id/live-stats (Every 3s)
+    Backend-->>Teacher: Student Status: 'In Exam' (Green)
+    end
+
+    rect rgb(45, 30, 20)
+    note over Candidate, Teacher: Phase 2: Internet Disconnection & 5-Min Hold
+    Candidate->>Agent: window.offline Event Detected
+    Agent->>Candidate: Lock Answering & Show 5-Min Hold Modal
+    Backend->>Backend: Heartbeat scanner: last_heartbeat > 18s
+    Teacher->>Backend: GET /exams/:id/live-stats
+    Backend-->>Teacher: Student Status: 'Offline (Net Lost)' (Amber Badge)
+    end
+
+    rect rgb(20, 45, 30)
+    note over Candidate, Teacher: Scenario A: Reconnected Within 5 Minutes (< 300s)
+    Candidate->>Agent: window.online Event Detected
+    Agent->>Candidate: Close Hold Modal & Unlock Answering
+    Candidate->>Backend: Heartbeat Resumed & 'Network Restored' Log
+    Backend-->>Teacher: Student Status Restored to 'In Exam'
+    end
+
+    rect rgb(45, 20, 20)
+    note over Candidate, Teacher: Scenario B: Offline Exceeds 5 Minutes (Fail-Safe Auto-Submit)
+    Agent->>Candidate: 5-Minute Timer Reaches 00:00 -> Trigger Auto-Submit
+    note over Backend: If student laptop closed, Server Scanner Auto-Submits at 300s
+    Backend->>Backend: Mark StudentExam status = 'finished'
+    Backend-->>Teacher: Student Status: 'Submitted' (Offline Reason Logged)
+    end

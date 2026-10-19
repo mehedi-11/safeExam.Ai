@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="1400" height="900" style="background:#0B1120; font-family:'Segoe UI', Roboto, Helvetica, sans-serif;">
+  <defs>
+    <linearGradient id="gradNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="gradBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="gradEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="gradPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <linearGradient id="gradAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrowAmber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrowEmerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#10B981"/>
+    </marker>
+  </defs>
+
+  <!-- Title Header -->
+  <rect x="50" y="25" width="1300" height="70" rx="12" fill="url(#gradNavy)" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="55" fill="#38BDF8" font-size="12" font-weight="700" letter-spacing="2">SAFEEXAM.AI SYSTEM ARCHITECTURE</text>
+  <text x="80" y="78" fill="#FFFFFF" font-size="20" font-weight="700">3-Tier Distributed Architecture &amp; Edge AI Proctoring Ecosystem</text>
+  <rect x="1100" y="42" width="220" height="36" rx="18" fill="#1E293B" stroke="#38BDF8" stroke-width="1"/>
+  <circle cx="1120" cy="60" r="6" fill="#10B981"/>
+  <text x="1135" y="65" fill="#E2E8F0" font-size="12" font-weight="600">YOLOv11 Edge Active</text>
+
+  <!-- ================= TIER 1: CLIENT PRESENTATION ================= -->
+  <rect x="50" y="120" width="1300" height="260" rx="16" fill="#0F172A" stroke="#1E293B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="70" y="135" width="220" height="30" rx="6" fill="#1E3A8A"/>
+  <text x="85" y="155" fill="#93C5FD" font-size="13" font-weight="700">TIER 1: PRESENTATION &amp; EDGE</text>
+
+  <!-- Student Card -->
+  <rect x="70" y="180" width="580" height="180" rx="12" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="70" y="180" width="580" height="36" rx="12" fill="url(#gradBlue)"/>
+  <text x="90" y="204" fill="#FFFFFF" font-size="15" font-weight="700">Student Exam Workspace (ExamInterface.jsx)</text>
+  
+  <rect x="90" y="230" width="240" height="115" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="105" y="252" fill="#38BDF8" font-size="13" font-weight="700">Agent ELI Vision Core</text>
+  <text x="105" y="272" fill="#94A3B8" font-size="11">• Custom YOLOv11 Model (1 FPS)</text>
+  <text x="105" y="290" fill="#94A3B8" font-size="11">• Mobile Phone &amp; Book Detection</text>
+  <text x="105" y="308" fill="#94A3B8" font-size="11">• Multiple Persons &amp; Absence Trap</text>
+  <text x="105" y="326" fill="#10B981" font-size="11">✔ Zero Video Bandwidth (<5 kbps)</text>
+
+  <rect x="350" y="230" width="280" height="115" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="365" y="252" fill="#F59E0B" font-size="13" font-weight="700">Browser Security Guards</text>
+  <text x="365" y="272" fill="#94A3B8" font-size="11">• Shortcut Interceptor (Ctrl+C/V/X/A)</text>
+  <text x="365" y="290" fill="#94A3B8" font-size="11">• Reload Interceptor -> Beacon Auto-Submit</text>
+  <text x="365" y="308" fill="#94A3B8" font-size="11">• Tab Switch (>10s) -> 5s Countdown</text>
+  <text x="365" y="326" fill="#EF4444" font-size="11">• Network Loss -> 5-Min Hold Modal</text>
+
+  <!-- Teacher Card -->
+  <rect x="680" y="180" width="650" height="180" rx="12" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+  <rect x="680" y="180" width="650" height="36" rx="12" fill="url(#gradEmerald)"/>
+  <text x="700" y="204" fill="#FFFFFF" font-size="15" font-weight="700">Teacher Live Surveillance Console (TeacherProctoring.jsx)</text>
+  
+  <rect x="700" y="230" width="290" height="115" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="715" y="252" fill="#34D399" font-size="13" font-weight="700">Interactive Student Tabs</text>
+  <text x="715" y="272" fill="#94A3B8" font-size="11">• All Students Master Feed Button</text>
+  <text x="715" y="290" fill="#94A3B8" font-size="11">• Selectable Student Card Tabs</text>
+  <text x="715" y="308" fill="#94A3B8" font-size="11">• Live Offline Badge (>18s Heartbeat)</text>
+  <text x="715" y="326" fill="#94A3B8" font-size="11">• Real-Time Demerit Meter (X/10 pts)</text>
+
+  <rect x="1010" y="230" width="300" height="115" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="1025" y="252" fill="#60A5FA" font-size="13" font-weight="700">Categorized Incident Stream</text>
+  <text x="1025" y="272" fill="#94A3B8" font-size="11">• Real-Time 3s Polling Aggregation</text>
+  <text x="1025" y="290" fill="#94A3B8" font-size="11">• Color-Coded Violation Badges</text>
+  <text x="1025" y="308" fill="#94A3B8" font-size="11">• Instant Student Incident Filter</text>
+  <text x="1025" y="326" fill="#FBBF24" font-size="11">• One-Click CSV Audit Log Export</text>
+
+  <!-- Connectors Tier 1 to Tier 2 -->
+  <line x1="360" y1="380" x2="360" y2="430" stroke="#38BDF8" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
+  <text x="375" y="410" fill="#38BDF8" font-size="11" font-weight="600">Beacon / Heartbeats / Answers</text>
+
+  <line x1="1005" y1="430" x2="1005" y2="380" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrowEmerald)"/>
+  <text x="1020" y="410" fill="#10B981" font-size="11" font-weight="600">3s Live Polling / Stats</text>
+
+  <!-- ================= TIER 2: APPLICATION GATEWAY ================= -->
+  <rect x="50" y="430" width="1300" height="210" rx="16" fill="#0F172A" stroke="#1E293B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="70" y="445" width="220" height="30" rx="6" fill="#5B21B6"/>
+  <text x="85" y="465" fill="#DDD6FE" font-size="13" font-weight="700">TIER 2: BACKEND API GATEWAY</text>
+  <text x="310" y="465" fill="#A78BFA" font-size="13">Node.js v20+ • Express.js REST Framework • Port 5000</text>
+
+  <rect x="70" y="490" width="290" height="130" rx="10" fill="#1E293B" stroke="#6D28D9"/>
+  <text x="90" y="515" fill="#C4B5FD" font-size="14" font-weight="700">Proctor Controller</text>
+  <text x="90" y="538" fill="#94A3B8" font-size="11">• Atomic Demerit Increment Engine</text>
+  <text x="90" y="556" fill="#94A3B8" font-size="11">• 10-Demerit Ceiling Enforcement</text>
+  <text x="90" y="574" fill="#94A3B8" font-size="11">• Real-Time ProctoringLog Store</text>
+  <text x="90" y="594" fill="#EF4444" font-size="11">⚡ Instant Auto-Submit Trigger</text>
+
+  <rect x="380" y="490" width="290" height="130" rx="10" fill="#1E293B" stroke="#B45309"/>
+  <text x="400" y="515" fill="#FCD34D" font-size="14" font-weight="700">Heartbeat &amp; Network Monitor</text>
+  <text x="400" y="538" fill="#94A3B8" font-size="11">• 10s Background Client Pings</text>
+  <text x="400" y="556" fill="#94A3B8" font-size="11">• Detects Net Loss (>18s Inactive)</text>
+  <text x="400" y="574" fill="#94A3B8" font-size="11">• 5-Min Offline Auto-Submit Scanner</text>
+  <text x="400" y="594" fill="#F59E0B" font-size="11">⏱ 300s Server-Side Fail-Safe</text>
+
+  <rect x="690" y="490" width="300" height="130" rx="10" fill="#1E293B" stroke="#047857"/>
+  <text x="710" y="515" fill="#6EE7B7" font-size="14" font-weight="700">Student &amp; Grading Engine</text>
+  <text x="710" y="538" fill="#94A3B8" font-size="11">• Beacon API Safe Answer Extractor</text>
+  <text x="710" y="556" fill="#94A3B8" font-size="11">• Automated MCQ Scoring Engine</text>
+  <text x="710" y="574" fill="#94A3B8" font-size="11">• Written Answer Submission Hold</text>
+  <text x="710" y="594" fill="#10B981" font-size="11">📝 30s Client Auto-Save Sync</text>
+
+  <rect x="1010" y="490" width="320" height="130" rx="10" fill="#1E293B" stroke="#1D4ED8"/>
+  <text x="1030" y="515" fill="#93C5FD" font-size="14" font-weight="700">Auth &amp; Teacher Aggregator</text>
+  <text x="1030" y="538" fill="#94A3B8" font-size="11">• JWT Token &amp; RBAC Middleware</text>
+  <text x="1030" y="556" fill="#94A3B8" font-size="11">• Live Exam Stats Aggregation</text>
+  <text x="1030" y="574" fill="#94A3B8" font-size="11">• Exam CRUD &amp; Question Reordering</text>
+  <text x="1030" y="594" fill="#38BDF8" font-size="11">🔒 Encrypted BCrypt Credentials</text>
+
+  <!-- Connectors Tier 2 to Tier 3 -->
+  <line x1="700" y1="640" x2="700" y2="690" stroke="#38BDF8" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="715" y="670" fill="#38BDF8" font-size="11" font-weight="600">Mongoose ODM (BSON Over TLS)</text>
+
+  <!-- ================= TIER 3: DATABASE ================= -->
+  <rect x="50" y="690" width="1300" height="180" rx="16" fill="#0F172A" stroke="#1E293B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="70" y="705" width="220" height="30" rx="6" fill="#064E3B"/>
+  <text x="85" y="725" fill="#A7F3D0" font-size="13" font-weight="700">TIER 3: DATABASE &amp; AUDIT</text>
+  <text x="310" y="725" fill="#6EE7B7" font-size="13">MongoDB Atlas Distributed Document Store</text>
+
+  <rect x="70" y="745" width="230" height="105" rx="8" fill="#1E293B" stroke="#334155"/>
+  <text x="85" y="768" fill="#E2E8F0" font-size="13" font-weight="700">StudentExams</text>
+  <text x="85" y="788" fill="#94A3B8" font-size="11">• status, demerit_points</text>
+  <text x="85" y="806" fill="#94A3B8" font-size="11">• last_heartbeat (Date)</text>
+  <text x="85" y="824" fill="#94A3B8" font-size="11">• answers, started/finished</text>
+
+  <rect x="320" y="745" width="230" height="105" rx="8" fill="#1E293B" stroke="#334155"/>
+  <text x="335" y="768" fill="#E2E8F0" font-size="13" font-weight="700">ProctoringLogs</text>
+  <text x="335" y="788" fill="#94A3B8" font-size="11">• student_id, activity_type</text>
+  <text x="335" y="806" fill="#94A3B8" font-size="11">• details, demerit_points</text>
+  <text x="335" y="824" fill="#94A3B8" font-size="11">• timestamp (ISO Audit)</text>
+
+  <rect x="570" y="745" width="230" height="105" rx="8" fill="#1E293B" stroke="#334155"/>
+  <text x="585" y="768" fill="#E2E8F0" font-size="13" font-weight="700">Exams</text>
+  <text x="585" y="788" fill="#94A3B8" font-size="11">• title, teacher_id</text>
+  <text x="585" y="806" fill="#94A3B8" font-size="11">• duration_minutes, code</text>
+  <text x="585" y="824" fill="#94A3B8" font-size="11">• pass_marks, is_published</text>
+
+  <rect x="820" y="745" width="230" height="105" rx="8" fill="#1E293B" stroke="#334155"/>
+  <text x="835" y="768" fill="#E2E8F0" font-size="13" font-weight="700">ExamQuestions</text>
+  <text x="835" y="788" fill="#94A3B8" font-size="11">• exam_id, question_text</text>
+  <text x="835" y="806" fill="#94A3B8" font-size="11">• type (mcq/written), options</text>
+  <text x="835" y="824" fill="#94A3B8" font-size="11">• correct_answer, marks</text>
+
+  <rect x="1070" y="745" width="260" height="105" rx="8" fill="#1E293B" stroke="#334155"/>
+  <text x="1085" y="768" fill="#E2E8F0" font-size="13" font-weight="700">Users &amp; Profiles</text>
+  <text x="1085" y="788" fill="#94A3B8" font-size="11">• student_id, name, email</text>
+  <text x="1085" y="806" fill="#94A3B8" font-size="11">• password_hash, role</text>
+  <text x="1085" y="824" fill="#94A3B8" font-size="11">• department, profile_pic</text>
+
+</svg>

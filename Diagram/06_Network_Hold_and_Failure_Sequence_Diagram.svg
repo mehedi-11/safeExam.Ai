@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="1400" height="900" style="background:#0B1120; font-family:'Segoe UI', Roboto, Helvetica, sans-serif;">
+  <defs>
+    <linearGradient id="nsGradNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <filter id="nsShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="nsArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="nsArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#EF4444"/>
+    </marker>
+    <marker id="nsArrowAmber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="nsArrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#10B981"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <rect x="50" y="25" width="1300" height="70" rx="12" fill="url(#nsGradNavy)" stroke="#334155" stroke-width="1.5" filter="url(#nsShadow)"/>
+  <text x="80" y="55" fill="#38BDF8" font-size="12" font-weight="700" letter-spacing="2">SAFEEXAM.AI NETWORK FAIL-SAFE &amp; HEARTBEAT PROTOCOL</text>
+  <text x="80" y="78" fill="#FFFFFF" font-size="20" font-weight="700">Sequence Lifecycle: 10s Pings, 5-Minute Hold Modal, and Dual Auto-Submit</text>
+
+  <!-- PARTICIPANT HEADERS -->
+  <!-- 1: Student Client -->
+  <rect x="80" y="125" width="220" height="50" rx="8" fill="#1E3A8A" stroke="#3B82F6"/>
+  <text x="190" y="155" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">Student Client (Browser)</text>
+  <line x1="190" y1="175" x2="190" y2="860" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+
+  <!-- 2: Agent ELI / Event Layer -->
+  <rect x="420" y="125" width="220" height="50" rx="8" fill="#5B21B6" stroke="#8B5CF6"/>
+  <text x="530" y="155" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">Agent ELI &amp; Modal Guard</text>
+  <line x1="530" y1="175" x2="530" y2="860" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+
+  <!-- 3: Backend REST Gateway -->
+  <rect x="760" y="125" width="220" height="50" rx="8" fill="#064E3B" stroke="#10B981"/>
+  <text x="870" y="155" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">Express Backend Server</text>
+  <line x1="870" y1="175" x2="870" y2="860" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+
+  <!-- 4: Teacher Console -->
+  <rect x="1100" y="125" width="220" height="50" rx="8" fill="#78350F" stroke="#F59E0B"/>
+  <text x="1210" y="155" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">Teacher Live Console</text>
+  <line x1="1210" y1="175" x2="1210" y2="860" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+
+  <!-- PHASE 1: NORMAL SESSION -->
+  <rect x="60" y="195" width="1280" height="110" rx="6" fill="#1E293B" opacity="0.3"/>
+  <text x="80" y="215" fill="#93C5FD" font-size="11" font-weight="700">PHASE 1: HEALTHY STATE (ONLINE)</text>
+
+  <line x1="190" y1="240" x2="870" y2="240" stroke="#38BDF8" stroke-width="2" marker-end="url(#nsArrow)"/>
+  <text x="530" y="235" fill="#38BDF8" font-size="11" text-anchor="middle">POST /exams/:id/heartbeat (Every 10 seconds)</text>
+
+  <line x1="870" y1="270" x2="190" y2="270" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#nsArrowGreen)"/>
+  <text x="530" y="265" fill="#10B981" font-size="11" text-anchor="middle">HTTP 200 OK (Updates last_heartbeat timestamp)</text>
+
+  <line x1="870" y1="290" x2="1210" y2="290" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#nsArrowAmber)"/>
+  <text x="1040" y="285" fill="#FCD34D" font-size="11" text-anchor="middle">Teacher Polls: Status 'In Exam' (Green Badge)</text>
+
+  <!-- PHASE 2: NETWORK DROPS -->
+  <rect x="60" y="325" width="1280" height="175" rx="6" fill="#78350F" opacity="0.2"/>
+  <text x="80" y="345" fill="#FCD34D" font-size="11" font-weight="700">PHASE 2: NETWORK LOSS &amp; 5-MINUTE LOCKED HOLD</text>
+
+  <line x1="190" y1="365" x2="530" y2="365" stroke="#F59E0B" stroke-width="2" marker-end="url(#nsArrowAmber)"/>
+  <text x="360" y="360" fill="#FCD34D" font-size="11" text-anchor="middle">window.addEventListener('offline') Fires</text>
+
+  <!-- Modal Activated -->
+  <rect x="440" y="380" width="180" height="40" rx="6" fill="#B45309"/>
+  <text x="530" y="405" fill="#FFFFFF" font-size="11" font-weight="700" text-anchor="middle">Activate 5-Min Hold Modal</text>
+
+  <line x1="530" y1="435" x2="190" y2="435" stroke="#F59E0B" stroke-width="2" marker-end="url(#nsArrowAmber)"/>
+  <text x="360" y="430" fill="#FCD34D" font-size="11" text-anchor="middle">Freeze Answering UI (pointer-events-none)</text>
+
+  <!-- Backend Detects Missed Heartbeat -->
+  <line x1="870" y1="465" x2="1210" y2="465" stroke="#EF4444" stroke-width="2" marker-end="url(#nsArrowRed)"/>
+  <text x="1040" y="460" fill="#FCA5A5" font-size="11" text-anchor="middle">Now - last_heartbeat &gt; 18s: Set is_offline = true</text>
+  <rect x="1115" y="475" width="190" height="22" rx="4" fill="#7F1D1D"/>
+  <text x="1210" y="490" fill="#FECACA" font-size="10" font-weight="700" text-anchor="middle">Badge: Offline (Net Lost)</text>
+
+  <!-- PHASE 3: SCENARIO A: RESTORED WITHIN 5 MIN -->
+  <rect x="60" y="520" width="1280" height="110" rx="6" fill="#064E3B" opacity="0.2"/>
+  <text x="80" y="540" fill="#6EE7B7" font-size="11" font-weight="700">SCENARIO A: RESTORED WITHIN 5 MINUTES (&lt; 300s)</text>
+
+  <line x1="190" y1="565" x2="530" y2="565" stroke="#10B981" stroke-width="2" marker-end="url(#nsArrowGreen)"/>
+  <text x="360" y="560" fill="#6EE7B7" font-size="11" text-anchor="middle">window.addEventListener('online') Fires</text>
+
+  <line x1="530" y1="590" x2="190" y2="590" stroke="#10B981" stroke-width="2" marker-end="url(#nsArrowGreen)"/>
+  <text x="360" y="585" fill="#6EE7B7" font-size="11" text-anchor="middle">Dismiss Hold Modal &amp; Resume Question Answering</text>
+
+  <line x1="190" y1="615" x2="870" y2="615" stroke="#10B981" stroke-width="2" marker-end="url(#nsArrowGreen)"/>
+  <text x="530" y="610" fill="#6EE7B7" font-size="11" text-anchor="middle">Resume Heartbeats &amp; Log 'Network Restored'</text>
+
+  <!-- PHASE 4: SCENARIO B: EXCEEDS 5 MIN (FAIL-SAFE AUTO-SUBMIT) -->
+  <rect x="60" y="650" width="1280" height="190" rx="6" fill="#7F1D1D" opacity="0.2"/>
+  <text x="80" y="670" fill="#FCA5A5" font-size="11" font-weight="700">SCENARIO B: OFFLINE EXCEEDS 5 MINUTES (&gt;= 300s) -> DUAL FAIL-SAFE AUTO-SUBMIT</text>
+
+  <!-- Client Side Timer Expiry -->
+  <text x="360" y="700" fill="#EF4444" font-size="11" font-weight="700" text-anchor="middle">1. Client-Side: 5:00 Timer Hits 00:00</text>
+  <line x1="530" y1="710" x2="190" y2="710" stroke="#EF4444" stroke-width="2" marker-end="url(#nsArrowRed)"/>
+  <text x="360" y="725" fill="#FECACA" font-size="10" text-anchor="middle">Triggers client handleSubmitExam(true, 'Offline timeout')</text>
+
+  <!-- Server Side Scanner Backup -->
+  <text x="1040" y="750" fill="#EF4444" font-size="11" font-weight="700" text-anchor="middle">2. Server-Side Scanner (If client device was shut down):</text>
+  <rect x="780" y="760" width="180" height="40" rx="6" fill="#991B1B"/>
+  <text x="870" y="785" fill="#FFFFFF" font-size="10" font-weight="700" text-anchor="middle">Background Offline Scanner</text>
+
+  <line x1="870" y1="810" x2="1210" y2="810" stroke="#EF4444" stroke-width="2.5" marker-end="url(#nsArrowRed)"/>
+  <text x="1040" y="805" fill="#EF4444" font-size="11" font-weight="700" text-anchor="middle">Auto-Submits Exam: 'Auto-Submitted: Offline &gt; 5 Minutes'</text>
+
+  <rect x="1115" y="820" width="190" height="22" rx="4" fill="#047857"/>
+  <text x="1210" y="835" fill="#A7F3D0" font-size="10" font-weight="700" text-anchor="middle">Status Updated: 'Submitted'</text>
+
+</svg>

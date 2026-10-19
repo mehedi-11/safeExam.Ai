@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="1400" height="900" style="background:#0B1120; font-family:'Segoe UI', Roboto, Helvetica, sans-serif;">
+  <defs>
+    <linearGradient id="erGradNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <filter id="erShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="erArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <rect x="50" y="25" width="1300" height="70" rx="12" fill="url(#erGradNavy)" stroke="#334155" stroke-width="1.5" filter="url(#erShadow)"/>
+  <text x="80" y="55" fill="#38BDF8" font-size="12" font-weight="700" letter-spacing="2">SAFEEXAM.AI DATABASE DESIGN</text>
+  <text x="80" y="78" fill="#FFFFFF" font-size="20" font-weight="700">Entity-Relationship (ER) Schema &amp; Data Models</text>
+
+  <!-- TABLE 1: USERS -->
+  <rect x="50" y="140" width="280" height="260" rx="10" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5" filter="url(#erShadow)"/>
+  <rect x="50" y="140" width="280" height="36" rx="10" fill="#1D4ED8"/>
+  <text x="70" y="164" fill="#FFFFFF" font-size="15" font-weight="700">User</text>
+  <text x="290" y="164" fill="#BFDBFE" font-size="11" text-anchor="end">MongoDB Collection</text>
+  <text x="70" y="200" fill="#FCA5A5" font-size="12" font-weight="700">PK  _id</text><text x="140" y="200" fill="#94A3B8" font-size="12">ObjectId</text>
+  <text x="70" y="225" fill="#E2E8F0" font-size="12">    student_id</text><text x="140" y="225" fill="#94A3B8" font-size="12">String (Unique)</text>
+  <text x="70" y="250" fill="#E2E8F0" font-size="12">    name</text><text x="140" y="250" fill="#94A3B8" font-size="12">String</text>
+  <text x="70" y="275" fill="#E2E8F0" font-size="12">    email</text><text x="140" y="275" fill="#94A3B8" font-size="12">String (Indexed)</text>
+  <text x="70" y="300" fill="#E2E8F0" font-size="12">    password_hash</text><text x="160" y="300" fill="#94A3B8" font-size="12">String (BCrypt)</text>
+  <text x="70" y="325" fill="#FCD34D" font-size="12">    role</text><text x="140" y="325" fill="#94A3B8" font-size="12">Enum (std, tch, adm)</text>
+  <text x="70" y="350" fill="#E2E8F0" font-size="12">    department</text><text x="160" y="350" fill="#94A3B8" font-size="12">String</text>
+  <text x="70" y="375" fill="#E2E8F0" font-size="12">    createdAt</text><text x="140" y="375" fill="#94A3B8" font-size="12">Date</text>
+
+  <!-- TABLE 2: EXAMS -->
+  <rect x="420" y="140" width="310" height="280" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="1.5" filter="url(#erShadow)"/>
+  <rect x="420" y="140" width="310" height="36" rx="10" fill="#047857"/>
+  <text x="440" y="164" fill="#FFFFFF" font-size="15" font-weight="700">Exam</text>
+  <text x="710" y="164" fill="#A7F3D0" font-size="11" text-anchor="end">MongoDB Collection</text>
+  <text x="440" y="200" fill="#FCA5A5" font-size="12" font-weight="700">PK  _id</text><text x="520" y="200" fill="#94A3B8" font-size="12">ObjectId</text>
+  <text x="440" y="225" fill="#93C5FD" font-size="12" font-weight="700">FK  teacher_id</text><text x="530" y="225" fill="#94A3B8" font-size="12">ObjectId (User)</text>
+  <text x="440" y="250" fill="#E2E8F0" font-size="12">    title</text><text x="520" y="250" fill="#94A3B8" font-size="12">String</text>
+  <text x="440" y="275" fill="#E2E8F0" font-size="12">    description</text><text x="520" y="275" fill="#94A3B8" font-size="12">String</text>
+  <text x="440" y="300" fill="#E2E8F0" font-size="12">    duration_min</text><text x="530" y="300" fill="#94A3B8" font-size="12">Number (Timer)</text>
+  <text x="440" y="325" fill="#E2E8F0" font-size="12">    passcode</text><text x="520" y="325" fill="#94A3B8" font-size="12">String (Access PIN)</text>
+  <text x="440" y="350" fill="#E2E8F0" font-size="12">    pass_marks</text><text x="520" y="350" fill="#94A3B8" font-size="12">Number</text>
+  <text x="440" y="375" fill="#E2E8F0" font-size="12">    is_published</text><text x="520" y="375" fill="#94A3B8" font-size="12">Boolean</text>
+  <text x="440" y="400" fill="#E2E8F0" font-size="12">    createdAt</text><text x="520" y="400" fill="#94A3B8" font-size="12">Date</text>
+
+  <!-- TABLE 3: EXAM QUESTIONS -->
+  <rect x="820" y="140" width="320" height="280" rx="10" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5" filter="url(#erShadow)"/>
+  <rect x="820" y="140" width="320" height="36" rx="10" fill="#6D28D9"/>
+  <text x="840" y="164" fill="#FFFFFF" font-size="15" font-weight="700">ExamQuestion</text>
+  <text x="1120" y="164" fill="#DDD6FE" font-size="11" text-anchor="end">MongoDB Collection</text>
+  <text x="840" y="200" fill="#FCA5A5" font-size="12" font-weight="700">PK  _id</text><text x="940" y="200" fill="#94A3B8" font-size="12">ObjectId</text>
+  <text x="840" y="225" fill="#93C5FD" font-size="12" font-weight="700">FK  exam_id</text><text x="940" y="225" fill="#94A3B8" font-size="12">ObjectId (Exam)</text>
+  <text x="840" y="250" fill="#E2E8F0" font-size="12">    question_text</text><text x="940" y="250" fill="#94A3B8" font-size="12">String</text>
+  <text x="840" y="275" fill="#FCD34D" font-size="12">    type</text><text x="940" y="275" fill="#94A3B8" font-size="12">Enum ('mcq', 'written')</text>
+  <text x="840" y="300" fill="#E2E8F0" font-size="12">    options</text><text x="940" y="300" fill="#94A3B8" font-size="12">Array [String]</text>
+  <text x="840" y="325" fill="#6EE7B7" font-size="12">    correct_ans</text><text x="940" y="325" fill="#94A3B8" font-size="12">Number / Text</text>
+  <text x="840" y="350" fill="#E2E8F0" font-size="12">    marks</text><text x="940" y="350" fill="#94A3B8" font-size="12">Number</text>
+  <text x="840" y="375" fill="#E2E8F0" font-size="12">    order</text><text x="940" y="375" fill="#94A3B8" font-size="12">Number</text>
+  <text x="840" y="400" fill="#E2E8F0" font-size="12">    createdAt</text><text x="940" y="400" fill="#94A3B8" font-size="12">Date</text>
+
+  <!-- TABLE 4: STUDENT EXAM (ATTEMPT) -->
+  <rect x="220" y="520" width="370" height="330" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5" filter="url(#erShadow)"/>
+  <rect x="220" y="520" width="370" height="36" rx="10" fill="#B45309"/>
+  <text x="240" y="544" fill="#FFFFFF" font-size="15" font-weight="700">StudentExam (Active Session)</text>
+  <text x="570" y="544" fill="#FDE68A" font-size="11" text-anchor="end">MongoDB Collection</text>
+  <text x="240" y="580" fill="#FCA5A5" font-size="12" font-weight="700">PK  _id</text><text x="350" y="580" fill="#94A3B8" font-size="12">ObjectId</text>
+  <text x="240" y="605" fill="#93C5FD" font-size="12" font-weight="700">FK  student_id</text><text x="350" y="605" fill="#94A3B8" font-size="12">String (User)</text>
+  <text x="240" y="630" fill="#93C5FD" font-size="12" font-weight="700">FK  exam_id</text><text x="350" y="630" fill="#94A3B8" font-size="12">ObjectId (Exam)</text>
+  <text x="240" y="655" fill="#FCD34D" font-size="12">    status</text><text x="350" y="655" fill="#94A3B8" font-size="12">started | in_prog | finished</text>
+  <text x="240" y="680" fill="#EF4444" font-size="12" font-weight="700">    demerit_points</text><text x="365" y="680" fill="#FCA5A5" font-size="12">Number (0 to 10)</text>
+  <text x="240" y="705" fill="#38BDF8" font-size="12" font-weight="700">    last_heartbeat</text><text x="365" y="705" fill="#38BDF8" font-size="12">Date (Every 10s)</text>
+  <text x="240" y="730" fill="#E2E8F0" font-size="12">    answers</text><text x="350" y="730" fill="#94A3B8" font-size="12">Array [Q_id, answer, marks]</text>
+  <text x="240" y="755" fill="#E2E8F0" font-size="12">    score / total</text><text x="350" y="755" fill="#94A3B8" font-size="12">Number</text>
+  <text x="240" y="780" fill="#E2E8F0" font-size="12">    started_at</text><text x="350" y="780" fill="#94A3B8" font-size="12">Date</text>
+  <text x="240" y="805" fill="#E2E8F0" font-size="12">    finished_at</text><text x="350" y="805" fill="#94A3B8" font-size="12">Date</text>
+  <text x="240" y="830" fill="#E2E8F0" font-size="12">    block_until</text><text x="350" y="830" fill="#94A3B8" font-size="12">Date</text>
+
+  <!-- TABLE 5: PROCTORING LOGS -->
+  <rect x="730" y="520" width="370" height="310" rx="10" fill="#1E293B" stroke="#DC2626" stroke-width="1.5" filter="url(#erShadow)"/>
+  <rect x="730" y="520" width="370" height="36" rx="10" fill="#991B1B"/>
+  <text x="750" y="544" fill="#FFFFFF" font-size="15" font-weight="700">ProctoringLog (Audit Trail)</text>
+  <text x="1080" y="544" fill="#FECACA" font-size="11" text-anchor="end">MongoDB Collection</text>
+  <text x="750" y="580" fill="#FCA5A5" font-size="12" font-weight="700">PK  _id</text><text x="860" y="580" fill="#94A3B8" font-size="12">ObjectId</text>
+  <text x="750" y="605" fill="#93C5FD" font-size="12" font-weight="700">FK  student_id</text><text x="860" y="605" fill="#94A3B8" font-size="12">String (User)</text>
+  <text x="750" y="630" fill="#E2E8F0" font-size="12">    student_name</text><text x="860" y="630" fill="#94A3B8" font-size="12">String</text>
+  <text x="750" y="655" fill="#93C5FD" font-size="12" font-weight="700">FK  exam_id</text><text x="860" y="655" fill="#94A3B8" font-size="12">ObjectId (Exam)</text>
+  <text x="750" y="680" fill="#FCD34D" font-size="12">    activity_type</text><text x="860" y="680" fill="#94A3B8" font-size="12">Enum (Join, Reload, AI...)</text>
+  <text x="750" y="705" fill="#E2E8F0" font-size="12">    details</text><text x="860" y="705" fill="#94A3B8" font-size="12">String (Detailed context)</text>
+  <text x="750" y="730" fill="#FCA5A5" font-size="12" font-weight="700">    demerit_points</text><text x="870" y="730" fill="#FCA5A5" font-size="12">Number (e.g. 1, 2)</text>
+  <text x="750" y="755" fill="#38BDF8" font-size="12">    timestamp</text><text x="860" y="755" fill="#38BDF8" font-size="12">Date (Immutable UTC)</text>
+  <text x="750" y="780" fill="#E2E8F0" font-size="12">    createdAt</text><text x="860" y="780" fill="#94A3B8" font-size="12">Date</text>
+
+  <!-- ER RELATIONSHIP LINES & CARDINALITIES -->
+  <!-- User (Teacher) 1 -> N Exam -->
+  <line x1="330" y1="220" x2="420" y2="220" stroke="#38BDF8" stroke-width="2"/>
+  <text x="345" y="210" fill="#38BDF8" font-size="11" font-weight="700">1</text>
+  <text x="405" y="210" fill="#38BDF8" font-size="11" font-weight="700">N</text>
+
+  <!-- Exam 1 -> N ExamQuestions -->
+  <line x1="730" y1="220" x2="820" y2="220" stroke="#38BDF8" stroke-width="2"/>
+  <text x="745" y="210" fill="#38BDF8" font-size="11" font-weight="700">1</text>
+  <text x="805" y="210" fill="#38BDF8" font-size="11" font-weight="700">N</text>
+
+  <!-- User (Student) 1 -> N StudentExam -->
+  <path d="M 190 400 L 190 600 L 220 600" stroke="#38BDF8" stroke-width="2" fill="none"/>
+  <text x="175" y="420" fill="#38BDF8" font-size="11" font-weight="700">1</text>
+  <text x="205" y="590" fill="#38BDF8" font-size="11" font-weight="700">N</text>
+
+  <!-- Exam 1 -> N StudentExam -->
+  <path d="M 500 420 L 500 520" stroke="#38BDF8" stroke-width="2" fill="none"/>
+  <text x="510" y="440" fill="#38BDF8" font-size="11" font-weight="700">1</text>
+  <text x="510" y="510" fill="#38BDF8" font-size="11" font-weight="700">N</text>
+
+  <!-- StudentExam 1 -> N ProctoringLog -->
+  <line x1="590" y1="650" x2="730" y2="650" stroke="#EF4444" stroke-width="2"/>
+  <text x="605" y="640" fill="#EF4444" font-size="11" font-weight="700">1</text>
+  <text x="715" y="640" fill="#EF4444" font-size="11" font-weight="700">N</text>
+
+</svg>

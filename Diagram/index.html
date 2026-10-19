@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>safeExam.Ai — System Diagrams & Visual Models</title>
+  <style>
+    :root {
+      --bg: #0B1120;
+      --card-bg: #1E293B;
+      --border: #334155;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --accent-blue: #38BDF8;
+      --accent-emerald: #10B981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 40px 20px;
+    }
+    .header {
+      max-width: 1400px;
+      margin: 0 auto 40px auto;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 20px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: #1E3A8A;
+      color: var(--accent-blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    p.sub { color: var(--text-muted); font-size: 16px; }
+    .gallery {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+    .diagram-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .diagram-header {
+      padding: 20px 25px;
+      background: #0F172A;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .diagram-header h2 { font-size: 20px; font-weight: 700; color: #FFFFFF; }
+    .diagram-header p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .links { display: flex; gap: 10px; }
+    .btn {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-svg { background: #0284C7; color: white; }
+    .btn-png { background: #059669; color: white; }
+    .btn-mmd { background: #7C3AED; color: white; }
+    .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .diagram-view {
+      padding: 20px;
+      background: #0B1120;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .diagram-view img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="badge">SAFEEXAM.AI ARTIFACTS</span>
+    <h1>System Architecture & Visual Diagrams</h1>
+    <p class="sub">Complete collection of high-resolution architectural, workflow, ER, and sequence diagrams for safeExam.Ai.</p>
+  </div>
+
+  <div class="gallery">
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>1. System Architecture Diagram</h2>
+          <p>3-Tier Distributed Architecture & Edge YOLOv11 Proctoring Ecosystem</p>
+        </div>
+        <div class="links">
+          <a class="btn btn-svg" href="01_System_Architecture_Diagram.svg" target="_blank">View SVG</a>
+          <a class="btn btn-png" href="01_System_Architecture_Diagram.png" target="_blank">View PNG</a>
+          <a class="btn btn-mmd" href="01_System_Architecture_Diagram.mmd" target="_blank">Mermaid Code</a>
+        </div>
+      </div>
+      <div class="diagram-view">
+        <a href="01_System_Architecture_Diagram.svg" target="_blank">
+          <img src="01_System_Architecture_Diagram.svg" alt="1. System Architecture Diagram" loading="lazy"/>
+        </a>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>2. Use Case Diagram</h2>
+          <p>Role-Based Actor Interactions (Student, Teacher, Agent ELI) & Enforcements</p>
+        </div>
+        <div class="links">
+          <a class="btn btn-svg" href="02_Use_Case_Diagram.svg" target="_blank">View SVG</a>
+          <a class="btn btn-png" href="02_Use_Case_Diagram.png" target="_blank">View PNG</a>
+          <a class="btn btn-mmd" href="02_Use_Case_Diagram.mmd" target="_blank">Mermaid Code</a>
+        </div>
+      </div>
+      <div class="diagram-view">
+        <a href="02_Use_Case_Diagram.svg" target="_blank">
+          <img src="02_Use_Case_Diagram.svg" alt="2. Use Case Diagram" loading="lazy"/>
+        </a>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>3. System Workflow & Activity Lifecycle</h2>
+          <p>Chronological State Transitions & Progressive Intervention Engine</p>
+        </div>
+        <div class="links">
+          <a class="btn btn-svg" href="03_System_Workflow_Activity_Diagram.svg" target="_blank">View SVG</a>
+          <a class="btn btn-png" href="03_System_Workflow_Activity_Diagram.png" target="_blank">View PNG</a>
+          <a class="btn btn-mmd" href="03_System_Workflow_Activity_Diagram.mmd" target="_blank">Mermaid Code</a>
+        </div>
+      </div>
+      <div class="diagram-view">
+        <a href="03_System_Workflow_Activity_Diagram.svg" target="_blank">
+          <img src="03_System_Workflow_Activity_Diagram.svg" alt="3. System Workflow & Activity Lifecycle" loading="lazy"/>
+        </a>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>4. Database Design (Entity-Relationship)</h2>
+          <p>MongoDB Atlas Document Models, Keys, and Relational Cardinalities</p>
+        </div>
+        <div class="links">
+          <a class="btn btn-svg" href="04_Database_ER_Diagram.svg" target="_blank">View SVG</a>
+          <a class="btn btn-png" href="04_Database_ER_Diagram.png" target="_blank">View PNG</a>
+          <a class="btn btn-mmd" href="04_Database_ER_Diagram.mmd" target="_blank">Mermaid Code</a>
+        </div>
+      </div>
+      <div class="diagram-view">
+        <a href="04_Database_ER_Diagram.svg" target="_blank">
+          <img src="04_Database_ER_Diagram.svg" alt="4. Database Design (Entity-Relationship)" loading="lazy"/>
+        </a>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>5. Proctoring & Violation Decision Flowchart</h2>
+          <p>Violation Classification, Modal Triggers, and 10-Demerit Ceiling Logic</p>
+        </div>
+        <div class="links">
+          <a class="btn btn-svg" href="05_Proctoring_Violation_Decision_Flowchart.svg" target="_blank">View SVG</a>
+          <a class="btn btn-png" href="05_Proctoring_Violation_Decision_Flowchart.png" target="_blank">View PNG</a>
+          <a class="btn btn-mmd" href="05_Proctoring_Violation_Decision_Flowchart.mmd" target="_blank">Mermaid Code</a>
+        </div>
+      </div>
+      <div class="diagram-view">
+        <a href="05_Proctoring_Violation_Decision_Flowchart.svg" target="_blank">
+          <img src="05_Proctoring_Violation_Decision_Flowchart.svg" alt="5. Proctoring & Violation Decision Flowchart" loading="lazy"/>
+        </a>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>6. Network Fail-Safe & Heartbeat Sequence Diagram</h2>
+          <p>10s Pings, 5-Minute Hold Modal, and Dual Auto-Submit Fail-Safes</p>
+        </div>
+        <div class="links">
+          <a class="btn btn-svg" href="06_Network_Hold_and_Failure_Sequence_Diagram.svg" target="_blank">View SVG</a>
+          <a class="btn btn-png" href="06_Network_Hold_and_Failure_Sequence_Diagram.png" target="_blank">View PNG</a>
+          <a class="btn btn-mmd" href="06_Network_Hold_and_Failure_Sequence_Diagram.mmd" target="_blank">Mermaid Code</a>
+        </div>
+      </div>
+      <div class="diagram-view">
+        <a href="06_Network_Hold_and_Failure_Sequence_Diagram.svg" target="_blank">
+          <img src="06_Network_Hold_and_Failure_Sequence_Diagram.svg" alt="6. Network Fail-Safe & Heartbeat Sequence Diagram" loading="lazy"/>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

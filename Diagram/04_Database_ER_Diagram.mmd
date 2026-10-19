@@ -1,0 +1,64 @@
+erDiagram
+    USER ||--o{ EXAM : "creates"
+    USER ||--o{ STUDENT_EXAM : "attempts"
+    USER ||--o{ PROCTORING_LOG : "generates"
+    EXAM ||--|{ EXAM_QUESTION : "contains"
+    EXAM ||--o{ STUDENT_EXAM : "has_attempts"
+    STUDENT_EXAM ||--o{ PROCTORING_LOG : "audited_by"
+
+    USER {
+        ObjectId _id PK
+        string student_id "Unique Student Number"
+        string name "Full Name"
+        string email "Institutional Email"
+        string password_hash "BCrypt Hash"
+        string role "student, teacher, admin"
+        string department "Academic Dept"
+        date createdAt
+    }
+
+    EXAM {
+        ObjectId _id PK
+        ObjectId teacher_id FK
+        string title "Exam Title"
+        string description "Instructions"
+        number duration_minutes "Total Duration"
+        string passcode "Optional Pass PIN"
+        number pass_marks "Threshold"
+        boolean is_published
+        date createdAt
+    }
+
+    EXAM_QUESTION {
+        ObjectId _id PK
+        ObjectId exam_id FK
+        string question_text
+        string question_type "mcq, written"
+        array options "MCQ Options List"
+        string correct_answer "Key"
+        number marks "Weight"
+        number order "Display Index"
+    }
+
+    STUDENT_EXAM {
+        ObjectId _id PK
+        string student_id FK
+        ObjectId exam_id FK
+        string status "started, in_progress, finished"
+        number demerit_points "0 to 10 Scale"
+        date last_heartbeat "Ping Every 10s"
+        array answers "Recorded Responses"
+        number score "Final Score"
+        date started_at
+        date completed_at
+    }
+
+    PROCTORING_LOG {
+        ObjectId _id PK
+        string student_id FK
+        ObjectId exam_id FK
+        string activity_type "Join, Reload, AI, Shortcut..."
+        string details "Granular Context"
+        number demerit_points "Added Penalty"
+        date timestamp "Immutable Timestamp"
+    }
