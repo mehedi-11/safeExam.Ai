@@ -3,7 +3,6 @@ const Exam = require('../models/Exam');
 const StudentExam = require('../models/StudentExam');
 const StudentAnswer = require('../models/StudentAnswer');
 const ExamQuestion = require('../models/ExamQuestion');
-const Event = require('../models/Event');
 const ProctoringLog = require('../models/ProctoringLog');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -86,25 +85,13 @@ exports.changePassword = async (req, res) => {
 exports.getExams = async (req, res) => {
   try {
     const rawExams = await Exam.find().lean();
-    const events = await Event.find().select('_id status event_date').lean();
-    
-    // Auto expire live exams and auto-live event exams
     const now = new Date();
+    
+    // Evaluate active status directly from Exam model
     const exams = rawExams.map(exam => {
-      if (!exam.is_live && exam.event_id) {
-        const associatedEvent = events.find(e => e._id.toString() === exam.event_id.toString());
-        if (associatedEvent && associatedEvent.status === 'live') {
-          const eventDate = new Date(associatedEvent.event_date);
-          if (now >= eventDate) {
-            exam.is_live = true;
-            exam.exam_date = eventDate;
-          }
-        }
-      }
-
-      if (exam.is_live) {
+      if (exam.is_live && exam.exam_date) {
         const examDate = new Date(exam.exam_date);
-        const durationMs = (exam.duration_minutes + 5) * 60000;
+        const durationMs = ((exam.duration_minutes || 60) + 5) * 60000;
         const expireTime = new Date(examDate.getTime() + durationMs);
         if (now > expireTime) {
           exam.is_live = false;
@@ -228,21 +215,9 @@ exports.startExam = async (req, res) => {
 
     // Checking is_live for NEW attempts
     let actualIsLive = examDetails.is_live;
-    
-    if (!actualIsLive && examDetails.event_id) {
-      const associatedEvent = await Event.findById(examDetails.event_id);
-      if (associatedEvent && associatedEvent.status === 'live') {
-        const eventDate = new Date(associatedEvent.event_date);
-        if (new Date() >= eventDate) {
-          actualIsLive = true;
-          examDetails.exam_date = eventDate; // for expiration check below
-        }
-      }
-    }
-
-    if (actualIsLive) {
+    if (actualIsLive && examDetails.exam_date) {
       const examDate = new Date(examDetails.exam_date);
-      const durationMs = (examDetails.duration_minutes + 5) * 60000;
+      const durationMs = ((examDetails.duration_minutes || 60) + 5) * 60000;
       const expireTime = new Date(examDate.getTime() + durationMs);
       if (new Date() > expireTime) {
         actualIsLive = false;
@@ -411,9 +386,10 @@ exports.submitExam = async (req, res) => {
     const questions = await ExamQuestion.find({ exam_id: examId });
     let totalScore = 0;
     let pendingManualReview = false;
+    const answersMap = answers || {};
 
     for (let q of questions) {
-      const studentAnswer = answers[q._id.toString()];
+      const studentAnswer = answersMap[q._id.toString()];
       let marksAwarded = null; 
 
       if (studentAnswer) {
@@ -473,6 +449,28 @@ exports.submitExam = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error submitting exam' });
+  }
+};
+
+// Record Heartbeat from student exam browser to monitor network connection
+exports.recordHeartbeat = async (req, res) => {
+  const { examId } = req.params;
+  try {
+    const attempts = await StudentExam.find({ student_id: req.user.id, exam_id: examId }).sort({ started_at: -1 });
+    if (attempts.length === 0) return res.status(404).json({ message: 'No active session' });
+
+    const attempt = attempts[0];
+    if (attempt.status === 'completed' || attempt.status === 'finished') {
+      return res.json({ status: attempt.status, message: 'Exam completed' });
+    }
+
+    attempt.last_heartbeat = new Date();
+    await attempt.save();
+
+    return res.json({ status: 'alive', last_heartbeat: attempt.last_heartbeat });
+  } catch (err) {
+    console.error('Error recording heartbeat:', err);
+    return res.status(500).json({ message: 'Server error recording heartbeat' });
   }
 };
 

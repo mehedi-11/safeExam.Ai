@@ -28,7 +28,7 @@ const EventDetails = () => {
       setEvent(res.data.event);
       setIsRegistered(res.data.isRegistered);
     } catch (err) {
-      console.error(err);
+      // Failed to load event details
     } finally {
       setLoading(false);
     }
@@ -45,12 +45,15 @@ const EventDetails = () => {
     }
 
     try {
-      await api.post(`/events/${id}/register`, regForm);
+      const res = await api.post(`/events/${id}/register`, regForm);
+      if (res.data && res.data.success === false) {
+        setFormError(res.data.message || 'Already registered with this email');
+        return;
+      }
       setIsRegisterModalOpen(false);
       setIsRegistered(true);
       setIsSuccessModalOpen(true);
     } catch (err) {
-      console.error(err);
       setFormError(err.response?.data?.message || 'Failed to register');
     }
   };

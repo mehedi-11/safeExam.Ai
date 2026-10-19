@@ -11,6 +11,7 @@ const studentExamSchema = new mongoose.Schema({
   demerit_points: { type: Number, default: 0 },
   block_until: { type: Date, default: null },
   results_published: { type: Boolean, default: false },
-  attempts: { type: Number, default: 1 }
+  attempts: { type: Number, default: 1 },
+  last_heartbeat: { type: Date, default: Date.now }
 }, { strict: false });
 module.exports = mongoose.model('StudentExam', studentExamSchema);

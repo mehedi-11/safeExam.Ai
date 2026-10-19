@@ -120,17 +120,25 @@ exports.getExams = async (req, res) => {
 };
 
 exports.createExam = async (req, res) => {
-  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, event_id, course_name, course_code, university_name, max_attempts } = req.body;
+  const { title, duration_minutes, exam_date, must_on_camera, must_on_microphone, exam_password, event_id, course_name, course_code, university_name, max_attempts } = req.body;
   if (!title || !duration_minutes) {
     return res.status(400).json({ message: 'Title and duration are required' });
   }
 
   try {
+    let finalExamDate = exam_date ? new Date(exam_date) : new Date();
+    if (event_id) {
+      const parentEvent = await Event.findById(event_id);
+      if (parentEvent && parentEvent.event_date) {
+        finalExamDate = new Date(parentEvent.event_date);
+      }
+    }
+
     const newExam = new Exam({
       title,
       duration_minutes,
       teacher_id: req.user.id,
-      exam_date: new Date(),
+      exam_date: finalExamDate,
       must_on_camera: must_on_camera ?? true,
       must_on_microphone: must_on_microphone ?? true,
       exam_password: exam_password || null,
@@ -175,7 +183,7 @@ exports.createExam = async (req, res) => {
 
 exports.updateExam = async (req, res) => {
   const { id } = req.params;
-  const { title, duration_minutes, must_on_camera, must_on_microphone, exam_password, event_id, course_name, course_code, university_name, max_attempts } = req.body;
+  const { title, duration_minutes, exam_date, must_on_camera, must_on_microphone, exam_password, event_id, course_name, course_code, university_name, max_attempts } = req.body;
   
   if (!title || !duration_minutes) {
     return res.status(400).json({ message: 'Title and duration are required' });
@@ -193,6 +201,10 @@ exports.updateExam = async (req, res) => {
       university_name: university_name || null, 
       max_attempts: max_attempts || 1
     };
+
+    if (exam_date) {
+      updateData.exam_date = new Date(exam_date);
+    }
     
     const result = await Exam.updateOne(
       { _id: id, teacher_id: req.user.id },
@@ -673,7 +685,7 @@ exports.getLiveProctoringLogs = async (req, res) => {
     const { examId } = req.params;
     const logs = await ProctoringLog.find({ exam_id: examId })
       .sort({ timestamp: -1, _id: -1 })
-      .limit(100);
+      .limit(300);
     
     // Format to match requirements: time - student name - student id - feed
     const formattedLogs = logs.map(log => {
@@ -689,7 +701,7 @@ exports.getLiveProctoringLogs = async (req, res) => {
       return `[${time}] - ${studentName} - ${studentId} - ${feedText}`;
     });
 
-    res.json({ logs: formattedLogs });
+    res.json({ logs: formattedLogs, rawLogs: logs });
   } catch (error) {
     console.error('Error fetching live proctoring logs:', error);
     res.status(500).json({ message: 'Server error' });
@@ -721,6 +733,7 @@ exports.getLiveExamStats = async (req, res) => {
           started_at: 1,
           completed_at: 1,
           demerit_points: 1,
+          last_heartbeat: 1,
           student_name: { $ifNull: ['$student_info.name', 'Unknown'] }
         }
       },
@@ -728,6 +741,52 @@ exports.getLiveExamStats = async (req, res) => {
     ];
 
     const submissions = await StudentExam.aggregate(statsPipeline);
+    const now = Date.now();
+
+    // Check for 5-minute offline network timeout and auto-submit
+    for (let s of submissions) {
+      if (['started', 'in_progress'].includes(s.status) && s.last_heartbeat) {
+        const elapsedOffline = now - new Date(s.last_heartbeat).getTime();
+        if (elapsedOffline >= 300000) { // 5 minutes (300,000ms)
+          await StudentExam.updateOne(
+            { _id: s._id },
+            { 
+              status: 'completed', 
+              completed_at: new Date(), 
+              finished_at: new Date() 
+            }
+          );
+          s.status = 'completed';
+          s.completed_at = new Date();
+
+          const submissionReason = 'Auto-Submitted: Network disconnected for more than 5 minutes';
+          const alreadyLogged = await ProctoringLog.findOne({
+            student_id: s.student_id,
+            exam_id: examId,
+            activity_type: 'Exam Submission',
+            details: /network/i
+          });
+
+          if (!alreadyLogged) {
+            await new ProctoringLog({
+              student_id: s.student_id,
+              student_name: s.student_name,
+              exam_id: examId,
+              activity_type: 'Exam Submission',
+              details: submissionReason,
+              demerit_points: 0
+            }).save();
+          }
+        }
+      }
+
+      // Add a dynamic is_offline flag (no heartbeat for > 18s)
+      s.is_offline = Boolean(
+        ['started', 'in_progress'].includes(s.status) && 
+        s.last_heartbeat && 
+        (now - new Date(s.last_heartbeat).getTime() > 18000)
+      );
+    }
 
     const totalJoined = submissions.length;
     const totalSubmitted = submissions.filter(s => s.status === 'completed' || s.status === 'finished').length;

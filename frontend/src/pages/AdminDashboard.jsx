@@ -30,7 +30,6 @@ import {
   MoreVertical,
   Calendar,
   Camera,
-  Scan,
   Sparkles,
   TrendingUp,
   AlertCircle,
@@ -50,7 +49,6 @@ import {
   CartesianGrid,
 } from "recharts";
 import EventsManager from "./EventsManager";
-import ModelTest from "../components/ModelTest";
 import Loader from "../components/Loader";
 
 export default function AdminDashboard() {
@@ -518,9 +516,8 @@ export default function AdminDashboard() {
               { id: "overview", label: "Dashboard", icon: LayoutDashboard },
               { id: "users", label: "Manage Users", icon: Users },
               { id: "exams", label: "All Exams", icon: FileText },
-                { id: "proctoring", label: "Proctoring", icon: Camera },
+              { id: "proctoring", label: "Proctoring", icon: Camera },
               { id: "events", label: "Events", icon: Calendar },
-              { id: "model_test", label: "Model Testing", icon: Scan },
               { id: "settings", label: "Admin Profile", icon: Settings },
             ].map((tab) => {
               const unreadCount =
@@ -1617,11 +1614,6 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* TAB: MODEL TESTING */}
-          {activeTab === "model_test" && (
-            <ModelTest />
-          )}
-
           {/* TAB: SETTINGS (Admin Profile) */}
 
           {activeTab === "settings" && (
@@ -2177,7 +2169,6 @@ export default function AdminDashboard() {
           { id: 'exams', label: 'Exams', icon: FileText },
           { id: 'proctoring', label: 'Proctoring', icon: Camera },
           { id: 'events', label: 'Events', icon: Calendar },
-          { id: 'model_test', label: 'Testing', icon: Scan },
           { id: 'settings', label: 'Profile', icon: Settings }
         ];
         const activeIdx = mobileTabs.findIndex(t => t.id === activeTab);

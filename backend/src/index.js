@@ -52,52 +52,49 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 
-  // Background worker to auto-stop and auto-manage exams
+  // Background worker: Unified Exam Lifecycle Management (Auto-Start & Auto-Stop)
   setInterval(async () => {
     try {
       const now = new Date();
-      // Find all live exams
+
+      // 1. Auto-Stop live exams that have exceeded their duration (+ 5 min buffer)
       const liveExams = await Exam.find({ is_live: true });
       let stoppedCount = 0;
-      
       for (const exam of liveExams) {
         if (!exam.exam_date) continue;
-        const examTime = new Date(exam.exam_date).getTime();
-        if (isNaN(examTime)) continue;
+        const examStartTime = new Date(exam.exam_date).getTime();
+        if (isNaN(examStartTime)) continue;
 
         const duration = exam.duration_minutes || 60;
-        const endTime = new Date(examTime + (duration + 5) * 60000);
+        const endTime = new Date(examStartTime + (duration + 5) * 60000);
         if (now > endTime) {
           exam.is_live = false;
           await exam.save();
           stoppedCount++;
         }
       }
-      
       if (stoppedCount > 0) {
-        console.log(`[Auto-Stop] Stopped ${stoppedCount} exam(s) that exceeded their duration.`);
+        console.log(`[Auto-Stop] Stopped ${stoppedCount} exam(s) exceeding scheduled duration.`);
       }
 
-      // Auto-start Event Exams within their scheduled active window
-      const offlineEventExams = await Exam.find({ is_live: false, event_id: { $exists: true, $ne: null } }).populate('event_id');
+      // 2. Auto-Start scheduled offline exams within their active window
+      const offlineExams = await Exam.find({ is_live: false, exam_date: { $exists: true, $ne: null } });
       let startedCount = 0;
-      
-      for (const exam of offlineEventExams) {
-        if (exam.event_id && exam.event_id.status === 'live' && exam.event_id.event_date) {
-          const eventStartTime = new Date(exam.event_id.event_date);
-          const duration = exam.duration_minutes || 60;
-          const examEndTime = new Date(eventStartTime.getTime() + (duration + 5) * 60000);
+      for (const exam of offlineExams) {
+        const examStartTime = new Date(exam.exam_date).getTime();
+        if (isNaN(examStartTime)) continue;
 
-          if (now >= eventStartTime && now < examEndTime) {
-            exam.is_live = true;
-            await exam.save();
-            startedCount++;
-          }
+        const duration = exam.duration_minutes || 60;
+        const examEndTime = new Date(examStartTime + (duration + 5) * 60000);
+
+        if (now >= new Date(examStartTime) && now < examEndTime) {
+          exam.is_live = true;
+          await exam.save();
+          startedCount++;
         }
       }
-
       if (startedCount > 0) {
-        console.log(`[Auto-Start] Started ${startedCount} event exam(s) within active scheduled window.`);
+        console.log(`[Auto-Start] Started ${startedCount} scheduled exam(s) within active window.`);
       }
 
     } catch (err) {

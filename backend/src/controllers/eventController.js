@@ -99,18 +99,18 @@ exports.registerForEvent = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
     if (!name || !email) {
-      return res.status(400).json({ message: 'Name and email are required.' });
+      return res.json({ success: false, message: 'Name and email are required.' });
     }
 
     const event = await Event.findById(req.params.id);
     if (!event || event.status !== 'live') {
-      return res.status(404).json({ message: 'Event not found or not live' });
+      return res.json({ success: false, message: 'Event not found or not live' });
     }
 
     // Check existing registration by email
     const existingReg = await EventRegistration.findOne({ event_id: event._id, email });
     if (existingReg) {
-      return res.status(400).json({ message: 'Already registered with this email' });
+      return res.json({ success: false, message: 'Already registered with this email' });
     }
 
     // Generate a 6 digit security code
@@ -126,10 +126,10 @@ exports.registerForEvent = async (req, res) => {
     });
     await reg.save();
 
-    return res.json({ message: 'Registered successfully', registration: reg });
+    return res.json({ success: true, message: 'Registered successfully', registration: reg });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error registering for event' });
+    res.status(500).json({ success: false, message: 'Server error registering for event' });
   }
 };
 

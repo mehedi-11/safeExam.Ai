@@ -37,7 +37,7 @@ const StudentEvents = () => {
       });
       setEvents(sortedEvents);
     } catch (err) {
-      console.error(err);
+      // Failed to load events
     } finally {
       setLoading(false);
     }
@@ -54,11 +54,14 @@ const StudentEvents = () => {
     }
 
     try {
-      await api.post(`/events/${selectedEventId}/register`, regForm);
+      const res = await api.post(`/events/${selectedEventId}/register`, regForm);
+      if (res.data && res.data.success === false) {
+        setFormError(res.data.message || 'Already registered with this email');
+        return;
+      }
       setIsRegisterModalOpen(false);
       setIsSuccessModalOpen(true);
     } catch (err) {
-      console.error(err);
       setFormError(err.response?.data?.message || 'Failed to register');
     }
   };
