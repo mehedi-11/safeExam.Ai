@@ -1199,8 +1199,8 @@ export default function TeacherDashboard() {
                                     setExamForm({ id: exam.id });
                                     setIsNoQuestionsModalOpen(true);
                                   } else {
-                                    setExamForm({ id: exam.id });
-                                    setLiveForm({ password: "" });
+                                    setExamForm({ id: exam.id, exam_password: exam.exam_password });
+                                    setLiveForm({ password: exam.exam_password || "" });
                                     setIsLiveModalOpen(true);
                                   }
                                 }}

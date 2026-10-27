@@ -3,12 +3,13 @@ const router = express.Router();
 const eventController = require('../controllers/eventController');
 const { verifyToken, optionalAuth } = require('../middleware/authMiddleware');
 
-// Protected Stats Route
+// Protected Stats & Registrations Routes
 router.get('/stats', verifyToken, eventController.getEventStats);
+router.get('/my-registrations', verifyToken, eventController.getMyRegistrations);
 
 // Public / Optional Auth Routes
 router.get('/:id', optionalAuth, eventController.getEventDetails);
-router.post('/:id/register', eventController.registerForEvent);
+router.post('/:id/register', optionalAuth, eventController.registerForEvent);
 
 // Protected Routes
 router.post('/', verifyToken, eventController.createEvent);

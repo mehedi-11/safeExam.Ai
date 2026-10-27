@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
+const Exam = require('../models/Exam');
+const Student = require('../models/Student');
+const StudentExam = require('../models/StudentExam');
 
 exports.createEvent = async (req, res) => {
   try {
@@ -250,6 +253,100 @@ exports.getEventStats = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error fetching event statistics' });
+  }
+};
+
+exports.getMyRegistrations = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    const studentId = req.user.id;
+    let studentEmail = req.user.email;
+
+    if (!studentEmail) {
+      const student = await Student.findOne({ id: studentId });
+      if (student) {
+        studentEmail = student.email;
+      }
+    }
+
+    const queryConditions = [];
+    if (studentId) queryConditions.push({ student_id: studentId });
+    if (studentEmail) queryConditions.push({ email: studentEmail.toLowerCase() });
+
+    const registrations = await EventRegistration.find(
+      queryConditions.length > 0 ? { $or: queryConditions } : { student_id: studentId }
+    ).populate('event_id').sort({ registration_date: -1 }).lean();
+
+    const now = new Date();
+
+    const registeredEventsWithExam = await Promise.all(registrations.map(async (reg) => {
+      const event = reg.event_id;
+      if (!event) return null;
+
+      // Find any exam created under this event
+      const exam = await Exam.findOne({ event_id: event._id }).lean();
+      
+      let examInfo = null;
+      if (exam) {
+        let isLive = Boolean(exam.is_live);
+        let isEnded = false;
+
+        if (exam.exam_date) {
+          const examDate = new Date(exam.exam_date);
+          const durationMs = ((exam.duration_minutes || 60) + 5) * 60000;
+          const expireTime = new Date(examDate.getTime() + durationMs);
+          if (now > expireTime) {
+            isEnded = true;
+            isLive = false;
+          }
+        }
+
+        // Check if student has an existing attempt
+        const existingAttempt = await StudentExam.findOne({
+          student_id: studentId,
+          exam_id: exam._id
+        }).sort({ started_at: -1 }).lean();
+
+        examInfo = {
+          _id: exam._id,
+          title: exam.title,
+          duration_minutes: exam.duration_minutes,
+          total_marks: exam.total_marks,
+          exam_password: exam.exam_password || null,
+          is_live: isLive,
+          is_ended: isEnded,
+          exam_date: exam.exam_date,
+          attempt_status: existingAttempt ? existingAttempt.status : null,
+          score: existingAttempt ? existingAttempt.score : null
+        };
+      }
+
+      return {
+        _id: reg._id,
+        registration_date: reg.registration_date,
+        registered_name: reg.name,
+        registered_email: reg.email,
+        security_code: reg.security_code,
+        event: {
+          _id: event._id,
+          title: event.title,
+          description: event.description,
+          event_date: event.event_date,
+          image: event.image,
+          status: event.status
+        },
+        exam: examInfo
+      };
+    }));
+
+    const validRegistrations = registeredEventsWithExam.filter(r => r !== null);
+    return res.json(validRegistrations);
+  } catch (err) {
+    console.error('Error fetching registered events:', err);
+    return res.status(500).json({ message: 'Server error fetching registered events' });
   }
 };
 

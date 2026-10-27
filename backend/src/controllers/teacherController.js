@@ -9,7 +9,7 @@ const Student = require('../models/Student');
 const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
 const bcrypt = require('bcryptjs');
-const { sendExamPasswordEmail } = require('../utils/sendEmail');
+
 
 // --- PROFILE MANAGEMENT ---
 
@@ -156,23 +156,6 @@ exports.createExam = async (req, res) => {
       message: `Teacher ${req.user.name} created a new exam: ${title}`
     });
     await notif.save();
-
-    // Trigger email sending if event_id and exam_password exist
-    if (event_id && exam_password) {
-      try {
-        const event = await Event.findById(event_id);
-        if (event) {
-          const registrations = await EventRegistration.find({ event_id: event_id });
-          for (const reg of registrations) {
-            if (reg.email) {
-              await sendExamPasswordEmail(reg.email, reg.name, title, exam_password, event.title);
-            }
-          }
-        }
-      } catch (emailError) {
-        console.error('Failed to process password emails:', emailError);
-      }
-    }
 
     return res.status(201).json({ message: 'Exam created successfully', examId: newExam._id });
   } catch (error) {
