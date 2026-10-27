@@ -47,43 +47,6 @@ const sendOtpEmail = async (email, name, otp, purpose = 'Verification') => {
   }
 };
 
-/**
- * Send Exam Password Email via EmailJS
- */
-const sendExamPasswordEmail = async (studentEmail, studentName, examTitle, examPassword, eventTitle) => {
-  try {
-    console.log(`[EmailJS] Sending Exam Password for "${examTitle}" to ${studentEmail} (${examPassword})`);
-    
-    const emailJsRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'origin': 'http://localhost:5173',
-        'User-Agent': 'Mozilla/5.0'
-      },
-      body: JSON.stringify({
-        service_id: 'service_1xya9pm',
-        template_id: 'template_4db7mzc',
-        user_id: 'bUF4GpGI4G1vouutS',
-        template_params: {
-          to_name: studentName || 'Student',
-          to_email: studentEmail,
-          email: studentEmail,
-          exam_title: examTitle,
-          exam_password: examPassword,
-          event_title: eventTitle || ''
-        }
-      })
-    });
-
-    return emailJsRes.ok;
-  } catch (error) {
-    console.error(`Error sending exam password email:`, error.message);
-    return false;
-  }
-};
-
 module.exports = {
-  sendExamPasswordEmail,
   sendOtpEmail
 };

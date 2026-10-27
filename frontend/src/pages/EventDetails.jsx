@@ -168,9 +168,9 @@ const EventDetails = () => {
       {/* Registration Form Modal */}
       <Modal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} title="Event Registration">
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
-          <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-xs font-semibold flex items-start gap-2 border border-yellow-200">
-            <Info size={16} className="mt-0.5 shrink-0" />
-            <p>Please use your original email. A security code will be sent to this email when the exam is created, which is required to log into the event exam.</p>
+          <div className="bg-blue-50 text-blue-900 p-3.5 rounded-xl text-xs font-medium flex items-start gap-2.5 border border-blue-200">
+            <Info size={16} className="text-blue-600 mt-0.5 shrink-0" />
+            <p>Confirm your registration. Once registered, your entry and exam Secret Code will appear in the <strong>"Registered Events"</strong> tab under the Events page.</p>
           </div>
 
           {formError && (
@@ -231,19 +231,24 @@ const EventDetails = () => {
       {/* Success Modal */}
       <Modal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)}>
         <div className="py-6 text-center space-y-4">
-          <div className="w-20 h-20 bg-tomato-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <CheckCircle size={40} className="text-tomato-400" />
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <CheckCircle size={36} className="text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Registration Successful!</h2>
-          <p className="text-gray-500 max-w-sm mx-auto">
-            Your registration is complete! A <strong>security code</strong> will be sent to <span className="font-semibold text-gray-900">{regForm.email}</span> when the exam is created. You will need this code to login to the event exam.
+          <h2 className="text-2xl font-bold text-gray-900">Registration Confirmed!</h2>
+          <p className="text-gray-600 text-sm max-w-sm mx-auto">
+            Your registration is complete! You can find this event, the exam schedule, and the <strong>Secret Code</strong> in your <strong>"Registered Events"</strong> tab.
           </p>
-          <button 
-            onClick={() => setIsSuccessModalOpen(false)} 
-            className="mt-6 px-8 py-2.5 bg-gray-100 text-gray-800 font-bold rounded-xl hover:bg-dark-600 transition-colors"
-          >
-            Close
-          </button>
+          <div className="flex gap-3 justify-center pt-3">
+            <button 
+              onClick={() => {
+                setIsSuccessModalOpen(false);
+                navigate('/events');
+              }} 
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors text-xs shadow-md shadow-emerald-500/20"
+            >
+              Go to Registered Events Tab
+            </button>
+          </div>
         </div>
       </Modal>
     </div>
