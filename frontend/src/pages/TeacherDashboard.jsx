@@ -156,6 +156,12 @@ export default function TeacherDashboard() {
   const [stoppingLive, setStoppingLive] = useState(false);
   const [savingGrades, setSavingGrades] = useState(false);
 
+  // Bulk selection states
+  const [selectedExamIds, setSelectedExamIds] = useState([]);
+  const [isBulkDeletingExams, setIsBulkDeletingExams] = useState(false);
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState([]);
+  const [isBulkDeletingQuestions, setIsBulkDeletingQuestions] = useState(false);
+
   // Axios Instance with JWT auth is now centralized in api
 
   useEffect(() => {
@@ -353,6 +359,28 @@ export default function TeacherDashboard() {
     }
   };
 
+  const handleBulkDeleteExams = async () => {
+    if (selectedExamIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently wipe all questions and results.`
+      )
+    )
+      return;
+
+    setIsBulkDeletingExams(true);
+    try {
+      await api.post("/teacher/exams/bulk-delete", { examIds: selectedExamIds });
+      triggerSuccess(`${selectedExamIds.length} exam(s) deleted successfully`);
+      setSelectedExamIds([]);
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete selected exams");
+    } finally {
+      setIsBulkDeletingExams(false);
+    }
+  };
+
   const handleMakeLiveSubmit = async (e) => {
     e.preventDefault();
     setMakingLive(true);
@@ -482,6 +510,27 @@ export default function TeacherDashboard() {
       fetchData();
     } catch (err) {
       setError("Error deleting question");
+    }
+  };
+
+  const handleBulkDeleteQuestions = async () => {
+    if (selectedQuestionIds.length === 0 || !selectedExamId) return;
+    if (!window.confirm(`Delete ${selectedQuestionIds.length} selected question(s)?`)) return;
+
+    setIsBulkDeletingQuestions(true);
+    try {
+      await api.post("/teacher/questions/bulk-delete", {
+        examId: selectedExamId,
+        questionIds: selectedQuestionIds,
+      });
+      triggerSuccess(`${selectedQuestionIds.length} question(s) deleted successfully`);
+      setSelectedQuestionIds([]);
+      fetchQuestions(selectedExamId);
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete selected questions");
+    } finally {
+      setIsBulkDeletingQuestions(false);
     }
   };
 
@@ -1094,10 +1143,63 @@ export default function TeacherDashboard() {
                 </div>
               </div>
 
+              {/* Bulk Actions Bar */}
+              {selectedExamIds.length > 0 && (
+                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2.5 rounded-xl flex items-center justify-between animate-fade-in shadow-sm">
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <span className="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-[11px]">
+                      {selectedExamIds.length}
+                    </span>
+                    <span>exam(s) selected</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedExamIds([])}
+                      className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Deselect All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleBulkDeleteExams}
+                      disabled={isBulkDeletingExams}
+                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-60"
+                    >
+                      {isBulkDeletingExams ? (
+                        <RefreshCw className="animate-spin" size={13} />
+                      ) : (
+                        <Trash2 size={13} />
+                      )}
+                      <span>{isBulkDeletingExams ? "Deleting..." : `Delete Selected (${selectedExamIds.length})`}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
                     <tr className="border-b border-gray-200">
+                      <th className="py-3.5 px-4 font-bold text-xs text-left w-10">
+                        <input
+                          type="checkbox"
+                          checked={
+                            exams.filter(e => !e.is_live).length > 0 &&
+                            exams.filter(e => !e.is_live).every(e => selectedExamIds.includes(e.id))
+                          }
+                          onChange={(e) => {
+                            const deletableIds = exams.filter(x => !x.is_live).map(x => x.id);
+                            if (e.target.checked) {
+                              setSelectedExamIds(Array.from(new Set([...selectedExamIds, ...deletableIds])));
+                            } else {
+                              setSelectedExamIds(selectedExamIds.filter(id => !deletableIds.includes(id)));
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          title="Select all deletable exams"
+                        />
+                      </th>
                       <th className="py-3.5 px-4 font-bold text-xs text-left">
                         Exam Title
                       </th>
@@ -1160,7 +1262,7 @@ export default function TeacherDashboard() {
                         return (
                           <tr>
                             <td
-                              colSpan="6"
+                              colSpan="7"
                               className="py-8 text-center text-xs text-gray-500"
                             >
                               No exams found.
@@ -1168,14 +1270,36 @@ export default function TeacherDashboard() {
                           </tr>
                         );
                       }
-                      return filteredExams.map((exam) => (
-                        <tr
-                          key={exam.id}
-                          className="border-b border-gray-100 hover:bg-white"
-                        >
-                          <td className="py-3 px-4 text-sm text-gray-900">
-                            {exam.title}
-                          </td>
+                      return filteredExams.map((exam) => {
+                        const isSelected = selectedExamIds.includes(exam.id);
+                        return (
+                          <tr
+                            key={exam.id}
+                            className={`border-b border-gray-100 hover:bg-gray-50/60 transition-colors ${
+                              isSelected ? "bg-indigo-50/50" : ""
+                            }`}
+                          >
+                            <td className="py-3 px-4 w-10 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                disabled={exam.is_live}
+                                title={exam.is_live ? "Live exam cannot be deleted" : "Select exam"}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedExamIds((prev) => [...prev, exam.id]);
+                                  } else {
+                                    setSelectedExamIds((prev) => prev.filter((id) => id !== exam.id));
+                                  }
+                                }}
+                                className={`w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${
+                                  exam.is_live ? "cursor-not-allowed opacity-40" : "cursor-pointer"
+                                }`}
+                              />
+                            </td>
+                            <td className="py-3 px-4 text-sm text-gray-900 font-medium">
+                              {exam.title}
+                            </td>
                           <td className="py-3 px-4 text-xs text-gray-500">
                             {exam.course_name}{" "}
                             {exam.course_code ? `(${exam.course_code})` : ""}
@@ -1293,7 +1417,8 @@ export default function TeacherDashboard() {
                             </button>
                           </td>
                         </tr>
-                      ));
+                      );
+                    });
                     })()}
                   </tbody>
                 </table>
@@ -2336,7 +2461,7 @@ export default function TeacherDashboard() {
         maxWidth="max-w-7xl"
       >
         <div className="space-y-6 min-h-[60vh]">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-4 gap-3">
             <div>
               <h4 className="font-bold text-gray-900">
                 {exams.find(
@@ -2351,26 +2476,60 @@ export default function TeacherDashboard() {
                 Add, edit or delete questions for this exam.
               </p>
             </div>
-            <button
-              onClick={() => {
-                setQuestionForm({
-                  id: null,
-                  question_text: "",
-                  marks: 1,
-                  option_a: "",
-                  option_b: "",
-                  option_c: "",
-                  option_d: "",
-                  correct_option: "A",
-                });
-                setIsEditingQuestion(false);
-                setIsQuestionModalOpen(true);
-              }}
-              className="tomato-btn py-2 text-xs flex items-center gap-1 shrink-0"
-            >
-              <Plus size={14} />
-              <span>Add Question</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {questions.length > 0 && (
+                <label className="flex items-center gap-1.5 text-xs text-gray-700 font-semibold cursor-pointer select-none bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={questions.length > 0 && selectedQuestionIds.length === questions.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedQuestionIds(questions.map((q) => q.id));
+                      } else {
+                        setSelectedQuestionIds([]);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <span>Select All ({questions.length})</span>
+                </label>
+              )}
+              {selectedQuestionIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleBulkDeleteQuestions}
+                  disabled={isBulkDeletingQuestions}
+                  className="px-3 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-60"
+                >
+                  {isBulkDeletingQuestions ? (
+                    <RefreshCw className="animate-spin" size={13} />
+                  ) : (
+                    <Trash2 size={13} />
+                  )}
+                  <span>{isBulkDeletingQuestions ? "Deleting..." : `Delete (${selectedQuestionIds.length})`}</span>
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setQuestionForm({
+                    id: null,
+                    question_text: "",
+                    marks: 1,
+                    option_a: "",
+                    option_b: "",
+                    option_c: "",
+                    option_d: "",
+                    correct_option: "A",
+                  });
+                  setIsEditingQuestion(false);
+                  setIsQuestionModalOpen(true);
+                }}
+                className="tomato-btn py-2 text-xs flex items-center gap-1 shrink-0"
+              >
+                <Plus size={14} />
+                <span>Add Question</span>
+              </button>
+            </div>
           </div>
 
           {questions.length === 0 ? (
@@ -2391,8 +2550,22 @@ export default function TeacherDashboard() {
                     dragItemIndex === qidx ? "opacity-50 border-dashed border-gray-300 bg-white" : ""
                   }`}
                 >
-                  <div className="mt-1 cursor-grab active:cursor-grabbing text-gray-700 hover:text-gray-500">
-                    <GripVertical size={20} />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedQuestionIds.includes(q.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedQuestionIds([...selectedQuestionIds, q.id]);
+                        } else {
+                          setSelectedQuestionIds(selectedQuestionIds.filter((id) => id !== q.id));
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <div className="cursor-grab active:cursor-grabbing text-gray-700 hover:text-gray-500">
+                      <GripVertical size={20} />
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="absolute top-4 right-4 flex gap-2">

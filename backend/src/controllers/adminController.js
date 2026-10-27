@@ -155,6 +155,20 @@ exports.deleteTeacher = async (req, res) => {
   }
 };
 
+exports.bulkDeleteTeachers = async (req, res) => {
+  const { teacherIds } = req.body;
+  if (!Array.isArray(teacherIds) || teacherIds.length === 0) {
+    return res.status(400).json({ message: 'No teacher IDs provided' });
+  }
+  try {
+    const result = await Teacher.deleteMany({ _id: { $in: teacherIds } });
+    return res.json({ message: `${result.deletedCount} teacher(s) deleted successfully`, deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Error bulk deleting teachers:', error);
+    return res.status(500).json({ message: 'Server error bulk deleting teachers' });
+  }
+};
+
 // --- STUDENT MANAGEMENT ---
 
 exports.getStudents = async (req, res) => {
@@ -230,6 +244,20 @@ exports.deleteStudent = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error deleting student' });
+  }
+};
+
+exports.bulkDeleteStudents = async (req, res) => {
+  const { studentIds } = req.body;
+  if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    return res.status(400).json({ message: 'No student IDs provided' });
+  }
+  try {
+    const result = await Student.deleteMany({ id: { $in: studentIds } });
+    return res.json({ message: `${result.deletedCount} student(s) deleted successfully`, deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Error bulk deleting students:', error);
+    return res.status(500).json({ message: 'Server error bulk deleting students' });
   }
 };
 

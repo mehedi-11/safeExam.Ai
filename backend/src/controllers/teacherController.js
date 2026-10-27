@@ -238,6 +238,37 @@ exports.deleteExam = async (req, res) => {
   }
 };
 
+exports.bulkDeleteExams = async (req, res) => {
+  const { examIds } = req.body;
+  if (!Array.isArray(examIds) || examIds.length === 0) {
+    return res.status(400).json({ message: 'No exam IDs provided' });
+  }
+  try {
+    const exams = await Exam.find({ _id: { $in: examIds }, teacher_id: req.user.id });
+    const deletableIds = exams.filter(e => !e.is_live).map(e => e._id);
+    
+    if (deletableIds.length === 0) {
+      return res.status(400).json({ message: 'No deletable exams found (active live exams cannot be deleted)' });
+    }
+
+    await Exam.deleteMany({ _id: { $in: deletableIds } });
+    await ExamQuestion.deleteMany({ exam_id: { $in: deletableIds } });
+    await StudentExam.deleteMany({ exam_id: { $in: deletableIds } });
+    await StudentAnswer.deleteMany({ exam_id: { $in: deletableIds } });
+
+    const notif = new AdminNotification({
+      title: 'Bulk Exams Deleted',
+      message: `Teacher ${req.user.name} deleted ${deletableIds.length} exams`
+    });
+    await notif.save();
+
+    return res.json({ message: `${deletableIds.length} exam(s) deleted successfully`, deletedCount: deletableIds.length });
+  } catch (error) {
+    console.error('Error bulk deleting exams:', error);
+    return res.status(500).json({ message: 'Server error bulk deleting exams' });
+  }
+};
+
 exports.toggleExamLive = async (req, res) => {
   const { id } = req.params;
   const { is_live, exam_password } = req.body;
@@ -389,6 +420,28 @@ exports.deleteQuestion = async (req, res) => {
   } catch (error) {
     console.error('Error deleting question:', error);
     return res.status(500).json({ message: 'Server error deleting question' });
+  }
+};
+
+exports.bulkDeleteQuestions = async (req, res) => {
+  const { examId, questionIds } = req.body;
+  if (!Array.isArray(questionIds) || questionIds.length === 0) {
+    return res.status(400).json({ message: 'No question IDs provided' });
+  }
+  try {
+    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    if (!exam) return res.status(403).json({ message: 'Unauthorized or exam not found' });
+
+    const questions = await ExamQuestion.find({ _id: { $in: questionIds }, exam_id: exam._id });
+    const totalMarksToRemove = questions.reduce((acc, q) => acc + (Number(q.marks) || 0), 0);
+
+    await ExamQuestion.deleteMany({ _id: { $in: questions.map(q => q._id) } });
+    await Exam.findByIdAndUpdate(exam._id, { $inc: { total_marks: -totalMarksToRemove } });
+
+    return res.json({ message: `${questions.length} question(s) deleted successfully`, deletedCount: questions.length });
+  } catch (error) {
+    console.error('Error bulk deleting questions:', error);
+    return res.status(500).json({ message: 'Server error bulk deleting questions' });
   }
 };
 

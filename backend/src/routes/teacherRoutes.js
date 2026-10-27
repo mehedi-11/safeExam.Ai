@@ -13,6 +13,7 @@ router.put('/profile', teacherController.updateProfile);
 router.put('/change-password', teacherController.changePassword);
 
 // Exams
+router.post('/exams/bulk-delete', teacherController.bulkDeleteExams);
 router.get('/exams', teacherController.getExams);
 router.post('/exams', teacherController.createExam);
 router.put('/exams/:id', teacherController.updateExam);
@@ -28,6 +29,7 @@ router.get('/exams/:examId/students/:studentId/logs', teacherController.download
 router.post('/exams/:examId/students/:studentId/grade/manual', teacherController.manualGradeAnswersheet);
 
 // Exam Questions
+router.post('/questions/bulk-delete', teacherController.bulkDeleteQuestions);
 router.get('/exams/:examId/questions', teacherController.getQuestions);
 router.post('/questions', teacherController.createQuestion);
 router.put('/questions/:id', teacherController.updateQuestion);

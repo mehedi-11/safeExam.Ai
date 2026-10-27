@@ -139,6 +139,12 @@ export default function AdminDashboard() {
   const [showTeacherPassword, setShowTeacherPassword] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
 
+  // Bulk Selection State
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [isBulkDeletingStudents, setIsBulkDeletingStudents] = useState(false);
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
+  const [isBulkDeletingTeachers, setIsBulkDeletingTeachers] = useState(false);
+
   // Student Exams Modal State
   const [selectedStudentForModal, setSelectedStudentForModal] = useState(null);
   const [studentExamDetails, setStudentExamDetails] = useState([]);
@@ -336,6 +342,56 @@ export default function AdminDashboard() {
       fetchData();
     } catch (err) {
       setError("Error deleting student");
+    }
+  };
+
+  const handleBulkDeleteStudents = async () => {
+    if (selectedStudentIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedStudentIds.length} selected student(s)? This will also delete their registrations and exam results.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsBulkDeletingStudents(true);
+      const res = await api.post("/admin/students/bulk-delete", {
+        studentIds: selectedStudentIds,
+      });
+      triggerSuccess(res.data.message || "Selected students deleted successfully");
+      setSelectedStudentIds([]);
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Error bulk deleting students");
+    } finally {
+      setIsBulkDeletingStudents(false);
+    }
+  };
+
+  const handleBulkDeleteTeachers = async () => {
+    if (selectedTeacherIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedTeacherIds.length} selected teacher(s)?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsBulkDeletingTeachers(true);
+      const res = await api.post("/admin/teachers/bulk-delete", {
+        teacherIds: selectedTeacherIds,
+      });
+      triggerSuccess(res.data.message || "Selected teachers deleted successfully");
+      setSelectedTeacherIds([]);
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Error bulk deleting teachers");
+    } finally {
+      setIsBulkDeletingTeachers(false);
     }
   };
 
@@ -1189,10 +1245,84 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Bulk Actions Bar for Students */}
+                  {selectedStudentIds.length > 0 && (
+                    <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-indigo-900">
+                          {selectedStudentIds.length} student{selectedStudentIds.length > 1 ? "s" : ""} selected
+                        </span>
+                        <button
+                          onClick={() => setSelectedStudentIds([])}
+                          className="text-indigo-600 hover:text-indigo-800 underline text-xs ml-2 cursor-pointer"
+                        >
+                          Deselect all
+                        </button>
+                      </div>
+                      <button
+                        onClick={handleBulkDeleteStudents}
+                        disabled={isBulkDeletingStudents}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                        {isBulkDeletingStudents
+                          ? "Deleting..."
+                          : `Delete Selected (${selectedStudentIds.length})`}
+                      </button>
+                    </div>
+                  )}
+
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
                         <tr className="border-b border-gray-200 font-bold uppercase tracking-wider">
+                          <th className="p-4 font-bold text-center w-12">
+                            <input
+                              type="checkbox"
+                              checked={
+                                students.filter(
+                                  (s) =>
+                                    s.name
+                                      .toLowerCase()
+                                      .includes(studentSearch.toLowerCase()) ||
+                                    s.id
+                                      .toLowerCase()
+                                      .includes(studentSearch.toLowerCase())
+                                ).length > 0 &&
+                                students
+                                  .filter(
+                                    (s) =>
+                                      s.name
+                                        .toLowerCase()
+                                        .includes(studentSearch.toLowerCase()) ||
+                                      s.id
+                                        .toLowerCase()
+                                        .includes(studentSearch.toLowerCase())
+                                  )
+                                  .every((s) => selectedStudentIds.includes(s.id))
+                              }
+                              onChange={(e) => {
+                                const currentFiltered = students.filter(
+                                  (s) =>
+                                    s.name
+                                      .toLowerCase()
+                                      .includes(studentSearch.toLowerCase()) ||
+                                    s.id
+                                      .toLowerCase()
+                                      .includes(studentSearch.toLowerCase())
+                                );
+                                const filteredIds = currentFiltered.map((s) => s.id);
+                                if (e.target.checked) {
+                                  setSelectedStudentIds(Array.from(new Set([...selectedStudentIds, ...filteredIds])));
+                                } else {
+                                  setSelectedStudentIds(selectedStudentIds.filter((id) => !filteredIds.includes(id)));
+                                }
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              title="Select all students"
+                            />
+                          </th>
                           <th className="p-4 font-bold text-left">Student Info</th>
                           <th className="p-4 font-bold text-left">Email</th>
                           <th className="p-4 font-bold text-center">Exams Info</th>
@@ -1200,62 +1330,93 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
-                        {students
-                          .filter(
+                        {(() => {
+                          const filtered = students.filter(
                             (s) =>
                               s.name
                                 .toLowerCase()
                                 .includes(studentSearch.toLowerCase()) ||
                               s.id
                                 .toLowerCase()
-                                .includes(studentSearch.toLowerCase()),
-                          )
-                          .map((student) => (
-                            <tr
-                              key={student.id}
-                              className="hover:bg-white"
-                            >
-                              <td className="p-4">
-                                <div className="text-gray-900">{student.name}</div>
-                                <div className="text-gray-500 text-[11px] font-mono mt-0.5">{student.id}</div>
-                              </td>
-                              <td className="p-4">{student.email}</td>
-                              <td className="p-4 text-center">
-                                <div className="text-gray-900">{student.totalExams || 0}</div>
-                                <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
-                              </td>
-                              <td className="p-4 flex justify-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleUpdateStudentStatus(
-                                      student.id,
-                                      student.status,
-                                    )
-                                  }
-                                  className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${student.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
-                                >
-                                  {student.status === "approved" ? (
-                                    <UserMinus size={13} />
-                                  ) : (
-                                    <UserCheck size={13} />
-                                  )}
-                                  <span>
-                                    {student.status === "approved"
-                                      ? "Suspend"
-                                      : "Activate"}
-                                  </span>
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleDeleteStudent(student.id)
-                                  }
-                                  className="p-1.5 text-gray-500 hover:text-red-500 rounded-lg"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                                .includes(studentSearch.toLowerCase())
+                          );
+                          if (filtered.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan="5" className="p-8 text-center text-gray-500">
+                                  No students found.
+                                </td>
+                              </tr>
+                            );
+                          }
+                          return filtered.map((student) => {
+                            const isSelected = selectedStudentIds.includes(student.id);
+                            return (
+                              <tr
+                                key={student.id}
+                                className={`hover:bg-gray-50/60 transition-colors ${
+                                  isSelected ? "bg-indigo-50/50" : ""
+                                }`}
+                              >
+                                <td className="p-4 text-center w-12">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedStudentIds((prev) => [...prev, student.id]);
+                                      } else {
+                                        setSelectedStudentIds((prev) =>
+                                          prev.filter((id) => id !== student.id)
+                                        );
+                                      }
+                                    }}
+                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                  />
+                                </td>
+                                <td className="p-4">
+                                  <div className="text-gray-900 font-medium">{student.name}</div>
+                                  <div className="text-gray-500 text-[11px] font-mono mt-0.5">{student.id}</div>
+                                </td>
+                                <td className="p-4">{student.email}</td>
+                                <td className="p-4 text-center">
+                                  <div className="text-gray-900">{student.totalExams || 0}</div>
+                                  <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Total Exams</div>
+                                </td>
+                                <td className="p-4 flex justify-center gap-2">
+                                  <button
+                                    onClick={() =>
+                                      handleUpdateStudentStatus(
+                                        student.id,
+                                        student.status,
+                                      )
+                                    }
+                                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${student.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
+                                  >
+                                    {student.status === "approved" ? (
+                                      <UserMinus size={13} />
+                                    ) : (
+                                      <UserCheck size={13} />
+                                    )}
+                                    <span>
+                                      {student.status === "approved"
+                                        ? "Suspend"
+                                        : "Activate"}
+                                    </span>
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteStudent(student.id)
+                                    }
+                                    className="p-1.5 text-gray-500 hover:text-red-500 rounded-lg"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          });
+                        })()}
                       </tbody>
                     </table>
                   </div>
@@ -1336,10 +1497,87 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Bulk Actions Bar for Teachers */}
+                  {selectedTeacherIds.length > 0 && (
+                    <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-indigo-900">
+                          {selectedTeacherIds.length} teacher{selectedTeacherIds.length > 1 ? "s" : ""} selected
+                        </span>
+                        <button
+                          onClick={() => setSelectedTeacherIds([])}
+                          className="text-indigo-600 hover:text-indigo-800 underline text-xs ml-2 cursor-pointer"
+                        >
+                          Deselect all
+                        </button>
+                      </div>
+                      <button
+                        onClick={handleBulkDeleteTeachers}
+                        disabled={isBulkDeletingTeachers}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                        {isBulkDeletingTeachers
+                          ? "Deleting..."
+                          : `Delete Selected (${selectedTeacherIds.length})`}
+                      </button>
+                    </div>
+                  )}
+
                   <div className="overflow-x-auto border border-gray-200 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
                         <tr className="border-b border-gray-200 font-bold uppercase tracking-wider">
+                          <th className="p-4 font-bold text-center w-12">
+                            <input
+                              type="checkbox"
+                              checked={
+                                teachers.filter(
+                                  (t) =>
+                                    t.status !== "pending" &&
+                                    (t.name
+                                      .toLowerCase()
+                                      .includes(teacherSearch.toLowerCase()) ||
+                                      t.email
+                                        .toLowerCase()
+                                        .includes(teacherSearch.toLowerCase()))
+                                ).length > 0 &&
+                                teachers
+                                  .filter(
+                                    (t) =>
+                                      t.status !== "pending" &&
+                                      (t.name
+                                        .toLowerCase()
+                                        .includes(teacherSearch.toLowerCase()) ||
+                                        t.email
+                                          .toLowerCase()
+                                          .includes(teacherSearch.toLowerCase()))
+                                  )
+                                  .every((t) => selectedTeacherIds.includes(t.id))
+                              }
+                              onChange={(e) => {
+                                const currentFiltered = teachers.filter(
+                                  (t) =>
+                                    t.status !== "pending" &&
+                                    (t.name
+                                      .toLowerCase()
+                                      .includes(teacherSearch.toLowerCase()) ||
+                                      t.email
+                                        .toLowerCase()
+                                        .includes(teacherSearch.toLowerCase()))
+                                );
+                                const filteredIds = currentFiltered.map((t) => t.id);
+                                if (e.target.checked) {
+                                  setSelectedTeacherIds(Array.from(new Set([...selectedTeacherIds, ...filteredIds])));
+                                } else {
+                                  setSelectedTeacherIds(selectedTeacherIds.filter((id) => !filteredIds.includes(id)));
+                                }
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              title="Select all teachers"
+                            />
+                          </th>
                           <th className="p-4 font-bold text-left">Teacher Info</th>
                           <th className="p-4 font-bold text-center">Exams Info</th>
                           <th className="p-4 font-bold text-left">Joined Date</th>
@@ -1347,8 +1585,8 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
-                        {teachers
-                          .filter(
+                        {(() => {
+                          const filtered = teachers.filter(
                             (t) =>
                               t.status !== "pending" &&
                               (t.name
@@ -1357,60 +1595,90 @@ export default function AdminDashboard() {
                                 t.email
                                   .toLowerCase()
                                   .includes(teacherSearch.toLowerCase())),
-                          )
-                          .map((teacher) => {
+                          );
+                          if (filtered.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan="5" className="p-8 text-center text-gray-500">
+                                  No teachers found.
+                                </td>
+                              </tr>
+                            );
+                          }
+                          return filtered.map((teacher) => {
+                            const isSelected = selectedTeacherIds.includes(teacher.id);
                             const tExams = allExams.filter(e => e.teacher_id && (e.teacher_id._id === teacher.id || e.teacher_id === teacher.id));
                             const completedCount = tExams.filter(e => !e.is_live).length;
                             return (
-                            <tr
-                              key={teacher.id}
-                              className="hover:bg-white"
-                            >
-                              <td className="p-4">
-                                <div className="text-gray-900">{teacher.name}</div>
-                                <div className="text-gray-500 text-[11px] mt-0.5">{teacher.email}</div>
-                              </td>
-                              <td className="p-4 text-center">
-                                <div className="text-gray-900">{tExams.length} <span className="text-gray-500 font-normal mx-1">/</span> {completedCount}</div>
-                                <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
-                              </td>
-                              <td className="p-4">
-                                {new Date(
-                                  teacher.joining_date,
-                                ).toLocaleDateString()}
-                              </td>
-                              <td className="p-4 flex justify-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleUpdateTeacherStatus(
-                                      teacher.id,
-                                      teacher.status,
-                                    )
-                                  }
-                                  className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${teacher.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
-                                >
-                                  {teacher.status === "approved" ? (
-                                    <UserMinus size={13} />
-                                  ) : (
-                                    <UserCheck size={13} />
-                                  )}
-                                  <span>
-                                    {teacher.status === "approved"
-                                      ? "Suspend"
-                                      : "Activate"}
-                                  </span>
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleDeleteTeacher(teacher.id)
-                                  }
-                                  className="p-1.5 text-gray-500 hover:text-red-500 rounded-lg"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </td>
-                            </tr>
-                          );})}
+                              <tr
+                                key={teacher.id}
+                                className={`hover:bg-gray-50/60 transition-colors ${
+                                  isSelected ? "bg-indigo-50/50" : ""
+                                }`}
+                              >
+                                <td className="p-4 text-center w-12">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedTeacherIds((prev) => [...prev, teacher.id]);
+                                      } else {
+                                        setSelectedTeacherIds((prev) =>
+                                          prev.filter((id) => id !== teacher.id)
+                                        );
+                                      }
+                                    }}
+                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                  />
+                                </td>
+                                <td className="p-4">
+                                  <div className="text-gray-900 font-medium">{teacher.name}</div>
+                                  <div className="text-gray-500 text-[11px] mt-0.5">{teacher.email}</div>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <div className="text-gray-900">{tExams.length} <span className="text-gray-500 font-normal mx-1">/</span> {completedCount}</div>
+                                  <div className="text-gray-500 text-[10px] uppercase tracking-wider mt-0.5">Created / Done</div>
+                                </td>
+                                <td className="p-4">
+                                  {new Date(
+                                    teacher.joining_date,
+                                  ).toLocaleDateString()}
+                                </td>
+                                <td className="p-4 flex justify-center gap-2">
+                                  <button
+                                    onClick={() =>
+                                      handleUpdateTeacherStatus(
+                                        teacher.id,
+                                        teacher.status,
+                                      )
+                                    }
+                                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${teacher.status === "approved" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-tomato-200 text-tomato-600 hover:bg-tomato-50"}`}
+                                  >
+                                    {teacher.status === "approved" ? (
+                                      <UserMinus size={13} />
+                                    ) : (
+                                      <UserCheck size={13} />
+                                    )}
+                                    <span>
+                                      {teacher.status === "approved"
+                                        ? "Suspend"
+                                        : "Activate"}
+                                    </span>
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteTeacher(teacher.id)
+                                    }
+                                    className="p-1.5 text-gray-500 hover:text-red-500 rounded-lg"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          });
+                        })()}
                       </tbody>
                     </table>
                   </div>

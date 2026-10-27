@@ -26,6 +26,7 @@ router.get('/notifications', adminController.getNotifications);
 router.put('/notifications/mark-read', adminController.markNotificationsRead);
 
 // Teacher management
+router.post('/teachers/bulk-delete', adminController.bulkDeleteTeachers);
 router.get('/teachers', adminController.getTeachers);
 router.post('/teachers', adminController.addTeacher);
 router.post('/teachers/bulk', adminController.addBulkTeachers);
@@ -33,6 +34,7 @@ router.put('/teachers/:id/status', adminController.updateTeacherStatus);
 router.delete('/teachers/:id', adminController.deleteTeacher);
 
 // Student management
+router.post('/students/bulk-delete', adminController.bulkDeleteStudents);
 router.get('/students', adminController.getStudents);
 router.post('/students', adminController.addStudent);
 router.post('/students/bulk', adminController.addBulkStudents);
