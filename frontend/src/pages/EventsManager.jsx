@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Play, Image as ImageIcon, Edit, Trash2, Search, Calendar, Users, Clock, Sparkles, TrendingUp } from 'lucide-react';
+import { Plus, Play, Image as ImageIcon, Edit, Trash2, Search, Calendar, Users, Clock, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import api from '../api/axiosConfig';
@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 const EventsManager = ({ isAdmin = false }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEventId, setEditingEventId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,6 +112,7 @@ const EventsManager = ({ isAdmin = false }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
       const payload = { ...formData };
 
@@ -125,6 +127,8 @@ const EventsManager = ({ isAdmin = false }) => {
     } catch (err) {
       console.error(err);
       alert(`Failed to ${editingEventId ? 'update' : 'create'} event`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -499,7 +503,14 @@ const EventsManager = ({ isAdmin = false }) => {
               onChange={handleImageUpload} 
             />
           </div>
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">{editingEventId ? "Update Event" : "Save Event"}</button>
+          <button 
+            type="submit" 
+            disabled={saving}
+            className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
+          >
+            {saving && <Loader2 className="animate-spin shrink-0" size={16} />}
+            <span>{saving ? (editingEventId ? "Updating Event..." : "Saving Event...") : (editingEventId ? "Update Event" : "Save Event")}</span>
+          </button>
         </form>
       </Modal>
 

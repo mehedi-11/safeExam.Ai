@@ -29,11 +29,18 @@
   }
 
   .tomato-btn {
-    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-xl shadow-md shadow-indigo-200/50 hover:shadow-lg smooth-transition inline-flex items-center justify-center gap-2;
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-xl shadow-md shadow-indigo-200/50 hover:shadow-lg smooth-transition inline-flex items-center justify-center gap-2 disabled:opacity-65 disabled:cursor-not-allowed disabled:pointer-events-none;
   }
 
   .tomato-btn-outline {
-    @apply border border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 font-medium py-2 px-5 rounded-xl smooth-transition inline-flex items-center justify-center gap-2;
+    @apply border border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 font-medium py-2 px-5 rounded-xl smooth-transition inline-flex items-center justify-center gap-2 disabled:opacity-65 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  button:disabled,
+  button[disabled] {
+    opacity: 0.65;
+    cursor: not-allowed !important;
+    pointer-events: none;
   }
 
   .modal-backdrop {

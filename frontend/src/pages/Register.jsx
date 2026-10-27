@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import emailjs from '@emailjs/browser';
-import { UserSquare, Mail, KeyRound, ArrowLeft, ShieldAlert, BadgeCheck, Eye, EyeOff } from 'lucide-react';
+import { UserSquare, Mail, KeyRound, ArrowLeft, ShieldAlert, BadgeCheck, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 export default function Register() {
@@ -249,8 +249,13 @@ export default function Register() {
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className="w-full tomato-btn py-3 mt-4 text-sm disabled:opacity-70 disabled:cursor-not-allowed">
-                {loading ? 'Processing...' : 'Verify Email'}
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full tomato-btn py-3 mt-4 text-sm flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="animate-spin shrink-0" size={18} />}
+                <span>{loading ? 'Sending OTP...' : 'Verify Email'}</span>
               </button>
             </form>
           )}
@@ -289,9 +294,10 @@ export default function Register() {
                 <button 
                   type="submit" 
                   disabled={loading || enteredOtp.length !== 6} 
-                  className="flex-1 tomato-btn py-3 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex-1 tomato-btn py-3 text-sm flex items-center justify-center gap-2"
                 >
-                  {loading ? 'Verifying...' : 'Verify & Register'}
+                  {loading && <Loader2 className="animate-spin shrink-0" size={18} />}
+                  <span>{loading ? 'Verifying...' : 'Verify & Register'}</span>
                 </button>
               </div>
             </form>

@@ -147,6 +147,15 @@ export default function TeacherDashboard() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
+  // Button Loading States
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [savingExam, setSavingExam] = useState(false);
+  const [savingQuestion, setSavingQuestion] = useState(false);
+  const [makingLive, setMakingLive] = useState(false);
+  const [stoppingLive, setStoppingLive] = useState(false);
+  const [savingGrades, setSavingGrades] = useState(false);
+
   // Axios Instance with JWT auth is now centralized in api
 
   useEffect(() => {
@@ -251,6 +260,7 @@ export default function TeacherDashboard() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSavingProfile(true);
     const payload = {
       name: profileName,
       email: profileEmail,
@@ -268,24 +278,30 @@ export default function TeacherDashboard() {
       setIsProfileModalOpen(false);
     } catch (err) {
       setError("Error updating profile details.");
+    } finally {
+      setSavingProfile(false);
     }
   };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSavingPassword(true);
     try {
       await api.put("/teacher/change-password", pwData);
       triggerSuccess("Password changed successfully");
       setPwData({ oldPassword: "", newPassword: "" });
     } catch (err) {
       setError(err.response?.data?.message || "Error changing password.");
+    } finally {
+      setSavingPassword(false);
     }
   };
 
   // --- Exam Actions ---
   const handleSaveExam = async (e) => {
     e.preventDefault();
+    setSavingExam(true);
     try {
       if (isEditingExam) {
         await api.put(`/teacher/exams/${examForm.id}`, examForm);
@@ -303,6 +319,8 @@ export default function TeacherDashboard() {
       }
     } catch (err) {
       setError(err.response?.data?.message || "Error saving exam");
+    } finally {
+      setSavingExam(false);
     }
   };
 
@@ -337,6 +355,7 @@ export default function TeacherDashboard() {
 
   const handleMakeLiveSubmit = async (e) => {
     e.preventDefault();
+    setMakingLive(true);
     try {
       await api.post(`/teacher/exams/${examForm.id}/live`, {
         is_live: true,
@@ -352,6 +371,8 @@ export default function TeacherDashboard() {
       } else {
         setError(err.response?.data?.message || "Error making exam live");
       }
+    } finally {
+      setMakingLive(false);
     }
   };
 
@@ -362,6 +383,7 @@ export default function TeacherDashboard() {
 
   const confirmStopLive = async () => {
     if (!examToStopId) return;
+    setStoppingLive(true);
     try {
       await api.post(`/teacher/exams/${examToStopId}/live`, {
         is_live: false,
@@ -373,6 +395,8 @@ export default function TeacherDashboard() {
       fetchData();
     } catch (err) {
       setError("Error stopping exam");
+    } finally {
+      setStoppingLive(false);
     }
   };
 
@@ -424,6 +448,7 @@ export default function TeacherDashboard() {
 
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
+    setSavingQuestion(true);
     try {
       const payload = {
         ...questionForm,
@@ -443,6 +468,8 @@ export default function TeacherDashboard() {
       fetchData(); // Reload counts
     } catch (err) {
       setError(err.response?.data?.message || "Error saving question");
+    } finally {
+      setSavingQuestion(false);
     }
   };
 
@@ -494,6 +521,7 @@ export default function TeacherDashboard() {
   };
 
   const handleManualGradeSubmit = async () => {
+    setSavingGrades(true);
     try {
       const res = await api.post(
         `/teacher/exams/${selectedResultExamId}/students/${selectedStudentForAnswers.id}/grade/manual`,
@@ -506,6 +534,8 @@ export default function TeacherDashboard() {
       fetchExamResults(selectedResultExamId);
     } catch (err) {
       setError("Error saving manual grades");
+    } finally {
+      setSavingGrades(false);
     }
   };
 
@@ -1898,9 +1928,11 @@ export default function TeacherDashboard() {
                   </div>
                   <button
                     type="submit"
-                    className="tomato-btn w-full py-2.5 mt-2"
+                    disabled={savingPassword}
+                    className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
                   >
-                    Submit Password Change
+                    {savingPassword && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                    <span>{savingPassword ? "Updating Password..." : "Submit Password Change"}</span>
                   </button>
                 </form>
               </div>
@@ -2014,9 +2046,11 @@ export default function TeacherDashboard() {
 
                         <button
                           type="submit"
-                          className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50"
+                          disabled={savingProfile}
+                          className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
                         >
-                          Save Changes
+                          {savingProfile && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                          <span>{savingProfile ? "Saving Changes..." : "Save Changes"}</span>
                         </button>
                       </form>
                     </div>
@@ -2133,8 +2167,13 @@ export default function TeacherDashboard() {
             </div>
           </div>
 
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
-            Save Exam
+          <button 
+            type="submit" 
+            disabled={savingExam} 
+            className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
+          >
+            {savingExam && <RefreshCw className="animate-spin shrink-0" size={16} />}
+            <span>{savingExam ? "Saving Exam..." : "Save Exam"}</span>
           </button>
         </form>
         ) : (
@@ -2209,8 +2248,13 @@ export default function TeacherDashboard() {
                 />
               </div>
             </div>
-            <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
-              Create Event Exam
+            <button 
+              type="submit" 
+              disabled={savingExam} 
+              className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
+            >
+              {savingExam && <RefreshCw className="animate-spin shrink-0" size={16} />}
+              <span>{savingExam ? "Creating Exam..." : "Create Event Exam"}</span>
             </button>
           </form>
         )}
@@ -2243,9 +2287,11 @@ export default function TeacherDashboard() {
           </div>
           <button
             type="submit"
-            className="w-full py-2.5 mt-2 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2"
+            disabled={makingLive}
+            className="w-full py-2.5 mt-2 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
           >
-            <Play size={16} /> Start Live Exam Now
+            {makingLive ? <RefreshCw className="animate-spin shrink-0" size={16} /> : <Play size={16} />}
+            <span>{makingLive ? "Starting Live Exam..." : "Start Live Exam Now"}</span>
           </button>
         </form>
       </Modal>
@@ -2532,8 +2578,13 @@ export default function TeacherDashboard() {
             </>
           )}
 
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
-            Save Question
+          <button 
+            type="submit" 
+            disabled={savingQuestion} 
+            className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
+          >
+            {savingQuestion && <RefreshCw className="animate-spin shrink-0" size={16} />}
+            <span>{savingQuestion ? "Saving Question..." : "Save Question"}</span>
           </button>
         </form>
       </Modal>
@@ -2665,9 +2716,11 @@ export default function TeacherDashboard() {
               </button>
               <button
                 onClick={handleManualGradeSubmit}
-                className="tomato-btn px-6 py-2"
+                disabled={savingGrades}
+                className="tomato-btn px-6 py-2 flex items-center justify-center gap-2"
               >
-                Save Grades
+                {savingGrades && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                <span>{savingGrades ? "Saving Grades..." : "Save Grades"}</span>
               </button>
             </div>
           </div>
@@ -2702,9 +2755,11 @@ export default function TeacherDashboard() {
               </button>
               <button
                 onClick={confirmStopLive}
-                className="px-5 py-2 rounded-xl font-bold bg-gray-900 text-white hover:bg-black shadow-lg shadow-tomato-500/30 transition-all"
+                disabled={stoppingLive}
+                className="px-5 py-2 rounded-xl font-bold bg-gray-900 text-white hover:bg-black shadow-lg shadow-tomato-500/30 transition-all flex items-center justify-center gap-2"
               >
-                OK
+                {stoppingLive && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                <span>{stoppingLive ? "Stopping..." : "OK"}</span>
               </button>
             </div>
           </div>

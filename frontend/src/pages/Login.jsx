@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import { KeyRound, Mail, UserSquare, ShieldAlert, ArrowLeft, Eye, EyeOff, Lock, CheckCircle2 } from 'lucide-react';
+import { KeyRound, Mail, UserSquare, ShieldAlert, ArrowLeft, Eye, EyeOff, Lock, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const { role } = useParams(); // 'admin', 'teacher', 'student'
@@ -311,9 +311,10 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="tomato-btn w-full py-3 mt-4"
+                className="tomato-btn w-full py-3 mt-4 flex items-center justify-center gap-2"
               >
-                {loading ? 'Processing...' : 'Sign In'}
+                {loading && <Loader2 className="animate-spin shrink-0" size={18} />}
+                <span>{loading ? 'Signing In...' : 'Sign In'}</span>
               </button>
             </form>
           ) : (
@@ -388,9 +389,14 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="tomato-btn w-full py-3 mt-4"
+                className="tomato-btn w-full py-3 mt-4 flex items-center justify-center gap-2"
               >
-                {loading ? 'Processing...' : (resetStep === 1 ? 'Send OTP' : (resetStep === 2 ? 'Verify OTP' : 'Reset Password'))}
+                {loading && <Loader2 className="animate-spin shrink-0" size={18} />}
+                <span>
+                  {loading 
+                    ? 'Processing...' 
+                    : (resetStep === 1 ? 'Send OTP' : (resetStep === 2 ? 'Verify OTP' : 'Reset Password'))}
+                </span>
               </button>
 
               <div className="text-center mt-4">

@@ -129,6 +129,8 @@ export default function StudentDashboard({ defaultTab }) {
 
   // UI State
   const [loading, setLoading] = useState(false);
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -172,6 +174,7 @@ export default function StudentDashboard({ defaultTab }) {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setProfileSubmitting(true);
     const payload = {
       name: profileName,
       email: profileEmail,
@@ -188,6 +191,8 @@ export default function StudentDashboard({ defaultTab }) {
       setIsProfileModalOpen(false);
     } catch (err) {
       setError("Error updating profile details.");
+    } finally {
+      setProfileSubmitting(false);
     }
   };
 
@@ -200,12 +205,15 @@ export default function StudentDashboard({ defaultTab }) {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setPasswordSubmitting(true);
     try {
       await api.put('/student/change-password', pwData);
       triggerSuccess('Password updated successfully');
       setPwData({ oldPassword: '', newPassword: '' });
     } catch (err) {
       setError(err.response?.data?.message || 'Error updating password.');
+    } finally {
+      setPasswordSubmitting(false);
     }
   };
 
@@ -1010,8 +1018,13 @@ export default function StudentDashboard({ defaultTab }) {
                       </button>
                     </div>
                   </div>
-                  <button type="submit" className="tomato-btn w-full py-2.5 mt-4 text-sm">
-                    Update Password
+                  <button 
+                    type="submit" 
+                    disabled={passwordSubmitting}
+                    className="tomato-btn w-full py-2.5 mt-4 text-sm flex items-center justify-center gap-2"
+                  >
+                    {passwordSubmitting && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                    <span>{passwordSubmitting ? 'Updating Password...' : 'Update Password'}</span>
                   </button>
                 </form>
               </div>
@@ -1119,9 +1132,11 @@ export default function StudentDashboard({ defaultTab }) {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50"
+                  disabled={profileSubmitting}
+                  className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
                 >
-                  Save Changes
+                  {profileSubmitting && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                  <span>{profileSubmitting ? 'Saving Changes...' : 'Save Changes'}</span>
                 </button>
               </form>
             </div>

@@ -13,6 +13,7 @@ const EventDetails = () => {
   
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [registering, setRegistering] = useState(false);
   
   const [regForm, setRegForm] = useState({ name: '', email: '', phone: '' });
   const [emailError, setEmailError] = useState("");
@@ -44,6 +45,7 @@ const EventDetails = () => {
       return;
     }
 
+    setRegistering(true);
     try {
       const res = await api.post(`/events/${id}/register`, regForm);
       if (res.data && res.data.success === false) {
@@ -55,6 +57,8 @@ const EventDetails = () => {
       setIsSuccessModalOpen(true);
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to register');
+    } finally {
+      setRegistering(false);
     }
   };
 
@@ -221,8 +225,19 @@ const EventDetails = () => {
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50">
-              Submit Registration
+            <button 
+              type="submit" 
+              disabled={registering}
+              className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
+            >
+              {registering ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Submitting Registration...</span>
+                </>
+              ) : (
+                <span>Submit Registration</span>
+              )}
             </button>
           </div>
         </form>

@@ -16,6 +16,7 @@ const StudentEvents = () => {
   // Registration modal states
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [registering, setRegistering] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [regForm, setRegForm] = useState({ name: '', email: '', phone: '' });
   const [emailError, setEmailError] = useState("");
@@ -78,6 +79,7 @@ const StudentEvents = () => {
       return;
     }
 
+    setRegistering(true);
     try {
       const res = await api.post(`/events/${selectedEventId}/register`, regForm);
       if (res.data && res.data.success === false) {
@@ -90,6 +92,8 @@ const StudentEvents = () => {
       fetchData();
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to register');
+    } finally {
+      setRegistering(false);
     }
   };
 
@@ -540,8 +544,19 @@ const StudentEvents = () => {
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50">
-              Confirm Registration
+            <button 
+              type="submit" 
+              disabled={registering}
+              className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
+            >
+              {registering ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Registering...</span>
+                </>
+              ) : (
+                <span>Confirm Registration</span>
+              )}
             </button>
           </div>
         </form>

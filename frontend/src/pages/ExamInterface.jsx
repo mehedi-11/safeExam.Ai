@@ -43,6 +43,7 @@ export default function ExamInterface() {
   
   // UI State
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [limitReached, setLimitReached] = useState(false);
   const [showLogFeed, setShowLogFeed] = useState([]); // Local log stream on exam screen
@@ -763,6 +764,7 @@ export default function ExamInterface() {
   const handleSubmitExam = async (isAuto = false, reason = null) => {
     if (hasSubmittedRef.current) return;
     hasSubmittedRef.current = true;
+    setIsSubmitting(true);
     sessionStorage.removeItem(`exam_active_${examId}`);
     const submissionReason = reason || (isAuto ? 'Auto-Submitted: Exam time expired' : 'Exam submitted manually by student');
 
@@ -953,10 +955,15 @@ export default function ExamInterface() {
               {!isBlocked && questions.length > 0 && (
                 <button 
                   onClick={() => handleSubmitExam(false, 'Exam submitted manually by student')}
+                  disabled={isSubmitting}
                   className="tomato-btn w-full py-3.5 text-sm flex items-center justify-center gap-2"
                 >
-                  <CheckSquare size={18} />
-                  <span>Submit Exam Assessment</span>
+                  {isSubmitting ? (
+                    <RefreshCw className="animate-spin shrink-0" size={18} />
+                  ) : (
+                    <CheckSquare size={18} />
+                  )}
+                  <span>{isSubmitting ? 'Submitting Assessment...' : 'Submit Exam Assessment'}</span>
                 </button>
               )}
             </div>

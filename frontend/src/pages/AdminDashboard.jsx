@@ -143,6 +143,8 @@ export default function AdminDashboard() {
   const [selectedStudentForModal, setSelectedStudentForModal] = useState(null);
   const [studentExamDetails, setStudentExamDetails] = useState([]);
   const [loadingStudentExams, setLoadingStudentExams] = useState(false);
+  const [submittingModal, setSubmittingModal] = useState(false);
+  const [submittingProfile, setSubmittingProfile] = useState(false);
 
   // Axios Instance with JWT auth is now centralized in api
 
@@ -201,18 +203,22 @@ export default function AdminDashboard() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSubmittingProfile(true);
     try {
       await api.put("/admin/profile", profile);
       triggerSuccess("Profile credentials updated successfully");
       fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Error updating profile");
+    } finally {
+      setSubmittingProfile(false);
     }
   };
 
   // --- Admin Actions ---
   const handleAddAdmin = async (e) => {
     e.preventDefault();
+    setSubmittingModal(true);
     try {
       await api.post("/admin/admins", adminForm);
       setIsAdminModalOpen(false);
@@ -221,12 +227,15 @@ export default function AdminDashboard() {
       fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Error adding admin");
+    } finally {
+      setSubmittingModal(false);
     }
   };
 
   // --- Student Actions ---
   const handleAddStudent = async (e) => {
     e.preventDefault();
+    setSubmittingModal(true);
     try {
       await api.post("/admin/students", studentForm);
       setIsStudentModalOpen(false);
@@ -235,12 +244,15 @@ export default function AdminDashboard() {
       fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Error adding student");
+    } finally {
+      setSubmittingModal(false);
     }
   };
 
   // --- Teacher Actions ---
   const handleAddTeacher = async (e) => {
     e.preventDefault();
+    setSubmittingModal(true);
     try {
       await api.post("/admin/teachers", teacherForm);
       setIsTeacherModalOpen(false);
@@ -249,6 +261,8 @@ export default function AdminDashboard() {
       fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Error adding teacher");
+    } finally {
+      setSubmittingModal(false);
     }
   };
 
@@ -1711,10 +1725,11 @@ export default function AdminDashboard() {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="tomato-btn w-full md:w-auto py-2.5 px-6"
+                    disabled={submittingProfile}
+                    className="tomato-btn w-full md:w-auto py-2.5 px-6 flex items-center justify-center gap-2"
                   >
-                    {loading ? "Updating..." : "Update Profile"}
+                    {submittingProfile && <RefreshCw className="animate-spin shrink-0" size={16} />}
+                    <span>{submittingProfile ? "Updating Profile..." : "Update Profile"}</span>
                   </button>
                 </div>
               </form>
@@ -1964,8 +1979,13 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
-            Add Admin
+          <button 
+            type="submit" 
+            disabled={submittingModal}
+            className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
+          >
+            {submittingModal && <RefreshCw className="animate-spin shrink-0" size={16} />}
+            <span>{submittingModal ? "Adding Admin..." : "Add Admin"}</span>
           </button>
         </form>
       </Modal>
@@ -2046,8 +2066,13 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="pt-2">
-            <button type="submit" className="tomato-btn w-full py-2.5 text-sm">
-              Add Student
+            <button 
+              type="submit" 
+              disabled={submittingModal}
+              className="tomato-btn w-full py-2.5 text-sm flex items-center justify-center gap-2"
+            >
+              {submittingModal && <RefreshCw className="animate-spin shrink-0" size={16} />}
+              <span>{submittingModal ? "Adding Student..." : "Add Student"}</span>
             </button>
           </div>
         </form>
@@ -2114,8 +2139,13 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
-          <button type="submit" className="tomato-btn w-full py-2.5 mt-2">
-            Submit (Approve Directly)
+          <button 
+            type="submit" 
+            disabled={submittingModal}
+            className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
+          >
+            {submittingModal && <RefreshCw className="animate-spin shrink-0" size={16} />}
+            <span>{submittingModal ? "Saving Teacher..." : "Submit (Approve Directly)"}</span>
           </button>
         </form>
       </Modal>
