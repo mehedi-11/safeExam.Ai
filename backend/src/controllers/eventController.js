@@ -39,11 +39,11 @@ exports.getEvents = async (req, res) => {
   try {
     let events = [];
     if (req.user.role === 'admin') {
-      events = await Event.find().sort({ created_at: -1 }).lean();
+      events = await Event.find().sort({ created_at: -1, _id: -1 }).lean();
     } else if (req.user.role === 'teacher') {
-      events = await Event.find({ created_by: req.user.id }).sort({ created_at: -1 }).lean();
+      events = await Event.find({ created_by: req.user.id }).sort({ created_at: -1, _id: -1 }).lean();
     } else if (req.user.role === 'student') {
-      events = await Event.find({ status: 'live' }).sort({ event_date: 1 }).lean();
+      events = await Event.find({ status: 'live' }).sort({ created_at: -1, _id: -1 }).lean();
     }
 
     // Attach registration count
@@ -149,7 +149,7 @@ exports.getEventRegistrations = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized: You can only view your own events' });
     }
 
-    const regs = await EventRegistration.find({ event_id: req.params.id }).sort({ registration_date: -1 });
+    const regs = await EventRegistration.find({ event_id: req.params.id }).sort({ registration_date: -1, _id: -1 });
     return res.json(regs);
   } catch (err) {
     console.error(err);
@@ -278,7 +278,7 @@ exports.getMyRegistrations = async (req, res) => {
 
     const registrations = await EventRegistration.find(
       queryConditions.length > 0 ? { $or: queryConditions } : { student_id: studentId }
-    ).populate('event_id').sort({ registration_date: -1 }).lean();
+    ).populate('event_id').sort({ registration_date: -1, _id: -1 }).lean();
 
     const now = new Date();
 

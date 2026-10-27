@@ -1088,7 +1088,10 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {selectedSubjectModal.examsList.map((ex, i) => (
+                      {selectedSubjectModal.examsList
+                        .slice()
+                        .sort((a, b) => new Date(b.created_at || b.finished_at || 0) - new Date(a.created_at || a.finished_at || 0) || String(b._id || b.id || '').localeCompare(String(a._id || a.id || '')))
+                        .map((ex, i) => (
                         <tr key={i} className="hover:bg-gray-50/50">
                           <td className="p-3 text-gray-900">{ex.title}</td>
                           <td className="p-3">

@@ -37,6 +37,8 @@ export default function ExamInterface() {
   const [blockTimeLeft, setBlockTimeLeft] = useState(0); // Block countdown seconds
   const [examStarted, setExamStarted] = useState(false);
   const [webcamReady, setWebcamReady] = useState(false);
+  const [webcamLoading, setWebcamLoading] = useState(false);
+  const [webcamError, setWebcamError] = useState(null);
   const [examTitle, setExamTitle] = useState('');
   const [examDetails, setExamDetails] = useState(null);
   const [modelReady, setModelReady] = useState(false);
@@ -112,7 +114,13 @@ export default function ExamInterface() {
     initExam();
     startWebcam();
 
+    const handleBeforeUnload = () => {
+      stopWebcam();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       stopWebcam();
     };
   }, [examId]);
@@ -445,7 +453,10 @@ export default function ExamInterface() {
     }
   };
 
-  const startExamSession = () => {
+  const startExamSession = async () => {
+    if (!webcamReady) {
+      await startWebcam();
+    }
     sessionStorage.setItem(`exam_active_${examId}`, 'true');
     setShowRulesModal(false);
     setExamStarted(true);
@@ -466,24 +477,83 @@ export default function ExamInterface() {
     }
   };
 
-  const startWebcam = async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true });
-      streamRef.current = mediaStream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+  const stopWebcam = () => {
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+        });
+      } catch (e) {
+        console.warn('Error stopping tracks:', e);
       }
-      setWebcamReady(true);
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setWebcamReady(false);
+  };
+
+  const startWebcam = async () => {
+    setWebcamLoading(true);
+    setWebcamError(null);
+    stopWebcam(); // Always release previous stream first
+
+    try {
+      let mediaStream = null;
+      // 1. Try ideal video & audio
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: true
+        });
+      } catch (e1) {
+        console.warn('Ideal video+audio failed, trying standard video+audio:', e1);
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        } catch (e2) {
+          console.warn('Standard audio+video failed, trying video only:', e2);
+          mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+      }
+
+      if (mediaStream) {
+        streamRef.current = mediaStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(e => console.warn('Video play error:', e));
+          };
+        }
+        setWebcamReady(true);
+        setWebcamError(null);
+      } else {
+        throw new Error('Could not acquire media stream');
+      }
     } catch (err) {
       console.warn('Webcam permission denied or unavailable:', err);
+      setWebcamReady(false);
+      setWebcamError(
+        err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+          ? 'Camera permission denied. Please allow camera and microphone in your browser settings.'
+          : (err.message || 'Camera or microphone is currently in use or unavailable.')
+      );
+    } finally {
+      setWebcamLoading(false);
     }
   };
 
-  const stopWebcam = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+  // Ensure video element receives stream when ready or when modal state changes
+  useEffect(() => {
+    if (webcamReady && streamRef.current && videoRef.current) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => console.warn('Video play error:', e));
+        };
+      }
     }
-  };
+  }, [webcamReady, showRulesModal]);
 
   // Normalizes COCO-SSD class names so cell phones, notebook/books, and persons are accurately detected
   const normalizeDetectedClass = (rawClass) => {
@@ -752,6 +822,7 @@ export default function ExamInterface() {
 
       // Handle locking on the fly
       if (res.data.status === 'completed' && !hasSubmittedRef.current) {
+        stopWebcam();
         alert('A critical violation was detected! Your exam has been auto-submitted.');
         navigate('/dashboard/student');
       }
@@ -765,6 +836,7 @@ export default function ExamInterface() {
     if (hasSubmittedRef.current) return;
     hasSubmittedRef.current = true;
     setIsSubmitting(true);
+    stopWebcam(); // Release camera and microphone hardware tracks immediately
     sessionStorage.removeItem(`exam_active_${examId}`);
     const submissionReason = reason || (isAuto ? 'Auto-Submitted: Exam time expired' : 'Exam submitted manually by student');
 
@@ -848,10 +920,49 @@ export default function ExamInterface() {
                 <li><span className="font-bold">Accumulated 10 Demerits:</span> Immediate auto-submission of the exam.</li>
               </ul>
             </div>
-            <div className="mt-8 flex justify-end">
+
+            {/* Camera & Mic Pre-flight Check */}
+            <div className="mt-6 p-4 rounded-2xl border border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  webcamReady ? 'bg-green-100 text-green-700' : 'bg-tomato-100 text-tomato-700'
+                }`}>
+                  <Camera size={20} />
+                </div>
+                <div>
+                  <h5 className="font-bold text-xs text-gray-900">
+                    {webcamReady ? 'Camera & Audio Active' : 'Camera & Audio Permission Required'}
+                  </h5>
+                  <p className="text-[11px] text-gray-500">
+                    {webcamReady
+                      ? 'Live video stream ready. AI proctoring will monitor your exam.'
+                      : (webcamError || 'Please allow camera and microphone access to begin the exam.')}
+                  </p>
+                </div>
+              </div>
+
+              {!webcamReady ? (
+                <button
+                  type="button"
+                  onClick={startWebcam}
+                  disabled={webcamLoading}
+                  className="px-4 py-2 bg-tomato-500 hover:bg-tomato-600 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer"
+                >
+                  <RefreshCw size={13} className={webcamLoading ? 'animate-spin' : ''} />
+                  <span>{webcamLoading ? 'Connecting...' : 'Allow / Test Camera'}</span>
+                </button>
+              ) : (
+                <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-lg flex items-center gap-1 shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  Verified
+                </span>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
               <button 
                 onClick={startExamSession}
-                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg"
+                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg cursor-pointer"
               >
                 I Understand, Start Exam
               </button>
@@ -869,7 +980,12 @@ export default function ExamInterface() {
           <div className="bg-white border border-gray-200 p-6 rounded-2xl flex justify-between items-center shadow-md shadow-gray-200/50">
             <div>
               <button 
-                onClick={() => { if(window.confirm('Abandon exam? Your progress will not be submitted.')) navigate('/dashboard/student'); }} 
+                onClick={() => { 
+                  if(window.confirm('Abandon exam? Your progress will not be submitted.')) {
+                    stopWebcam();
+                    navigate('/dashboard/student');
+                  }
+                }} 
                 className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-tomato-400 mb-2 smooth-transition"
               >
                 <ArrowLeft size={13} />
@@ -979,22 +1095,35 @@ export default function ExamInterface() {
               <Camera size={14} className="text-tomato-400" />
               <span>Camera Monitor Preview</span>
             </h4>
-            <div className="w-full aspect-[4/3] bg-white rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
+            <div className="w-full aspect-[4/3] bg-gray-900 rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
               <video 
                 ref={videoRef} 
                 autoPlay 
                 playsInline 
                 muted 
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover ${webcamReady ? 'block' : 'hidden'}`}
               />
 
               <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />
-              {!streamRef.current && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                  <div className="w-10 h-10 rounded-full bg-tomato-50 text-tomato-400 flex items-center justify-center mb-2 animate-bounce">
+              {!webcamReady && (
+                <div className="absolute inset-0 bg-gray-900/95 flex flex-col items-center justify-center text-center p-4">
+                  <div className="w-10 h-10 rounded-full bg-tomato-500/20 text-tomato-400 flex items-center justify-center mb-2">
                     <ShieldAlert size={20} />
                   </div>
-                  <span className="text-[10px] font-bold text-gray-500">Webcam Inactive / Denied</span>
+                  <span className="text-xs font-bold text-white mb-1">
+                    {webcamLoading ? 'Starting Camera...' : 'Camera Inactive / Denied'}
+                  </span>
+                  <p className="text-[10px] text-gray-300 max-w-[200px] mb-3 leading-tight">
+                    {webcamError || 'Camera permission was declined or device is busy.'}
+                  </p>
+                  <button
+                    onClick={startWebcam}
+                    disabled={webcamLoading}
+                    className="px-3 py-1.5 bg-tomato-500 hover:bg-tomato-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition disabled:opacity-50 cursor-pointer"
+                  >
+                    <RefreshCw size={12} className={webcamLoading ? 'animate-spin' : ''} />
+                    <span>{webcamLoading ? 'Connecting...' : 'Restart Camera'}</span>
+                  </button>
                 </div>
               )}
             </div>

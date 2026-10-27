@@ -11,6 +11,8 @@ import {
   FileQuestion,
   Trash2,
   Check,
+  CheckCircle2,
+  XCircle,
   Camera,
   AlertCircle,
   RefreshCw,
@@ -1226,7 +1228,7 @@ export default function TeacherDashboard() {
                       const now = new Date();
                       const filteredExams = exams
                         .slice()
-                        .sort((a, b) => b.id.localeCompare(a.id))
+                        .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b.id || b._id || '').localeCompare(String(a.id || a._id || '')))
                         .filter((exam) => {
                           if (examCategoryFilter === "academic" && exam.event_id) return false;
                           if (examCategoryFilter === "event" && !exam.event_id) return false;
@@ -1579,7 +1581,10 @@ export default function TeacherDashboard() {
                           </tr>
                         </thead>
                       <tbody>
-                        {examResults.map((res, index) => (
+                        {examResults
+                          .slice()
+                          .sort((a, b) => new Date(b.finished_at || b.started_at || 0) - new Date(a.finished_at || a.started_at || 0) || String(b.attempt_id || b._id).localeCompare(String(a.attempt_id || a._id)))
+                          .map((res, index) => (
                           <tr
                             key={res.attempt_id || res.student_id || index}
                             className="border-b border-gray-100 hover:bg-white"
@@ -1750,7 +1755,7 @@ export default function TeacherDashboard() {
                         const sq = proctoringSearchQuery.toLowerCase();
                         const filteredExams = exams
                           .slice()
-                          .sort((a, b) => (b._id || b.id).localeCompare((a._id || a.id)))
+                          .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b._id || b.id || '').localeCompare(String(a._id || a.id || '')))
                           .filter((exam) => {
                             const matchesSearch =
                               (exam.title && exam.title.toLowerCase().includes(sq)) ||
@@ -2763,142 +2768,320 @@ export default function TeacherDashboard() {
       </Modal>
 
       {/* Modal: View Answersheet */}
-      {isAnswersModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-up">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
-              <div>
-                <h3 className="font-extrabold text-lg text-gray-900">
-                  Answersheet: {selectedStudentForAnswers?.name}
-                </h3>
-                <p className="text-xs text-gray-500">
-                  Review and grade the student's submission.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsAnswersModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900"
-                >
-                  <Menu size={20} />
-                </button>
-              </div>
-            </div>
+      {isAnswersModalOpen && (() => {
+        const totalQuestions = studentAnswers.length;
+        const mcqAnswers = studentAnswers.filter(a => String(a.type || '').toLowerCase() === 'mcq');
+        const correctCount = mcqAnswers.filter(a => {
+          const s = String(a.student_answer || '').trim().toUpperCase();
+          const c = String(a.correct_option || '').trim().toUpperCase();
+          return s && c && s === c;
+        }).length;
+        const wrongCount = mcqAnswers.filter(a => {
+          const s = String(a.student_answer || '').trim().toUpperCase();
+          const c = String(a.correct_option || '').trim().toUpperCase();
+          return s && c && s !== c;
+        }).length;
+        const unansweredCount = studentAnswers.filter(a => !String(a.student_answer || '').trim()).length;
 
-            <div className="p-6 overflow-y-auto flex-1 bg-white">
-              {studentAnswers.length === 0 ? (
-                <div className="text-center text-gray-500 py-10">
-                  No answers recorded.
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col animate-scale-up border border-gray-200 overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-5 border-b border-gray-150 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-white">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-extrabold text-lg text-gray-900">
+                      Answersheet: {selectedStudentForAnswers?.name}
+                    </h3>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-md font-mono">
+                      ID: {selectedStudentForAnswers?.id}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Review and verify student answers against correct keys, or adjust awarded marks.
+                  </p>
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  {studentAnswers.map((ans, idx) => (
-                    <div
-                      key={ans.answer_id}
-                      className="bg-white border border-gray-200 rounded-xl p-5 shadow-md shadow-gray-200/50"
-                    >
-                      <div className="flex justify-between items-start gap-4 mb-4">
-                        <div className="flex-1">
-                          <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[10px] font-bold shrink-0 mb-2 inline-block">
-                            {ans.type} | Max Marks: {ans.max_marks}
-                          </span>
-                          <p className="font-bold text-sm text-gray-900">
-                            Q{idx + 1}: {ans.question_text}
-                          </p>
-                        </div>
-                        <div className="shrink-0 w-24">
-                          <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 text-right">
-                            Awarded Marks
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            max={ans.max_marks}
-                            value={
-                              manualGrades[ans.answer_id] !== undefined
-                                ? manualGrades[ans.answer_id]
-                                : ans.marks_awarded !== null
-                                  ? ans.marks_awarded
-                                  : ""
-                            }
-                            onChange={(e) =>
-                              setManualGrades({
-                                ...manualGrades,
-                                [ans.answer_id]:
-                                  e.target.value === ""
-                                    ? ""
-                                    : parseInt(e.target.value),
-                              })
-                            }
-                            className="w-full text-right px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-gray-800 focus:ring-1 focus:ring-tomato-500"
-                            placeholder="-"
-                          />
-                        </div>
-                      </div>
+                
+                <div className="flex items-center gap-3 self-end sm:self-auto">
+                  {/* Summary badges */}
+                  <div className="hidden md:flex items-center gap-2">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                      <CheckCircle2 size={12} /> {correctCount} Correct
+                    </span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
+                      <XCircle size={12} /> {wrongCount} Wrong
+                    </span>
+                    {unansweredCount > 0 && (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                        <AlertCircle size={12} /> {unansweredCount} Unanswered
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setIsAnswersModalOpen(false)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition cursor-pointer"
+                    title="Close answersheet"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
 
-                      {String(ans.type || '').toLowerCase() === "mcq" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3">
-                          {["A", "B", "C", "D"].map((opt) => (
-                            <div
-                              key={opt}
-                              className={`p-2 rounded-lg border ${
-                                ans.correct_option === opt
-                                  ? "bg-tomato-50 border-tomato-200 text-tomato-700 font-semibold"
-                                  : ans.student_answer === opt
-                                    ? "bg-red-50 border-red-200 text-red-700 line-through"
-                                    : "border-gray-100 text-gray-500"
-                              }`}
-                            >
-                              {opt}) {ans[`option_${opt.toLowerCase()}`]}
-                              {ans.student_answer === opt && (
-                                <span className="ml-2 font-bold">
-                                  (Student's Answer)
+              {/* Answers list */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-gray-50/50 space-y-4">
+                {studentAnswers.length === 0 ? (
+                  <div className="text-center text-gray-500 py-16 bg-white rounded-xl border border-dashed border-gray-200">
+                    No answers recorded for this student submission.
+                  </div>
+                ) : (
+                  studentAnswers.map((ans, idx) => {
+                    const qType = String(ans.type || '').toLowerCase();
+                    const isMCQ = qType === 'mcq';
+                    const gradeKey = ans.answer_id || ans.question_id;
+
+                    // Normalize student and correct keys
+                    const studentAns = ans.student_answer ? String(ans.student_answer).trim().toUpperCase() : '';
+                    const correctOpt = ans.correct_option ? String(ans.correct_option).trim().toUpperCase() : '';
+                    const isAnswered = Boolean(studentAns);
+                    const isCorrect = isAnswered && Boolean(correctOpt) && studentAns === correctOpt;
+                    const isWrong = isAnswered && Boolean(correctOpt) && studentAns !== correctOpt;
+
+                    const currentMarks = manualGrades[gradeKey] !== undefined
+                      ? manualGrades[gradeKey]
+                      : ans.marks_awarded !== null && ans.marks_awarded !== undefined
+                        ? ans.marks_awarded
+                        : isMCQ
+                          ? (isCorrect ? ans.max_marks : 0)
+                          : '';
+
+                    return (
+                      <div
+                        key={gradeKey || idx}
+                        className={`bg-white border rounded-xl p-4 sm:p-5 shadow-sm transition ${
+                          isMCQ
+                            ? isCorrect
+                              ? 'border-emerald-200'
+                              : isWrong
+                                ? 'border-rose-200'
+                                : 'border-gray-200'
+                            : 'border-gray-200'
+                        }`}
+                      >
+                        {/* Question Header & Grading */}
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3 mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                {ans.type || 'MCQ'} &bull; Max: {ans.max_marks} {ans.max_marks === 1 ? 'Mark' : 'Marks'}
+                              </span>
+
+                              {isMCQ && (
+                                <>
+                                  {isCorrect && (
+                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                      <CheckCircle2 size={11} /> Correct
+                                    </span>
+                                  )}
+                                  {isWrong && (
+                                    <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-800 border border-rose-300 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                      <XCircle size={11} /> Wrong Answer
+                                    </span>
+                                  )}
+                                  {!isAnswered && (
+                                    <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                      <AlertCircle size={11} /> Not Answered
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+
+                            <p className="font-bold text-sm text-gray-900 leading-snug">
+                              Q{idx + 1}: {ans.question_text}
+                            </p>
+                          </div>
+
+                          {/* Marks Input */}
+                          <div className="shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-1 pt-1">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                              Awarded Marks
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                min="0"
+                                max={ans.max_marks}
+                                value={currentMarks}
+                                onChange={(e) =>
+                                  setManualGrades({
+                                    ...manualGrades,
+                                    [gradeKey]: e.target.value === '' ? '' : parseFloat(e.target.value),
+                                  })
+                                }
+                                className="w-20 text-center sm:text-right px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-tomato-500/20 focus:border-tomato-500"
+                                placeholder="0"
+                              />
+                              <span className="text-xs font-bold text-gray-400">/ {ans.max_marks}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* MCQ Options Rendering */}
+                        {isMCQ && (
+                          <div className="space-y-2 mt-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              {['A', 'B', 'C', 'D'].map((opt) => {
+                                const optionText = ans[`option_${opt.toLowerCase()}`];
+                                if (!optionText && !correctOpt.includes(opt) && !studentAns.includes(opt)) {
+                                  return null;
+                                }
+
+                                const isThisCorrect = correctOpt === opt;
+                                const isThisStudentChoice = studentAns === opt;
+
+                                let containerClass = 'border-gray-200 bg-gray-50/60 text-gray-700';
+                                let badgeElement = null;
+                                let letterBadgeClass = 'bg-gray-200 text-gray-700 font-bold';
+
+                                if (isThisCorrect && isThisStudentChoice) {
+                                  // Student chose the correct answer
+                                  containerClass = 'bg-emerald-50 border-2 border-emerald-500 text-emerald-950 shadow-xs';
+                                  letterBadgeClass = 'bg-emerald-600 text-white font-extrabold';
+                                  badgeElement = (
+                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0">
+                                      <CheckCircle2 size={11} className="text-emerald-700" />
+                                      ✓ Correct (Student's Answer)
+                                    </span>
+                                  );
+                                } else if (isThisCorrect && !isThisStudentChoice) {
+                                  // The correct answer (which student missed or chose wrongly)
+                                  containerClass = 'bg-emerald-50/80 border-2 border-emerald-500 text-emerald-950 shadow-xs';
+                                  letterBadgeClass = 'bg-emerald-600 text-white font-extrabold';
+                                  badgeElement = (
+                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0">
+                                      <Check size={11} className="text-emerald-700" />
+                                      ✓ Correct Answer
+                                    </span>
+                                  );
+                                } else if (!isThisCorrect && isThisStudentChoice) {
+                                  // The student's wrong answer
+                                  containerClass = 'bg-rose-50 border-2 border-rose-500 text-rose-950 shadow-xs';
+                                  letterBadgeClass = 'bg-rose-600 text-white font-extrabold';
+                                  badgeElement = (
+                                    <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-800 border border-rose-300 px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0">
+                                      <XCircle size={11} className="text-rose-700" />
+                                      ✗ Student's Answer (Wrong)
+                                    </span>
+                                  );
+                                }
+
+                                return (
+                                  <div
+                                    key={opt}
+                                    className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border transition-colors ${containerClass}`}
+                                  >
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                      <span className={`w-5 h-5 rounded flex items-center justify-center text-[10px] shrink-0 ${letterBadgeClass}`}>
+                                        {opt}
+                                      </span>
+                                      <span className={`truncate text-xs ${!isThisCorrect && isThisStudentChoice ? 'line-through decoration-rose-500 text-rose-900' : ''}`}>
+                                        {optionText || '(Empty option)'}
+                                      </span>
+                                    </div>
+                                    {badgeElement}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Comparison summary bar */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-[11px] text-gray-600 bg-gray-50/80 px-3 py-1.5 rounded-lg border border-gray-150">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-gray-500">Student Answer:</span>
+                                {studentAns ? (
+                                  <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                                    isCorrect 
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                                      : 'bg-rose-100 text-rose-800 border border-rose-200'
+                                  }`}>
+                                    Option {studentAns} {isCorrect ? '(Correct)' : '(Incorrect)'}
+                                  </span>
+                                ) : (
+                                  <span className="italic text-gray-400 font-medium">Not Answered</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-gray-500">Correct Answer:</span>
+                                <span className="font-bold px-2 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  Option {correctOpt || 'Not set'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Written / Descriptive Questions */}
+                        {!isMCQ && (
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                                Student's Written Submission:
+                              </p>
+                              {ans.student_answer && (
+                                <span className="text-[10px] text-gray-400 font-mono">
+                                  {ans.student_answer.length} characters
                                 </span>
                               )}
                             </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {(String(ans.type || '').toLowerCase() === "written" || String(ans.type || '').toLowerCase() === "descriptive") && (
-                        <div>
-                          <p className="text-xs font-bold text-gray-500 mb-1">
-                            Student's Answer:
-                          </p>
-                          <div className="bg-tomato-50/50 border border-tomato-100 p-4 rounded-lg text-sm text-gray-900 whitespace-pre-wrap min-h-[60px]">
-                            {ans.student_answer || (
-                              <span className="text-gray-500 italic">
-                                No answer provided.
-                              </span>
-                            )}
+                            <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl text-sm text-gray-900 whitespace-pre-wrap min-h-[70px]">
+                              {ans.student_answer ? (
+                                ans.student_answer
+                              ) : (
+                                <span className="text-gray-400 italic text-xs">
+                                  No written answer was provided by the student.
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
 
-            <div className="p-4 border-t border-gray-100 bg-white rounded-b-2xl flex justify-end gap-3">
-              <button
-                onClick={() => setIsAnswersModalOpen(false)}
-                className="px-5 py-2 rounded-xl font-bold text-gray-500 hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleManualGradeSubmit}
-                disabled={savingGrades}
-                className="tomato-btn px-6 py-2 flex items-center justify-center gap-2"
-              >
-                {savingGrades && <RefreshCw className="animate-spin shrink-0" size={16} />}
-                <span>{savingGrades ? "Saving Grades..." : "Save Grades"}</span>
-              </button>
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-gray-150 bg-white flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                <div className="text-xs text-gray-500">
+                  <span>Questions: <strong className="text-gray-900">{totalQuestions}</strong></span>
+                  {Object.keys(manualGrades).length > 0 && (
+                    <span className="ml-3 text-tomato-600 font-medium">
+                      ({Object.keys(manualGrades).length} marks modified)
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2.5 justify-end">
+                  <button
+                    onClick={() => setIsAnswersModalOpen(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleManualGradeSubmit}
+                    disabled={savingGrades}
+                    className="tomato-btn px-5 py-2 text-xs font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                  >
+                    {savingGrades && <RefreshCw className="animate-spin shrink-0" size={14} />}
+                    <span>{savingGrades ? 'Saving Grades...' : 'Save Grades & Update Result'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modal: Confirm Stop Exam */}
       {isStopExamModalOpen && (
@@ -2963,7 +3146,10 @@ export default function TeacherDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {selectedEventRegistrations.map((reg) => (
+                    {selectedEventRegistrations
+                      .slice()
+                      .sort((a, b) => new Date(b.registration_date || 0) - new Date(a.registration_date || 0) || String(b._id || b.id || '').localeCompare(String(a._id || a.id || '')))
+                      .map((reg) => (
                       <tr key={reg._id} className="hover:bg-white transition-colors">
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">{reg.name}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>

@@ -60,7 +60,7 @@ exports.updateProfile = async (req, res) => {
 
 exports.getAdmins = async (req, res) => {
   try {
-    const admins = await Admin.find().select('_id name email');
+    const admins = await Admin.find().select('_id name email').sort({ _id: -1 });
     const response = admins.map(a => { const obj = a.toObject(); obj.id = obj._id; return obj; });
     return res.json(response);
   } catch (error) {
@@ -99,7 +99,7 @@ exports.addAdmin = async (req, res) => {
 
 exports.getTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find().select('_id name email profile_image joining_date status');
+    const teachers = await Teacher.find().select('_id name email profile_image joining_date status').sort({ _id: -1 });
     const response = teachers.map(a => { const obj = a.toObject(); obj.id = obj._id; return obj; });
     return res.json(response);
   } catch (error) {
@@ -173,7 +173,7 @@ exports.bulkDeleteTeachers = async (req, res) => {
 
 exports.getStudents = async (req, res) => {
   try {
-    const students = await Student.find().select('id name email profile_image status joining_date');
+    const students = await Student.find().select('id name email profile_image status joining_date').sort({ _id: -1 });
     const stats = await StudentExam.aggregate([
       { $group: { _id: "$student_id", totalExams: { $sum: 1 }, avgScore: { $avg: "$total_score" } } }
     ]);
@@ -264,7 +264,7 @@ exports.bulkDeleteStudents = async (req, res) => {
 // --- ADMIN EXAM MANAGEMENT ---
 exports.getAllExams = async (req, res) => {
   try {
-    const exams = await Exam.find().populate('teacher_id', 'name email').sort({ exam_date: -1 });
+    const exams = await Exam.find().populate('teacher_id', 'name email').sort({ _id: -1 });
     const response = exams.map(e => {
       const obj = e.toObject();
       obj.id = obj._id;

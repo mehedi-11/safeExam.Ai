@@ -1331,15 +1331,17 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-150">
                         {(() => {
-                          const filtered = students.filter(
-                            (s) =>
-                              s.name
-                                .toLowerCase()
-                                .includes(studentSearch.toLowerCase()) ||
-                              s.id
-                                .toLowerCase()
-                                .includes(studentSearch.toLowerCase())
-                          );
+                          const filtered = students
+                            .filter(
+                              (s) =>
+                                s.name
+                                  .toLowerCase()
+                                  .includes(studentSearch.toLowerCase()) ||
+                                s.id
+                                  .toLowerCase()
+                                  .includes(studentSearch.toLowerCase())
+                            )
+                            .sort((a, b) => new Date(b.joining_date || 0) - new Date(a.joining_date || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)));
                           if (filtered.length === 0) {
                             return (
                               <tr>
@@ -1586,16 +1588,18 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-gray-150">
                         {(() => {
-                          const filtered = teachers.filter(
-                            (t) =>
-                              t.status !== "pending" &&
-                              (t.name
-                                .toLowerCase()
-                                .includes(teacherSearch.toLowerCase()) ||
-                                t.email
+                          const filtered = teachers
+                            .filter(
+                              (t) =>
+                                t.status !== "pending" &&
+                                (t.name
                                   .toLowerCase()
-                                  .includes(teacherSearch.toLowerCase())),
-                          );
+                                  .includes(teacherSearch.toLowerCase()) ||
+                                  t.email
+                                    .toLowerCase()
+                                    .includes(teacherSearch.toLowerCase())),
+                            )
+                            .sort((a, b) => new Date(b.joining_date || 0) - new Date(a.joining_date || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)));
                           if (filtered.length === 0) {
                             return (
                               <tr>
@@ -1787,7 +1791,7 @@ export default function AdminDashboard() {
                         const sq = proctoringSearchQuery.toLowerCase();
                         const filteredExams = allExams
                           .slice()
-                          .sort((a, b) => (b._id || b.id).localeCompare((a._id || a.id)))
+                          .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)))
                           .filter((exam) => {
                             const matchesSearch =
                               (exam.title && exam.title.toLowerCase().includes(sq)) ||
@@ -2095,12 +2099,14 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {(() => {
-                        const filteredExams = allExams.filter(exam => {
-                          const query = allExamsSearch.toLowerCase();
-                          const titleMatch = exam.title?.toLowerCase().includes(query);
-                          const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
-                          return titleMatch || teacherMatch;
-                        });
+                        const filteredExams = allExams
+                          .filter(exam => {
+                            const query = allExamsSearch.toLowerCase();
+                            const titleMatch = exam.title?.toLowerCase().includes(query);
+                            const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
+                            return titleMatch || teacherMatch;
+                          })
+                          .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)));
                         return filteredExams.length > 0 ? (
                           filteredExams.map((exam) => (
                             <tr key={exam.id || exam._id} className="hover:bg-white transition-colors">
@@ -2151,6 +2157,7 @@ export default function AdminDashboard() {
           ) : (
             teachers
               .filter((t) => t.status === "pending")
+              .sort((a, b) => new Date(b.joining_date || 0) - new Date(a.joining_date || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)))
               .map((teacher) => (
                 <div
                   key={teacher.id}
@@ -2442,7 +2449,10 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {studentExamDetails.map((exam, idx) => (
+                  {studentExamDetails
+                    .slice()
+                    .sort((a, b) => new Date(b.finished_at || 0) - new Date(a.finished_at || 0))
+                    .map((exam, idx) => (
                     <tr key={idx} className="hover:bg-white">
                       <td className="px-4 py-3 text-gray-900">{exam.title}</td>
                       <td className="px-4 py-3 text-xs">{new Date(exam.finished_at).toLocaleDateString()}</td>

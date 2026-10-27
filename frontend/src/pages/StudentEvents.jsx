@@ -61,7 +61,12 @@ const StudentEvents = () => {
       });
 
       setEvents(sortedEvents);
-      setRegisteredEvents(regRes.data || []);
+      const sortedRegistrations = (regRes.data || []).sort((a, b) => {
+        const dateA = new Date(a.registration_date || a.created_at || (a.event && a.event.created_at) || 0);
+        const dateB = new Date(b.registration_date || b.created_at || (b.event && b.event.created_at) || 0);
+        return dateB - dateA || String(b._id || b.id || '').localeCompare(String(a._id || a.id || ''));
+      });
+      setRegisteredEvents(sortedRegistrations);
     } catch (err) {
       console.error('Failed to load event data:', err);
     } finally {

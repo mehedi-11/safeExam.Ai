@@ -110,6 +110,7 @@ export default function StudentDashboard({ defaultTab }) {
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
+  const [resultsSearchQuery, setResultsSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('grid');
 
   // Password Update State
@@ -618,7 +619,7 @@ export default function StudentDashboard({ defaultTab }) {
               const matchesFilter = exam.is_live;
 
               return matchesSearch && matchesFilter;
-            });
+            }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b.id || b._id || '').localeCompare(String(a.id || a._id || '')));
 
             return (
               <div className="space-y-6 animate-fade-in">
@@ -834,17 +835,60 @@ export default function StudentDashboard({ defaultTab }) {
 
           {/* TAB: RESULTS */}
           {activeTab === 'results' && (() => {
-            const completedExams = exams.filter(exam => exam.exam_status === 'completed');
+            const completedExams = exams
+              .filter(exam => exam.exam_status === 'completed')
+              .sort((a, b) => new Date(b.finished_at || b.completed_at || 0) - new Date(a.finished_at || a.completed_at || 0) || String(b.id || b._id || '').localeCompare(String(a.id || a._id || '')));
+            const sq = resultsSearchQuery.trim().toLowerCase();
+            const filteredResults = completedExams.filter(exam => {
+              if (!sq) return true;
+              const titleMatch = exam.title && exam.title.toLowerCase().includes(sq);
+              const courseMatch = exam.course_name && exam.course_name.toLowerCase().includes(sq);
+              const codeMatch = exam.course_code && exam.course_code.toLowerCase().includes(sq);
+              const uniMatch = exam.university_name && exam.university_name.toLowerCase().includes(sq);
+              return titleMatch || courseMatch || codeMatch || uniMatch;
+            });
 
             return (
               <div className="space-y-6 animate-fade-in">
-                <div className="flex items-center gap-6">
-                  <h3 className="text-lg font-bold text-gray-900">My Exam Results</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">My Exam Results</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Review your scores, attempts, and performance across completed exams
+                    </p>
+                  </div>
+
+                  <div className="relative w-full sm:w-72">
+                    <Search
+                      size={16}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search exam, course, code..."
+                      value={resultsSearchQuery}
+                      onChange={(e) => setResultsSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-9 py-2 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-tomato-500/20 focus:border-tomato-500 shadow-sm transition"
+                    />
+                    {resultsSearchQuery && (
+                      <button
+                        onClick={() => setResultsSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition"
+                        title="Clear search"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {completedExams.length === 0 ? (
                   <div className="border border-dashed border-gray-200 bg-white/20 py-12 text-center text-xs text-gray-500 rounded-xl">
                     You haven't completed any exams yet.
+                  </div>
+                ) : filteredResults.length === 0 ? (
+                  <div className="border border-dashed border-gray-200 bg-white/20 py-12 text-center text-xs text-gray-500 rounded-xl">
+                    No results match your search "{resultsSearchQuery}".
                   </div>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
@@ -859,13 +903,13 @@ export default function StudentDashboard({ defaultTab }) {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-150">
-                        {completedExams.map(exam => {
+                        {filteredResults.map(exam => {
                           const isPublished = exam.results_published;
 
                           return (
-                            <tr key={exam.unique_id || exam.id} className="hover:bg-white transition-colors">
+                            <tr key={exam.unique_id || exam.id} className="hover:bg-gray-50/60 transition-colors">
                               <td className="px-6 py-4">
-                                <h4 className="text-gray-900">{exam.title}</h4>
+                                <h4 className="text-gray-900 font-medium">{exam.title}</h4>
                               </td>
                               <td className="px-6 py-4">
                                 {exam.university_name && <p className="text-xs text-tomato-600">{exam.university_name}</p>}

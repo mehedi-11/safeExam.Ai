@@ -105,7 +105,7 @@ exports.getExams = async (req, res) => {
           }
       } },
       { $project: { questions: 0, submissions: 0 } },
-      { $sort: { exam_date: -1 } }
+      { $sort: { _id: -1 } }
     ]);
     
     const response = exams.map(e => {
@@ -523,7 +523,8 @@ exports.getExamResults = async (req, res) => {
       { $project: {
           student_id: 1, score: "$total_score", status: 1, started_at: 1, finished_at: "$completed_at", 
           demerit_points: 1, attempt_id: "$_id", name: "$student.name", email: "$student.email"
-      }}
+      }},
+      { $sort: { _id: -1 } }
     ]);
     return res.json(results);
   } catch (error) {
@@ -565,10 +566,15 @@ exports.downloadStudentLog = async (req, res) => {
 exports.getStudentAnswersheet = async (req, res) => {
   const { examId, studentId } = req.params;
   try {
-    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    const isTeacher = req.user.role === 'teacher';
+    const examQuery = { _id: examId };
+    if (isTeacher) {
+      examQuery.teacher_id = req.user.id;
+    }
+    const exam = await Exam.findOne(examQuery);
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    const questions = await ExamQuestion.find({ exam_id: exam._id }).lean();
+    const questions = await ExamQuestion.find({ exam_id: exam._id }).sort({ sort_order: 1, createdAt: 1, _id: 1 }).lean();
     const answers = await StudentAnswer.find({ exam_id: exam._id, student_id: studentId }).lean();
     
     const ansMap = {};
@@ -576,19 +582,59 @@ exports.getStudentAnswersheet = async (req, res) => {
     
     const rows = questions.map(eq => {
       const ans = ansMap[eq._id.toString()];
+      const rawCorrect = eq.correct_option || eq.correct_answer || null;
+      const rawStudent = ans ? (ans.student_answer || ans.answer_text) : null;
+
+      let correctOpt = rawCorrect ? String(rawCorrect).trim() : null;
+      if (correctOpt) {
+        if (/^[a-d]$/i.test(correctOpt)) {
+          correctOpt = correctOpt.toUpperCase();
+        } else if (/^option_[a-d]$/i.test(correctOpt)) {
+          correctOpt = correctOpt.replace(/^option_/i, '').toUpperCase();
+        } else if (eq.option_a && String(eq.option_a).trim().toLowerCase() === correctOpt.toLowerCase()) {
+          correctOpt = 'A';
+        } else if (eq.option_b && String(eq.option_b).trim().toLowerCase() === correctOpt.toLowerCase()) {
+          correctOpt = 'B';
+        } else if (eq.option_c && String(eq.option_c).trim().toLowerCase() === correctOpt.toLowerCase()) {
+          correctOpt = 'C';
+        } else if (eq.option_d && String(eq.option_d).trim().toLowerCase() === correctOpt.toLowerCase()) {
+          correctOpt = 'D';
+        }
+      }
+
+      let studentAns = rawStudent ? String(rawStudent).trim() : null;
+      const qType = (String(eq.type || eq.question_type || '').toLowerCase() === 'written' || String(eq.type || eq.question_type || '').toLowerCase() === 'descriptive') ? 'Written' : 'MCQ';
+
+      if (studentAns && qType === 'MCQ') {
+        if (/^[a-d]$/i.test(studentAns)) {
+          studentAns = studentAns.toUpperCase();
+        } else if (/^option_[a-d]$/i.test(studentAns)) {
+          studentAns = studentAns.replace(/^option_/i, '').toUpperCase();
+        } else if (eq.option_a && String(eq.option_a).trim().toLowerCase() === studentAns.toLowerCase()) {
+          studentAns = 'A';
+        } else if (eq.option_b && String(eq.option_b).trim().toLowerCase() === studentAns.toLowerCase()) {
+          studentAns = 'B';
+        } else if (eq.option_c && String(eq.option_c).trim().toLowerCase() === studentAns.toLowerCase()) {
+          studentAns = 'C';
+        } else if (eq.option_d && String(eq.option_d).trim().toLowerCase() === studentAns.toLowerCase()) {
+          studentAns = 'D';
+        }
+      }
+
       return {
         answer_id: ans ? ans._id : null,
-        student_answer: ans ? ans.answer_text : null,
-        marks_awarded: ans ? ans.marks_awarded : 0,
+        student_answer: studentAns,
+        raw_student_answer: rawStudent,
+        marks_awarded: ans ? (ans.marks_awarded !== undefined ? ans.marks_awarded : null) : null,
         question_id: eq._id,
-        type: (String(eq.type || eq.question_type || '').toLowerCase() === 'written' || String(eq.type || eq.question_type || '').toLowerCase() === 'descriptive') ? 'Written' : 'MCQ',
+        type: qType,
         question_text: eq.question_text,
         max_marks: eq.marks,
         option_a: eq.option_a,
         option_b: eq.option_b,
         option_c: eq.option_c,
         option_d: eq.option_d,
-        correct_option: eq.correct_option
+        correct_option: correctOpt
       };
     });
 
@@ -603,15 +649,32 @@ exports.manualGradeAnswersheet = async (req, res) => {
   const { examId, studentId } = req.params;
   const { grades } = req.body;
   try {
-    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
+    const isTeacher = req.user.role === 'teacher';
+    const examQuery = { _id: examId };
+    if (isTeacher) {
+      examQuery.teacher_id = req.user.id;
+    }
+    const exam = await Exam.findOne(examQuery);
     if (!exam) return res.status(403).json({ message: 'Unauthorized' });
 
-    for (const [answer_id, marks_awarded] of Object.entries(grades)) {
-      if (answer_id && answer_id !== 'null') {
-        await StudentAnswer.findByIdAndUpdate(
-          answer_id,
-          { $set: { marks_awarded: Number(marks_awarded) } }
-        );
+    for (const [key, marks_awarded] of Object.entries(grades || {})) {
+      if (marks_awarded === '' || marks_awarded === undefined || marks_awarded === null) continue;
+      const numMarks = Number(marks_awarded);
+      if (isNaN(numMarks)) continue;
+
+      if (key && key !== 'null') {
+        const byId = await StudentAnswer.findById(key);
+        if (byId) {
+          byId.marks_awarded = numMarks;
+          await byId.save();
+        } else {
+          // If key is question_id
+          await StudentAnswer.findOneAndUpdate(
+            { exam_id: exam._id, student_id: studentId, question_id: key },
+            { $set: { marks_awarded: numMarks } },
+            { upsert: true }
+          );
+        }
       }
     }
     
@@ -773,7 +836,7 @@ exports.getLiveExamStats = async (req, res) => {
           student_name: { $ifNull: ['$student_info.name', 'Unknown'] }
         }
       },
-      { $sort: { started_at: -1 } }
+      { $sort: { started_at: -1, _id: -1 } }
     ];
 
     const submissions = await StudentExam.aggregate(statsPipeline);

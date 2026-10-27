@@ -1,0 +1,170 @@
+================================================================================
+                    SAFEEXAM.AI - UNUSED CODE & SYSTEM AUDIT REPORT
+================================================================================
+Generated Date: 2026-10-27
+Audit Scope: Frontend & Backend codebases (Agent-ELI and Diagram strictly excluded)
+Report File: dummy_code.txt
+================================================================================
+
+--------------------------------------------------------------------------------
+1. UNUSED FILES (সম্পূর্ণ অব্যবহৃত ফাইলসমূহ)
+--------------------------------------------------------------------------------
+The following files exist in the project repository but are never imported, 
+routed, or executed anywhere in the running system:
+
+[1.1] frontend/src/components/Button.jsx
+      - File Size: ~2.4 KB (67 lines)
+      - Reason: A generic reusable button component originally created for UI, 
+        but never imported or referenced in any page or component across the frontend.
+        All pages use native <button> tags with Tailwind CSS classes or .tomato-btn.
+      - Status: 100% Unused / Dead File.
+
+[1.2] frontend/src/assets/hero.png
+      - File Size: ~13.0 KB
+      - Reason: Static image asset in frontend assets directory. Never imported 
+        or referenced in any JSX, CSS, or HTML file.
+      - Status: Unused static asset.
+
+[1.3] frontend/public/icons.svg
+      - File Size: ~5.0 KB
+      - Reason: SVG icon sprite file in the public directory. Never referenced in 
+        index.html or any component (the application uses 'lucide-react' for all icons).
+      - Status: Unused public asset.
+
+[1.4] backend/src/models/SystemSetting.js
+      - File Size: ~330 Bytes
+      - Reason: Mongoose model for system settings (systemSettingSchema). Only 
+        referenced by getSettings and updateSettings in adminController, but there 
+        is no settings page or settings API call in the frontend.
+      - Status: Unused Database Model.
+
+[1.5] book/proctoring_log_feed_details.txt
+      - File Size: ~4.9 KB
+      - Reason: Specification/documentation notes inside the 'book' folder. Not part 
+        of runtime execution.
+      - Status: Standalone Documentation Note.
+
+[1.6] generate_report.py
+      - File Size: ~42.4 KB (608 lines)
+      - Reason: Standalone ReportLab Python script for generating offline PDF reports.
+        Not connected to or called by Node.js backend or React frontend.
+      - Status: Standalone Utility Script.
+
+--------------------------------------------------------------------------------
+2. UNUSED / DEAD BACKEND ROUTES & CONTROLLER FUNCTIONS (অব্যবহৃত ব্যাকএন্ড কোড ও এপিআই)
+--------------------------------------------------------------------------------
+The following backend controller functions and route definitions exist in the 
+backend, but are never requested or called by any frontend page or client:
+
+[2.1] adminController.js -> exports.getSettings
+      - Route: GET /api/admin/settings
+      - Location: backend/src/controllers/adminController.js (Line 462)
+      - Reason: Fetches global system settings from MongoDB. No settings page 
+        or UI component calls this route from the frontend.
+
+[2.2] adminController.js -> exports.updateSettings
+      - Route: PUT /api/admin/settings
+      - Location: backend/src/controllers/adminController.js (Line 474)
+      - Reason: Updates system settings in MongoDB. Never called from frontend.
+
+[2.3] teacherController.js -> exports.downloadStudentLog
+      - Route: GET /api/teacher/exams/:examId/students/:studentId/logs
+      - Location: backend/src/controllers/teacherController.js (Line 536)
+      - Reason: Generates and streams a text log for an individual student. The 
+        frontend only provides a button for downloading the entire exam's logs 
+        (/logs/download); this single-student download route is never called.
+
+[2.4] teacherController.js -> exports.togglePublishResults
+      - Route: PUT /api/teacher/exams/:examId/students/:studentId/publish
+      - Location: backend/src/controllers/teacherController.js (Line 476)
+      - Reason: Toggles result publishing for an individual student. The frontend 
+        uses the bulk toggle route (/exams/:examId/publish) to publish/unpublish 
+        all results for the exam at once; this per-student endpoint is unused.
+
+[2.5] eventController.js -> exports.makeEventLive
+      - Route: PUT /api/events/:id/live
+      - Location: backend/src/controllers/eventController.js (Line 62)
+      - Reason: Dedicated endpoint to set event status to 'live'. In EventsManager.jsx, 
+        status toggling is handled through the generic updateEvent (PUT /api/events/:id) 
+        route. This endpoint is redundant and never invoked.
+
+[2.6] eventController.js -> exports.getEventStats
+      - Route: GET /api/events/stats
+      - Location: backend/src/controllers/eventController.js (Line 217)
+      - Reason: Aggregates event statistics on backend. In EventsManager.jsx, all 
+        counts (live, closed, total, registrations) are calculated directly on 
+        the client-side from the fetched events array. This API is never called.
+
+--------------------------------------------------------------------------------
+3. UNUSED PACKAGES & DEPENDENCIES (অব্যবহৃত প্যাকেজ ও ডিপেনডেন্সিসমূহ)
+--------------------------------------------------------------------------------
+The following packages are installed in package.json but are never required 
+or imported in the application code:
+
+[3.1] backend/package.json -> "@faker-js/faker": "^10.6.0"
+      - Location: backend/package.json (Line 12)
+      - Reason: Mock data generation library. Installed as a production dependency 
+        but never imported or used anywhere in backend/src.
+
+[3.2] backend/package.json -> "multer": "^1.4.5-lts.1"
+      - Location: backend/package.json (Line 19)
+      - Reason: Multipart/form-data upload middleware. All images (profiles, event 
+        banners, screenshots) are handled and transmitted as Base64 strings directly 
+        via JSON body. Multer is never imported or used in any route/middleware.
+
+--------------------------------------------------------------------------------
+4. UNUSED COMPONENTS, DEAD FUNCTIONS & STATES IN FRONTEND (ফ্রন্টএন্ডের ডেড কোড)
+--------------------------------------------------------------------------------
+The following components, functions, and state variables are defined in frontend 
+pages/components but are never triggered, rendered, or read:
+
+[4.1] frontend/src/components/Button.jsx
+      - Entire component is unused across all pages.
+
+[4.2] frontend/src/pages/TeacherDashboard.jsx:
+      - fetchExamStudents (Line ~232): Function defined to fetch student roster for 
+        an exam, but never invoked anywhere in the component.
+      - downloadLogs (Line ~594): Unused function for raw log file downloading.
+      - handleClearLogs (Line ~605): Function to delete raw proctoring logs, not 
+        wired to any button in the active UI.
+      - selectedLogExamId / setSelectedLogExamId (Line ~82): Unused state.
+      - examStudents (Line ~83): Unused state variable.
+      - Unused imports: Trash, KeyRound, TrendingUp, API_BASE_URL.
+
+[4.3] frontend/src/pages/ExamInterface.jsx:
+      - processedFrame (Line ~53): Defined variable holding canvas/frame data, never read.
+      - isOutOfScreenRef (Line ~29): Unused React ref.
+      - Unused imports: Play, HelpCircle, ShieldCheck, Wifi.
+
+[4.4] frontend/src/pages/Login.jsx:
+      - resetEmail, resetName (Lines ~27-28): State variables initialized in password 
+        reset modal flow but never consumed.
+      - Unused import: ArrowLeft.
+
+[4.5] frontend/src/pages/StudentDashboard.jsx:
+      - isUpcoming (Line ~755): Computed boolean flag not utilized in rendering.
+      - now (Line ~609): Unused date variable.
+      - Unused import: API_BASE_URL.
+
+[4.6] frontend/src/pages/SubjectInsights.jsx:
+      - profile (Line ~23): Passed as a prop but not used in component logic or render.
+      - Unused imports: TrendingUp, BookOpen, ArrowUpRight, ShieldAlert, Calendar, 
+        FileText, ArrowRight.
+
+[4.7] frontend/src/pages/TeacherProctoring.jsx:
+      - Unused imports: Camera, Sparkles, Wifi.
+
+[4.8] frontend/src/pages/EventsManager.jsx:
+      - Unused import: Play.
+
+--------------------------------------------------------------------------------
+5. EXCLUDED DIRECTORIES (সংরক্ষিত ও অক্ষত ফোল্ডার)
+--------------------------------------------------------------------------------
+As explicitly instructed by the user, the following directories were preserved 
+completely and remain 100% untouched:
+- Agent-ELI/   (Untouched)
+- Diagram/     (Untouched)
+
+================================================================================
+                              END OF AUDIT REPORT
+================================================================================

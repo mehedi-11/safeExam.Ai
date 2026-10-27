@@ -84,7 +84,7 @@ exports.changePassword = async (req, res) => {
 
 exports.getExams = async (req, res) => {
   try {
-    const rawExams = await Exam.find().lean();
+    const rawExams = await Exam.find().sort({ _id: -1 }).lean();
     const now = new Date();
     
     // Evaluate active status directly from Exam model
@@ -100,7 +100,7 @@ exports.getExams = async (req, res) => {
       return exam;
     });
 
-    const studentExams = await StudentExam.find({ student_id: req.user.id }).lean();
+    const studentExams = await StudentExam.find({ student_id: req.user.id }).sort({ _id: -1 }).lean();
     
     const result = [];
     for (const exam of exams) {

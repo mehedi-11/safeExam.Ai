@@ -193,7 +193,7 @@ const EventsManager = ({ isAdmin = false }) => {
     else if (eventFilter === "closed") matchesFilter = !isActive;
 
     return matchesSearch && matchesFilter;
-  });
+  }).sort((a, b) => new Date(b.created_at || b.event_date || 0) - new Date(a.created_at || a.event_date || 0) || String(b._id || b.id || '').localeCompare(String(a._id || a.id || '')));
 
   if (loading) return <div className="text-center py-10">Loading Events...</div>;
 
@@ -538,7 +538,10 @@ const EventsManager = ({ isAdmin = false }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {selectedEventRegistrations.map((reg) => (
+                    {selectedEventRegistrations
+                      .slice()
+                      .sort((a, b) => new Date(b.registration_date || 0) - new Date(a.registration_date || 0) || String(b._id || b.id || '').localeCompare(String(a._id || a.id || '')))
+                      .map((reg) => (
                       <tr key={reg._id} className="hover:bg-white transition-colors">
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">{reg.name}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{reg.email}</td>
