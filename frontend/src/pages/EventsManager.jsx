@@ -13,6 +13,8 @@ const EventsManager = ({ isAdmin = false }) => {
   const [editingEventId, setEditingEventId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
+  const [selectedEventIds, setSelectedEventIds] = useState([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   const modules = {
     toolbar: [
@@ -343,10 +345,49 @@ const EventsManager = ({ isAdmin = false }) => {
         </div>
       </div>
 
+      {/* Bulk Actions Bar for Events */}
+      {selectedEventIds.length > 0 && (
+        <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-indigo-900">
+              {selectedEventIds.length} event{selectedEventIds.length > 1 ? "s" : ""} selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedEventIds([])}
+              className="text-indigo-600 hover:text-indigo-800 underline text-xs ml-2 cursor-pointer"
+            >
+              Deselect all
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={handleBulkDelete}
+            disabled={isBulkDeleting}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
+          >
+            <Trash2 size={13} />
+            {isBulkDeleting ? "Deleting..." : `Delete Selected (${selectedEventIds.length})`}
+          </button>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
             <tr className="border-b border-gray-200">
+              <th className="py-3 px-4 font-bold text-center w-12">
+                <input
+                  type="checkbox"
+                  checked={
+                    filteredEvents.length > 0 &&
+                    filteredEvents.every((e) => selectedEventIds.includes(e._id || e.id))
+                  }
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  title="Select all events"
+                />
+              </th>
               <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-left">
                 Image
               </th>
@@ -371,7 +412,7 @@ const EventsManager = ({ isAdmin = false }) => {
             {filteredEvents.length === 0 ? (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="7"
                   className="py-8 text-center text-xs text-gray-500"
                 >
                   No events found.
@@ -381,11 +422,23 @@ const EventsManager = ({ isAdmin = false }) => {
               filteredEvents.map((evt) => {
                 const isActive = evt.status === 'live';
 
+                const isSelected = selectedEventIds.includes(evt._id || evt.id);
+
                 return (
                 <tr
                   key={evt._id}
-                  className="border-b border-gray-100 hover:bg-white"
+                  className={`border-b border-gray-100 hover:bg-white transition-colors ${
+                    isSelected ? "bg-indigo-50/40" : ""
+                  }`}
                 >
+                  <td className="py-3 px-4 text-center w-12">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleToggleSelect(evt._id || evt.id)}
+                      className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                  </td>
                   <td className="py-3 px-4">
                     {evt.image ? (
                       <img src={evt.image} alt={evt.title} className="w-16 h-12 rounded object-cover border border-gray-200" />

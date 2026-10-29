@@ -295,10 +295,40 @@ exports.deleteExam = async (req, res) => {
     await ExamQuestion.deleteMany({ exam_id: id });
     await StudentExam.deleteMany({ exam_id: id });
     await StudentAnswer.deleteMany({ exam_id: id });
+    await ProctoringLog.deleteMany({ exam_id: id });
     return res.json({ message: 'Exam deleted successfully' });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error deleting exam' });
+  }
+};
+
+exports.bulkDeleteExams = async (req, res) => {
+  const { examIds } = req.body;
+  if (!Array.isArray(examIds) || examIds.length === 0) {
+    return res.status(400).json({ message: 'No exam IDs provided' });
+  }
+  try {
+    const liveExams = await Exam.find({ _id: { $in: examIds }, is_live: true });
+    if (liveExams.length > 0) {
+      return res.status(400).json({
+        message: `Cannot delete: ${liveExams.length} selected exam(s) are currently LIVE. Stop them first.`
+      });
+    }
+
+    const result = await Exam.deleteMany({ _id: { $in: examIds } });
+    await ExamQuestion.deleteMany({ exam_id: { $in: examIds } });
+    await StudentExam.deleteMany({ exam_id: { $in: examIds } });
+    await StudentAnswer.deleteMany({ exam_id: { $in: examIds } });
+    await ProctoringLog.deleteMany({ exam_id: { $in: examIds } });
+
+    return res.json({
+      message: `${result.deletedCount} exam(s) deleted successfully`,
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('Error bulk deleting exams:', error);
+    return res.status(500).json({ message: 'Server error bulk deleting exams' });
   }
 };
 

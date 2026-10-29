@@ -144,6 +144,8 @@ export default function AdminDashboard() {
   const [isBulkDeletingStudents, setIsBulkDeletingStudents] = useState(false);
   const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
   const [isBulkDeletingTeachers, setIsBulkDeletingTeachers] = useState(false);
+  const [selectedExamIds, setSelectedExamIds] = useState([]);
+  const [isBulkDeletingExams, setIsBulkDeletingExams] = useState(false);
 
   // Student Exams Modal State
   const [selectedStudentForModal, setSelectedStudentForModal] = useState(null);
@@ -392,6 +394,59 @@ export default function AdminDashboard() {
       setError(err.response?.data?.message || "Error bulk deleting teachers");
     } finally {
       setIsBulkDeletingTeachers(false);
+    }
+  };
+
+  const handleDeleteExam = async (exam) => {
+    if (exam.is_live) {
+      alert("Active LIVE exams cannot be deleted. Please make the exam inactive/not live first.");
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to delete exam "${exam.title}"? This will permanently delete all associated questions, student submissions, and logs.`)) {
+      return;
+    }
+    try {
+      const examId = exam.id || exam._id;
+      const res = await api.delete(`/admin/exams/${examId}`);
+      triggerSuccess(res.data.message || "Exam deleted successfully");
+      setSelectedExamIds((prev) => prev.filter((id) => id !== examId));
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Error deleting exam");
+    }
+  };
+
+  const handleBulkDeleteExams = async () => {
+    if (selectedExamIds.length === 0) return;
+
+    const liveSelected = allExams.filter(
+      (e) => selectedExamIds.includes(e.id || e._id) && e.is_live
+    );
+    if (liveSelected.length > 0) {
+      alert(`Cannot delete: ${liveSelected.length} selected exam(s) are currently LIVE. Live exams cannot be deleted. Stop them first.`);
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently delete all associated questions, submissions, and proctoring logs.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsBulkDeletingExams(true);
+      const res = await api.post("/admin/exams/bulk-delete", {
+        examIds: selectedExamIds,
+      });
+      triggerSuccess(res.data.message || "Selected exams deleted successfully");
+      setSelectedExamIds([]);
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Error bulk deleting exams");
+    } finally {
+      setIsBulkDeletingExams(false);
     }
   };
 
@@ -2085,16 +2140,82 @@ export default function AdminDashboard() {
                   />
                 </div>
               </div>
+
+              {/* Bulk Actions Bar for Exams */}
+              {selectedExamIds.length > 0 && (
+                <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-indigo-900">
+                      {selectedExamIds.length} exam{selectedExamIds.length > 1 ? "s" : ""} selected
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedExamIds([])}
+                      className="text-indigo-600 hover:text-indigo-800 underline text-xs ml-2 cursor-pointer"
+                    >
+                      Deselect all
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBulkDeleteExams}
+                    disabled={isBulkDeletingExams}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
+                  >
+                    <Trash2 size={13} />
+                    {isBulkDeletingExams
+                      ? "Deleting..."
+                      : `Delete Selected (${selectedExamIds.length})`}
+                  </button>
+                </div>
+              )}
+
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md shadow-gray-200/50">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-gray-500">
                     <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
                       <tr className="border-b border-gray-200">
+                        <th className="p-4 font-bold text-center w-12">
+                          <input
+                            type="checkbox"
+                            checked={
+                              (() => {
+                                const query = allExamsSearch.toLowerCase();
+                                const filtered = allExams.filter((exam) => {
+                                  const titleMatch = exam.title?.toLowerCase().includes(query);
+                                  const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
+                                  return titleMatch || teacherMatch;
+                                });
+                                return (
+                                  filtered.length > 0 &&
+                                  filtered.every((exam) => selectedExamIds.includes(exam.id || exam._id))
+                                );
+                              })()
+                            }
+                            onChange={(e) => {
+                              const query = allExamsSearch.toLowerCase();
+                              const filtered = allExams.filter((exam) => {
+                                const titleMatch = exam.title?.toLowerCase().includes(query);
+                                const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
+                                return titleMatch || teacherMatch;
+                              });
+                              const filteredIds = filtered.map((e) => e.id || e._id);
+                              if (e.target.checked) {
+                                setSelectedExamIds(Array.from(new Set([...selectedExamIds, ...filteredIds])));
+                              } else {
+                                setSelectedExamIds(selectedExamIds.filter((id) => !filteredIds.includes(id)));
+                              }
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                            title="Select all exams"
+                          />
+                        </th>
                         <th className="px-6 py-4 font-bold text-left">Exam Title</th>
                         <th className="px-6 py-4 font-bold text-left">Teacher Name</th>
                         <th className="px-6 py-4 font-bold text-left">Date</th>
                         <th className="px-6 py-4 font-bold text-left">Duration</th>
                         <th className="px-6 py-4 font-bold text-center">Status</th>
+                        <th className="px-6 py-4 font-bold text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -2108,22 +2229,50 @@ export default function AdminDashboard() {
                           })
                           .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)));
                         return filteredExams.length > 0 ? (
-                          filteredExams.map((exam) => (
-                            <tr key={exam.id || exam._id} className="hover:bg-white transition-colors">
-                              <td className="px-6 py-4 text-gray-900">{exam.title}</td>
-                              <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
-                              <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
-                              <td className="px-6 py-4">{exam.duration_minutes} mins</td>
-                              <td className="px-6 py-4 text-center">
-                                <span className={`inline-block px-3 py-1 rounded-full text-xs ${exam.is_live ? "bg-tomato-100 text-tomato-700 border border-tomato-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
-                                  {exam.is_live ? "Live" : "Not Live"}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
+                          filteredExams.map((exam) => {
+                            const examId = exam.id || exam._id;
+                            const isSelected = selectedExamIds.includes(examId);
+                            return (
+                              <tr key={examId} className={`hover:bg-white transition-colors ${isSelected ? "bg-indigo-50/50" : ""}`}>
+                                <td className="p-4 text-center w-12">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => {
+                                      if (isSelected) {
+                                        setSelectedExamIds(selectedExamIds.filter((id) => id !== examId));
+                                      } else {
+                                        setSelectedExamIds([...selectedExamIds, examId]);
+                                      }
+                                    }}
+                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                  />
+                                </td>
+                                <td className="px-6 py-4 text-gray-900 font-medium">{exam.title}</td>
+                                <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
+                                <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
+                                <td className="px-6 py-4">{exam.duration_minutes} mins</td>
+                                <td className="px-6 py-4 text-center">
+                                  <span className={`inline-block px-3 py-1 rounded-full text-xs ${exam.is_live ? "bg-tomato-100 text-tomato-700 border border-tomato-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                    {exam.is_live ? "Live" : "Not Live"}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteExam(exam)}
+                                    className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Delete Exam"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
                         ) : (
                           <tr>
-                            <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                            <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
                               No exams found.
                             </td>
                           </tr>

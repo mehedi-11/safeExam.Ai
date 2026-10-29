@@ -206,11 +206,50 @@ exports.deleteEvent = async (req, res) => {
 
     // Optional: Delete associated registrations? 
     await EventRegistration.deleteMany({ event_id: req.params.id });
-
+    await Exam.updateMany({ event_id: req.params.id }, { $unset: { event_id: "" } });
     return res.json({ message: 'Event deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error deleting event' });
+  }
+};
+
+
+
+exports.bulkDeleteEvents = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const { eventIds } = req.body;
+    if (!Array.isArray(eventIds) || eventIds.length === 0) {
+      return res.status(400).json({ message: 'No event IDs provided' });
+    }
+
+    let filter = { _id: { $in: eventIds } };
+    if (req.user.role === 'teacher') {
+      filter.created_by = req.user.id;
+    }
+
+    const eventsToDelete = await Event.find(filter);
+    const deletableIds = eventsToDelete.map(e => e._id);
+
+    if (deletableIds.length === 0) {
+      return res.status(404).json({ message: 'No authorized events found to delete' });
+    }
+
+    const result = await Event.deleteMany({ _id: { $in: deletableIds } });
+    await EventRegistration.deleteMany({ event_id: { $in: deletableIds } });
+    await Exam.updateMany({ event_id: { $in: deletableIds } }, { $unset: { event_id: "" } });
+
+    return res.json({
+      message: `${result.deletedCount} event(s) deleted successfully`,
+      deletedCount: result.deletedCount
+    });
+  } catch (err) {
+    console.error('Error bulk deleting events:', err);
+    return res.status(500).json({ message: 'Server error deleting events' });
   }
 };
 

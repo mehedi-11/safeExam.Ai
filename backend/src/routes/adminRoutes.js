@@ -19,6 +19,7 @@ router.post('/admins', adminController.addAdmin);
 
 // Exam Management
 router.get('/all-exams', adminController.getAllExams);
+router.post('/exams/bulk-delete', adminController.bulkDeleteExams);
 router.delete('/exams/:id', adminController.deleteExam);
 
 // Notifications

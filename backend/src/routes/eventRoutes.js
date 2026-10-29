@@ -6,6 +6,7 @@ const { verifyToken, optionalAuth } = require('../middleware/authMiddleware');
 // Protected Stats & Registrations Routes
 router.get('/stats', verifyToken, eventController.getEventStats);
 router.get('/my-registrations', verifyToken, eventController.getMyRegistrations);
+router.post('/bulk-delete', verifyToken, eventController.bulkDeleteEvents);
 
 // Public / Optional Auth Routes
 router.get('/:id', optionalAuth, eventController.getEventDetails);
