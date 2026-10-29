@@ -4,6 +4,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import api from '../api/axiosConfig';
 import Modal from '../components/Modal';
+import { customAlert, customConfirm } from '../context/AlertContext';
 
 const EventsManager = ({ isAdmin = false }) => {
   const [events, setEvents] = useState([]);
@@ -68,7 +69,7 @@ const EventsManager = ({ isAdmin = false }) => {
       setSelectedEventRegistrations(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to fetch registrations');
+      customAlert('Failed to fetch registrations', 'Error', 'error');
       setSelectedEventRegistrations([]);
     } finally {
       setRegistrationsLoading(false);
@@ -102,14 +103,20 @@ const EventsManager = ({ isAdmin = false }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) return;
+    const confirmed = await customConfirm("Are you sure you want to delete this event?", {
+      title: "Delete Event",
+      confirmText: "Delete",
+      type: "danger"
+    });
+    if (!confirmed) return;
     try {
       await api.delete(`/events/${id}`);
       setSelectedEventIds((prev) => prev.filter((item) => item !== id));
+      customAlert("Event deleted successfully", "Success", "success");
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete event');
+      customAlert('Failed to delete event', 'Error', 'error');
     }
   };
 
@@ -133,22 +140,24 @@ const EventsManager = ({ isAdmin = false }) => {
 
   const handleBulkDelete = async () => {
     if (selectedEventIds.length === 0) return;
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedEventIds.length} selected event(s)? This will also delete their registrations.`
-      )
-    ) {
-      return;
-    }
+    const confirmed = await customConfirm(
+      `Are you sure you want to delete ${selectedEventIds.length} selected event(s)? This will also delete their registrations.`,
+      {
+        title: "Delete Selected Events",
+        confirmText: `Delete (${selectedEventIds.length})`,
+        type: "danger"
+      }
+    );
+    if (!confirmed) return;
     setIsBulkDeleting(true);
     try {
       const res = await api.post('/events/bulk-delete', { eventIds: selectedEventIds });
-      alert(res.data.message || 'Events deleted successfully');
+      customAlert(res.data.message || 'Events deleted successfully', "Success", "success");
       setSelectedEventIds([]);
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to bulk delete events');
+      customAlert(err.response?.data?.message || 'Failed to bulk delete events', 'Error', 'error');
     } finally {
       setIsBulkDeleting(false);
     }
@@ -170,7 +179,7 @@ const EventsManager = ({ isAdmin = false }) => {
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert(`Failed to ${editingEventId ? 'update' : 'create'} event`);
+      customAlert(`Failed to ${editingEventId ? 'update' : 'create'} event`, 'Error', 'error');
     } finally {
       setSaving(false);
     }
@@ -183,7 +192,7 @@ const EventsManager = ({ isAdmin = false }) => {
       fetchEvents();
     } catch (err) {
       console.error(err);
-      alert('Failed to update event status');
+      customAlert('Failed to update event status', 'Error', 'error');
     }
   };
 

@@ -36,6 +36,7 @@ import {
   Clock,
 } from "lucide-react";
 import Modal from "../components/Modal";
+import { customAlert, customConfirm } from "../context/AlertContext";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -313,8 +314,12 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteTeacher = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this teacher?"))
-      return;
+    const confirmed = await customConfirm("Are you sure you want to delete this teacher?", {
+      title: "Delete Teacher",
+      confirmText: "Delete",
+      type: "danger"
+    });
+    if (!confirmed) return;
     try {
       await api.delete(`/admin/teachers/${id}`);
       triggerSuccess("Teacher deleted successfully");
@@ -336,8 +341,12 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteStudent = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this student?"))
-      return;
+    const confirmed = await customConfirm("Are you sure you want to delete this student?", {
+      title: "Delete Student",
+      confirmText: "Delete",
+      type: "danger"
+    });
+    if (!confirmed) return;
     try {
       await api.delete(`/admin/students/${id}`);
       triggerSuccess("Student deleted successfully");
@@ -349,13 +358,15 @@ export default function AdminDashboard() {
 
   const handleBulkDeleteStudents = async () => {
     if (selectedStudentIds.length === 0) return;
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedStudentIds.length} selected student(s)? This will also delete their registrations and exam results.`
-      )
-    ) {
-      return;
-    }
+    const confirmed = await customConfirm(
+      `Are you sure you want to delete ${selectedStudentIds.length} selected student(s)? This will also delete their registrations and exam results.`,
+      {
+        title: "Bulk Delete Students",
+        confirmText: `Delete (${selectedStudentIds.length})`,
+        type: "danger"
+      }
+    );
+    if (!confirmed) return;
 
     try {
       setIsBulkDeletingStudents(true);
@@ -374,13 +385,15 @@ export default function AdminDashboard() {
 
   const handleBulkDeleteTeachers = async () => {
     if (selectedTeacherIds.length === 0) return;
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedTeacherIds.length} selected teacher(s)?`
-      )
-    ) {
-      return;
-    }
+    const confirmed = await customConfirm(
+      `Are you sure you want to delete ${selectedTeacherIds.length} selected teacher(s)?`,
+      {
+        title: "Bulk Delete Teachers",
+        confirmText: `Delete (${selectedTeacherIds.length})`,
+        type: "danger"
+      }
+    );
+    if (!confirmed) return;
 
     try {
       setIsBulkDeletingTeachers(true);
@@ -399,12 +412,18 @@ export default function AdminDashboard() {
 
   const handleDeleteExam = async (exam) => {
     if (exam.is_live) {
-      alert("Active LIVE exams cannot be deleted. Please make the exam inactive/not live first.");
+      customAlert("Active LIVE exams cannot be deleted. Please make the exam inactive/not live first.", "Live Exam Active", "warning");
       return;
     }
-    if (!window.confirm(`Are you sure you want to delete exam "${exam.title}"? This will permanently delete all associated questions, student submissions, and logs.`)) {
-      return;
-    }
+    const confirmed = await customConfirm(
+      `Are you sure you want to delete exam "${exam.title}"? This will permanently delete all associated questions, student submissions, and logs.`,
+      {
+        title: "Delete Exam",
+        confirmText: "Delete",
+        type: "danger"
+      }
+    );
+    if (!confirmed) return;
     try {
       const examId = exam.id || exam._id;
       const res = await api.delete(`/admin/exams/${examId}`);
@@ -423,17 +442,23 @@ export default function AdminDashboard() {
       (e) => selectedExamIds.includes(e.id || e._id) && e.is_live
     );
     if (liveSelected.length > 0) {
-      alert(`Cannot delete: ${liveSelected.length} selected exam(s) are currently LIVE. Live exams cannot be deleted. Stop them first.`);
+      customAlert(
+        `Cannot delete: ${liveSelected.length} selected exam(s) are currently LIVE. Live exams cannot be deleted. Stop them first.`,
+        "Action Blocked",
+        "warning"
+      );
       return;
     }
 
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently delete all associated questions, submissions, and proctoring logs.`
-      )
-    ) {
-      return;
-    }
+    const confirmed = await customConfirm(
+      `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently delete all associated questions, submissions, and proctoring logs.`,
+      {
+        title: "Bulk Delete Exams",
+        confirmText: `Delete (${selectedExamIds.length})`,
+        type: "danger"
+      }
+    );
+    if (!confirmed) return;
 
     try {
       setIsBulkDeletingExams(true);

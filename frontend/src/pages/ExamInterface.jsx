@@ -105,7 +105,7 @@ export default function ExamInterface() {
         reason: 'Auto-Submitted: Student reloaded the exam browser page',
         isAuto: true
       }).finally(() => {
-        alert('Browser reload detected! Your exam has been auto-submitted as per rules.');
+        customAlert('Browser reload detected! Your exam has been auto-submitted as per rules.', 'Exam Terminated', 'error');
         navigate('/dashboard/student');
       });
       return;
@@ -823,7 +823,7 @@ export default function ExamInterface() {
       // Handle locking on the fly
       if (res.data.status === 'completed' && !hasSubmittedRef.current) {
         stopWebcam();
-        alert('A critical violation was detected! Your exam has been auto-submitted.');
+        customAlert('A critical violation was detected! Your exam has been auto-submitted.', 'Critical Violation', 'error');
         navigate('/dashboard/student');
       }
     } catch (err) {
@@ -846,10 +846,10 @@ export default function ExamInterface() {
         reason: submissionReason,
         isAuto
       });
-      alert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted successfully.');
+      customAlert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted successfully.', isAuto ? 'Exam Finalized' : 'Exam Submitted', isAuto ? 'warning' : 'success');
       navigate('/dashboard/student');
     } catch (err) {
-      alert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted: ' + (err.response?.data?.message || 'Done'));
+      customAlert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted: ' + (err.response?.data?.message || 'Done'), isAuto ? 'Exam Finalized' : 'Exam Submitted', isAuto ? 'warning' : 'success');
       navigate('/dashboard/student');
     }
   };
@@ -980,8 +980,8 @@ export default function ExamInterface() {
           <div className="bg-white border border-gray-200 p-6 rounded-2xl flex justify-between items-center shadow-md shadow-gray-200/50">
             <div>
               <button 
-                onClick={() => { 
-                  if(window.confirm('Abandon exam? Your progress will not be submitted.')) {
+                onClick={async () => { 
+                  const confirmed = await customConfirm('Abandon exam? Your progress will not be submitted.', { title: 'Abandon Exam', confirmText: 'Abandon', type: 'danger' }); if (confirmed) {
                     stopWebcam();
                     navigate('/dashboard/student');
                   }

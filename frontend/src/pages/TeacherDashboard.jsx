@@ -257,7 +257,7 @@ export default function TeacherDashboard() {
       setSelectedEventRegistrations(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to fetch registrations');
+      customAlert('Failed to fetch registrations', 'Error', 'error');
       setSelectedEventRegistrations([]);
     } finally {
       setRegistrationsLoading(false);
@@ -338,12 +338,11 @@ export default function TeacherDashboard() {
       setError("Live exam cannot be deleted. Please stop the exam first.");
       return;
     }
-    if (
-      !window.confirm(
-        "Delete this exam? This will wipe all its questions and grades.",
-      )
-    )
-      return;
+    const confirmed = await customConfirm(
+      "Delete this exam? This will wipe all its questions and grades.",
+      { title: "Delete Exam", confirmText: "Delete", type: "danger" }
+    );
+    if (!confirmed) return;
     try {
       await api.delete(`/teacher/exams/${id}`);
       triggerSuccess("Exam deleted");
@@ -363,12 +362,11 @@ export default function TeacherDashboard() {
 
   const handleBulkDeleteExams = async () => {
     if (selectedExamIds.length === 0) return;
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently wipe all questions and results.`
-      )
-    )
-      return;
+    const confirmed = await customConfirm(
+      `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently wipe all questions and results.`,
+      { title: "Bulk Delete Exams", confirmText: `Delete (${selectedExamIds.length})`, type: "danger" }
+    );
+    if (!confirmed) return;
 
     setIsBulkDeletingExams(true);
     try {
@@ -504,7 +502,12 @@ export default function TeacherDashboard() {
   };
 
   const handleDeleteQuestion = async (id) => {
-    if (!window.confirm("Delete this question?")) return;
+    const confirmed = await customConfirm("Delete this question?", {
+      title: "Delete Question",
+      confirmText: "Delete",
+      type: "danger"
+    });
+    if (!confirmed) return;
     try {
       await api.delete(`/teacher/questions/${id}`);
       triggerSuccess("Question deleted");
@@ -517,7 +520,12 @@ export default function TeacherDashboard() {
 
   const handleBulkDeleteQuestions = async () => {
     if (selectedQuestionIds.length === 0 || !selectedExamId) return;
-    if (!window.confirm(`Delete ${selectedQuestionIds.length} selected question(s)?`)) return;
+    const confirmed = await customConfirm(`Delete ${selectedQuestionIds.length} selected question(s)?`, {
+      title: "Delete Questions",
+      confirmText: `Delete (${selectedQuestionIds.length})`,
+      type: "danger"
+    });
+    if (!confirmed) return;
 
     setIsBulkDeletingQuestions(true);
     try {
@@ -530,7 +538,7 @@ export default function TeacherDashboard() {
       fetchQuestions(selectedExamId);
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete selected questions");
+      setError(err.response?.data?.message || "Failed to bulk delete questions");
     } finally {
       setIsBulkDeletingQuestions(false);
     }
@@ -603,12 +611,11 @@ export default function TeacherDashboard() {
   };
 
   const handleClearLogs = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to permanently clear the proctoring log file?",
-      )
-    )
-      return;
+    const confirmed = await customConfirm(
+      "Are you sure you want to permanently clear the proctoring log file?",
+      { title: "Clear Proctoring Logs", confirmText: "Clear Logs", type: "danger" }
+    );
+    if (!confirmed) return;
     try {
       await api.delete("/proctor/raw-logs");
       setRawLogs("");
