@@ -1,16 +1,15 @@
+const mongoose = require('mongoose');
 const Admin = require('../models/Admin');
 const Teacher = require('../models/Teacher');
 const Student = require('../models/Student');
 const Exam = require('../models/Exam');
+const ExamQuestion = require('../models/ExamQuestion');
+const StudentAnswer = require('../models/StudentAnswer');
 const AdminNotification = require('../models/AdminNotification');
-const SystemSetting = require('../models/SystemSetting');
 const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
 const StudentExam = require('../models/StudentExam');
 const ProctoringLog = require('../models/ProctoringLog');
-const mongoose = require('mongoose');
-const ExamQuestion = require('../models/ExamQuestion');
-const StudentAnswer = require('../models/StudentAnswer');
 const bcrypt = require('bcryptjs');
 
 // Get Admin Profile
@@ -287,6 +286,10 @@ exports.getAllExams = async (req, res) => {
 exports.deleteExam = async (req, res) => {
   const { id } = req.params;
   try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid exam ID' });
+    }
+
     const exam = await Exam.findById(id);
     if (!exam) return res.status(404).json({ message: 'Exam not found' });
 
@@ -312,22 +315,28 @@ exports.bulkDeleteExams = async (req, res) => {
     return res.status(400).json({ message: 'No exam IDs provided' });
   }
   try {
-    const liveExams = await Exam.find({ _id: { $in: examIds }, is_live: true });
+    const validIds = examIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+    if (validIds.length === 0) {
+      return res.status(400).json({ message: 'Invalid exam IDs provided' });
+    }
+
+    const liveExams = await Exam.find({ _id: { $in: validIds }, is_live: true }).select('title');
     if (liveExams.length > 0) {
-      return res.status(400).json({
-        message: `Cannot delete: ${liveExams.length} selected exam(s) are currently LIVE. Stop them first.`
+      const titles = liveExams.map(e => `"${e.title}"`).join(', ');
+      return res.status(400).json({ 
+        message: `Cannot delete live exam(s): ${titles}. Please stop them before deleting.` 
       });
     }
 
-    const result = await Exam.deleteMany({ _id: { $in: examIds } });
-    await ExamQuestion.deleteMany({ exam_id: { $in: examIds } });
-    await StudentExam.deleteMany({ exam_id: { $in: examIds } });
-    await StudentAnswer.deleteMany({ exam_id: { $in: examIds } });
-    await ProctoringLog.deleteMany({ exam_id: { $in: examIds } });
+    const result = await Exam.deleteMany({ _id: { $in: validIds } });
+    await ExamQuestion.deleteMany({ exam_id: { $in: validIds } });
+    await StudentExam.deleteMany({ exam_id: { $in: validIds } });
+    await StudentAnswer.deleteMany({ exam_id: { $in: validIds } });
+    await ProctoringLog.deleteMany({ exam_id: { $in: validIds } });
 
-    return res.json({
-      message: `${result.deletedCount} exam(s) deleted successfully`,
-      deletedCount: result.deletedCount
+    return res.json({ 
+      message: `${result.deletedCount} exam(s) deleted successfully`, 
+      deletedCount: result.deletedCount 
     });
   } catch (error) {
     console.error('Error bulk deleting exams:', error);
@@ -488,41 +497,6 @@ exports.addBulkTeachers = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error bulk adding teachers' });
-  }
-};
-
-// --- SETTINGS ---
-exports.getSettings = async (req, res) => {
-  try {
-    const rows = await SystemSetting.find();
-    const settings = {};
-    rows.forEach(r => settings[r.setting_key] = r.setting_value);
-    return res.json(settings);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error fetching settings' });
-  }
-};
-
-exports.updateSettings = async (req, res) => {
-  const settings = req.body;
-  try {
-    const reqAdmin = await Admin.findById(req.user.id);
-    if (!reqAdmin || !reqAdmin.is_super_admin) {
-      return res.status(403).json({ message: 'Only Super Admins can update settings' });
-    }
-
-    for (const [key, value] of Object.entries(settings)) {
-      await SystemSetting.findOneAndUpdate(
-        { setting_key: key },
-        { setting_value: value },
-        { upsert: true }
-      );
-    }
-    return res.json({ message: 'Settings updated successfully' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error updating settings' });
   }
 };
 

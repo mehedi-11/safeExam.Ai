@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Play, Image as ImageIcon, Edit, Trash2, Search, Calendar, Users, Clock, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
+import { Plus, Image as ImageIcon, Edit, Trash2, Search, Calendar, Users, Clock, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import api from '../api/axiosConfig';
+import { useAlert } from '../context/AlertContext';
 import Modal from '../components/Modal';
-import { customAlert, customConfirm } from '../context/AlertContext';
 
 const EventsManager = ({ isAdmin = false }) => {
   const [events, setEvents] = useState([]);
@@ -15,7 +15,8 @@ const EventsManager = ({ isAdmin = false }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
   const [selectedEventIds, setSelectedEventIds] = useState([]);
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkDeletingEvents, setIsBulkDeletingEvents] = useState(false);
+  const { showConfirm, showSuccess, showError, showWarning } = useAlert();
   
   const modules = {
     toolbar: [
@@ -69,7 +70,7 @@ const EventsManager = ({ isAdmin = false }) => {
       setSelectedEventRegistrations(res.data);
     } catch (err) {
       console.error(err);
-      customAlert('Failed to fetch registrations', 'Error', 'error');
+      alert('Failed to fetch registrations');
       setSelectedEventRegistrations([]);
     } finally {
       setRegistrationsLoading(false);
@@ -102,64 +103,64 @@ const EventsManager = ({ isAdmin = false }) => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = await customConfirm("Are you sure you want to delete this event?", {
-      title: "Delete Event",
-      confirmText: "Delete",
-      type: "danger"
-    });
-    if (!confirmed) return;
-    try {
-      await api.delete(`/events/${id}`);
-      setSelectedEventIds((prev) => prev.filter((item) => item !== id));
-      customAlert("Event deleted successfully", "Success", "success");
-      fetchEvents();
-    } catch (err) {
-      console.error(err);
-      customAlert('Failed to delete event', 'Error', 'error');
-    }
-  };
-
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      const allFilteredIds = filteredEvents.map((e) => e._id || e.id);
-      setSelectedEventIds(Array.from(new Set([...selectedEventIds, ...allFilteredIds])));
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const ids = filteredEvents.map(evt => evt._id);
+      setSelectedEventIds(Array.from(new Set([...selectedEventIds, ...ids])));
     } else {
-      const filteredIds = filteredEvents.map((e) => e._id || e.id);
-      setSelectedEventIds(selectedEventIds.filter((id) => !filteredIds.includes(id)));
+      const filteredIds = filteredEvents.map(evt => evt._id);
+      setSelectedEventIds(selectedEventIds.filter(id => !filteredIds.includes(id)));
     }
   };
 
   const handleToggleSelect = (id) => {
-    if (selectedEventIds.includes(id)) {
-      setSelectedEventIds(selectedEventIds.filter((item) => item !== id));
-    } else {
-      setSelectedEventIds([...selectedEventIds, id]);
-    }
+    setSelectedEventIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
   };
 
   const handleBulkDelete = async () => {
     if (selectedEventIds.length === 0) return;
-    const confirmed = await customConfirm(
-      `Are you sure you want to delete ${selectedEventIds.length} selected event(s)? This will also delete their registrations.`,
-      {
-        title: "Delete Selected Events",
-        confirmText: `Delete (${selectedEventIds.length})`,
-        type: "danger"
-      }
-    );
+
+    const confirmed = await showConfirm({
+      title: "Bulk Delete Events",
+      message: `Are you sure you want to delete ${selectedEventIds.length} selected event(s)?\n\nThis will also remove all associated attendee registrations.`,
+      confirmText: `Delete (${selectedEventIds.length}) Events`,
+      isDanger: true
+    });
+
     if (!confirmed) return;
-    setIsBulkDeleting(true);
+
     try {
+      setIsBulkDeletingEvents(true);
       const res = await api.post('/events/bulk-delete', { eventIds: selectedEventIds });
-      customAlert(res.data.message || 'Events deleted successfully', "Success", "success");
+      showSuccess(res.data.message || "Selected events deleted successfully");
       setSelectedEventIds([]);
       fetchEvents();
     } catch (err) {
-      console.error(err);
-      customAlert(err.response?.data?.message || 'Failed to bulk delete events', 'Error', 'error');
+      showError(err.response?.data?.message || "Failed to bulk delete events");
     } finally {
-      setIsBulkDeleting(false);
+      setIsBulkDeletingEvents(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = await showConfirm({
+      title: "Delete Event",
+      message: "Are you sure you want to delete this event?\n\nThis will also remove all attendee registrations for this event.",
+      confirmText: "Delete Event",
+      isDanger: true
+    });
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/events/${id}`);
+      showSuccess("Event deleted successfully");
+      setSelectedEventIds(prev => prev.filter(item => item !== id));
+      fetchEvents();
+    } catch (err) {
+      console.error(err);
+      showError("Failed to delete event");
     }
   };
 
@@ -179,7 +180,7 @@ const EventsManager = ({ isAdmin = false }) => {
       fetchEvents();
     } catch (err) {
       console.error(err);
-      customAlert(`Failed to ${editingEventId ? 'update' : 'create'} event`, 'Error', 'error');
+      alert(`Failed to ${editingEventId ? 'update' : 'create'} event`);
     } finally {
       setSaving(false);
     }
@@ -192,7 +193,7 @@ const EventsManager = ({ isAdmin = false }) => {
       fetchEvents();
     } catch (err) {
       console.error(err);
-      customAlert('Failed to update event status', 'Error', 'error');
+      alert('Failed to update event status');
     }
   };
 
@@ -398,13 +399,12 @@ const EventsManager = ({ isAdmin = false }) => {
 
       {/* Bulk Actions Bar for Events */}
       {selectedEventIds.length > 0 && (
-        <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in">
+        <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in mb-4">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-indigo-900">
               {selectedEventIds.length} event{selectedEventIds.length > 1 ? "s" : ""} selected
             </span>
             <button
-              type="button"
               onClick={() => setSelectedEventIds([])}
               className="text-indigo-600 hover:text-indigo-800 underline text-xs ml-2 cursor-pointer"
             >
@@ -412,13 +412,14 @@ const EventsManager = ({ isAdmin = false }) => {
             </button>
           </div>
           <button
-            type="button"
             onClick={handleBulkDelete}
-            disabled={isBulkDeleting}
+            disabled={isBulkDeletingEvents}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
           >
             <Trash2 size={13} />
-            {isBulkDeleting ? "Deleting..." : `Delete Selected (${selectedEventIds.length})`}
+            {isBulkDeletingEvents
+              ? "Deleting..."
+              : `Delete Selected (${selectedEventIds.length})`}
           </button>
         </div>
       )}
@@ -427,16 +428,13 @@ const EventsManager = ({ isAdmin = false }) => {
         <table className="w-full text-left border-collapse">
           <thead className="text-xs font-bold uppercase tracking-wider text-gray-900 border-b border-gray-200">
             <tr className="border-b border-gray-200">
-              <th className="py-3 px-4 font-bold text-center w-12">
+              <th className="py-3 px-4 w-12 text-center">
                 <input
                   type="checkbox"
-                  checked={
-                    filteredEvents.length > 0 &&
-                    filteredEvents.every((e) => selectedEventIds.includes(e._id || e.id))
-                  }
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                  title="Select all events"
+                  className="rounded border-gray-300 text-gray-900 focus:ring-gray-900 h-4 w-4 cursor-pointer"
+                  checked={filteredEvents.length > 0 && filteredEvents.every(evt => selectedEventIds.includes(evt._id))}
+                  onChange={handleSelectAll}
+                  title="Select all filtered events"
                 />
               </th>
               <th className="py-3 px-4 font-bold text-xs uppercase tracking-widest text-left">
@@ -472,22 +470,20 @@ const EventsManager = ({ isAdmin = false }) => {
             ) : (
               filteredEvents.map((evt) => {
                 const isActive = evt.status === 'live';
-
-                const isSelected = selectedEventIds.includes(evt._id || evt.id);
+                const isSelected = selectedEventIds.includes(evt._id);
 
                 return (
                 <tr
                   key={evt._id}
-                  className={`border-b border-gray-100 hover:bg-white transition-colors ${
-                    isSelected ? "bg-indigo-50/40" : ""
-                  }`}
+                  className={`border-b border-gray-100 hover:bg-gray-50/60 transition-colors ${isSelected ? 'bg-indigo-50/40' : ''}`}
                 >
-                  <td className="py-3 px-4 text-center w-12">
+                  <td className="py-3 px-4 text-center">
                     <input
                       type="checkbox"
+                      className="rounded border-gray-300 text-gray-900 focus:ring-gray-900 h-4 w-4 cursor-pointer"
                       checked={isSelected}
-                      onChange={() => handleToggleSelect(evt._id || evt.id)}
-                      className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      onChange={() => handleToggleSelect(evt._id)}
+                      title="Select event"
                     />
                   </td>
                   <td className="py-3 px-4">
@@ -499,7 +495,7 @@ const EventsManager = ({ isAdmin = false }) => {
                       </div>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-900">
+                  <td className="py-3 px-4 text-sm text-gray-900 font-medium">
                     {evt.title}
                   </td>
                   <td className="py-3 px-4 text-xs text-gray-500">
@@ -542,7 +538,7 @@ const EventsManager = ({ isAdmin = false }) => {
                     {!isAdmin && (
                       <button
                         onClick={() => openEditModal(evt)}
-                        className="p-1.5 text-tomato-400 hover:bg-tomato-50 rounded-lg transition-colors"
+                        className="p-1.5 text-tomato-400 hover:bg-tomato-50 rounded-lg transition-colors cursor-pointer"
                         title="Edit Event"
                       >
                         <Edit size={16} />
@@ -550,7 +546,7 @@ const EventsManager = ({ isAdmin = false }) => {
                     )}
                     <button
                       onClick={() => handleDelete(evt._id)}
-                      className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                       title="Delete Event"
                     >
                       <Trash2 size={16} />

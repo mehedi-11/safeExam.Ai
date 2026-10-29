@@ -1,326 +1,242 @@
-# 🛡️ SafeExam.AI — AI-Powered Online Examination & Intelligent Proctoring Platform
+# 🛡️ SafeExam.Ai — Next-Gen AI-Powered Online Examination & Intelligent Proctoring System
 
-<div align="center">
-
-![SafeExam.AI Banner](Diagram/01_System_Architecture_Diagram.png)
-
-[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Express.js](https://img.shields.io/badge/Express-4.19-000000?logo=express&logoColor=white)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-4.22-FF6F00?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/js)
-[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-8E75B2?logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
-
-**A Next-Generation, Full-Stack, AI-Driven Online Examination Platform with Zero-Server-Lag Edge Proctoring, Automated Evaluation, and Real-Time Malpractice Prevention.**
-
-[Live Repository](https://github.com/mehedi-11/safeExam.Ai.git) • [System Architecture](Diagram/README.md) • [Key Features](#-core-capabilities--innovations) • [Quick Start](#-quick-start--installation) • [Portals](#-portal-architecture)
-
-</div>
+[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5.4.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.19.2-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-COCO--SSD-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/js)
 
 ---
 
-## 📖 Executive Summary
+## 📌 Executive Summary
 
-**SafeExam.AI** is a comprehensive academic examination ecosystem engineered to eradicate academic malpractice in remote digital tests while completely eliminating server-side video streaming bottlenecks. 
+**SafeExam.Ai** is a state-of-the-art, secure, and distributed online examination platform engineered to uphold absolute academic integrity during remote, unproctored, and hybrid assessments. Leveraging edge-based **TensorFlow.js computer vision models**, real-time biometric analysis, and event-driven heuristic monitoring, SafeExam.Ai provides uncompromising cheat prevention without compromising student privacy or transmitting invasive video feeds to third-party cloud servers.
 
-Traditional remote proctoring systems transmit hundreds of heavy video feeds to central servers, creating severe bandwidth congestion and latency. SafeExam.AI redefines this model by deploying **Edge AI (Computer Vision via TensorFlow.js & COCO-SSD)** directly inside the examinee's web browser. The client device autonomously analyzes video frames locally in real time, detecting unauthorized objects (smartphones, notes, extra screens) or multiple faces, sending only lightweight signed incident metadata to the server.
-
-Combined with an unyielding **Browser Lockdown Protocol**, **10-Point Demerit Penalty System**, **5-Minute Network Loss Fail-Safe**, and **Agent-ELI / Google Gemini AI Personalized Diagnostics**, SafeExam.AI delivers absolute integrity, fault tolerance, and educational insight.
+The platform provides dedicated, granularly controlled ecosystems for **Students**, **Teachers**, and **System Administrators**, complete with automated grading, instant PDF score reporting, community event contests, and intelligent real-time proctoring supervision.
 
 ---
 
-## 🚀 Core Capabilities & Innovations
+## 🏛️ 3-Tier Distributed Architecture
 
-### 1. 👁️ Edge Computer Vision & In-Browser Proctoring (Zero Server Lag)
-- **Zero Video Bandwidth Cost**: All machine learning inference executes on the student's hardware via `@tensorflow/tfjs` and `@tensorflow-models/coco-ssd`.
-- **Real-Time Object Detection**:
-  - 📱 **Cell Phone Detection**: Immediate detection of handheld mobile devices.
-  - 👥 **Multiple Faces / Persons**: Flags when an auxiliary person enters the camera frame.
-  - 📚 **Books & Notes**: Detects reading materials in the test workspace.
-  - 🖥️ **External Monitors / Screens**: Flags secondary monitors.
-  - 👤 **Absence From Camera**: Detects when the candidate leaves their seat.
-
-### 2. ⚖️ 10-Point Demerit Penalty & Instant Auto-Submit Matrix
-- Violations accrue demerit points dynamically based on severity.
-- Reaching or exceeding **10 Demerit Points** triggers an automatic, unbypassable examination lockdown and final auto-submission.
-- Real-time warning modals alert students before irreversible penalties occur.
-
-### 3. 🌐 Dual-Layer Network Disconnection Resilience (5-Minute Hold)
-- **10-Second Ping Heartbeat**: Continuous bidirectional verification between client and backend.
-- **Immediate Pause on Drop**: If the student's connection drops, the test interface freezes with an unclosable connection recovery dialog, protecting test time.
-- **Fail-Safe Auto-Submit**: If disconnected for $> 5$ minutes, the server daemon automatically closes and finalizes the test attempt based on cached state.
-
-### 4. 🔒 Complete Browser Lockdown & Anti-Cheat Guards
-- **Fullscreen Enforcement**: Candidates must remain in fullscreen mode throughout the sitting; exiting triggers instant warnings and demerits.
-- **Key Binding Trapping**: Intercepts and suppresses developer shortcuts (`F12`, `Ctrl+Shift+I`, `Ctrl+U`), tab-switching (`Alt+Tab`, `Cmd+Tab`), reload (`F5`, `Ctrl+R`), and clipboard commands (`Ctrl+C`, `Ctrl+V`).
-- **Context Menu & Text Selection Neutralization**: Right-click menus and text highlighting are disabled.
-- **Automated Periodic Auto-Save**: Responses auto-save every 3 seconds to guarantee zero loss of answers.
-
-### 5. ⚡ Automated MCQ Evaluation & Visual Color-Coded Answersheet
-- **Instant MCQ Marking**: Multiple-choice assessments are graded in milliseconds upon submission.
-- **Visual Answersheet Review**:
-  - Correct answers chosen by the student are highlighted in vibrant **Emerald Green** (`✓ Correct`).
-  - Incorrect choices are clearly labeled in **Rose Red** with strike-through (`✗ Student's Answer`), displaying the correct option side-by-side.
-  - Manual grading interface for written/descriptive answers with instant total score re-computation.
-
-### 6. 🤖 Subject Insights Powered by Agent-ELI & Google Gemini AI
-- Analyzes historical exam results and generates custom strengths and weakness diagnostics.
-- Outlines an actionable checklist and prioritized study roadmap tailored to individual academic gaps.
-
-### 7. 🗂️ Bulk Data Management & Administrative Controls
-- **Select-to-Delete**: Multi-select checkboxes and bulk deletion across Exams, Teachers, Students, Questions, and Events.
-- **CSV Bulk Import**: Bulk enroll hundreds of students and faculty members in seconds via PapaParse.
-- **PDF Report Generation**: Instant export of student rosters, examination answer sheets, and complete violation logs using `jsPDF` and `jspdf-autotable`.
-
----
-
-## 🏛️ System Architecture
-
-SafeExam.AI follows a modular **3-Tier Distributed Architecture**:
+The system utilizes an enterprise 3-tier distributed architecture ensuring strict separation of concerns, high throughput, and zero-latency client-side AI inference:
 
 ```mermaid
 flowchart TD
-    subgraph ClientTier ["1. Presentation & Edge AI Tier (Browser)"]
-        UI["React 18 + Vite SPA"]
-        TF["TensorFlow.js + COCO-SSD Inference Engine"]
-        Surv["Active Surveillance Loop (Audio/Video/DOM)"]
-        AutoSave["3-Sec Background Auto-Save"]
-        UI --> TF
-        UI --> Surv
-        UI --> AutoSave
+    subgraph ClientTier["🌐 Client Tier (Browser / React 18 + Vite)"]
+        A1["Student Portal & AI Proctoring (TF.js COCO-SSD)"]
+        A2["Teacher Dashboard (Exam Creator & Live Supervisor)"]
+        A3["Admin Master Portal (User Governance & System Metrics)"]
     end
 
-    subgraph ServerTier ["2. Application Gateway Tier (Node.js / Express)"]
-        API["Express.js RESTful API"]
-        Auth["JWT Stateless Role Guard (Admin / Teacher / Student)"]
-        Heartbeat["10s Heartbeat & Auto-Closer Daemon"]
-        Penalty["Demerit Calculation Engine"]
-        Gemini["Google Gemini AI Diagnostics Service"]
-        API --> Auth
-        API --> Heartbeat
-        API --> Penalty
-        API --> Gemini
+    subgraph APITier["⚡ Application & API Gateway (Node.js & Express)"]
+        B1["JWT Auth & Role-Based Access Control"]
+        B2["Exam Lifecycle & Manual Live State Manager"]
+        B3["Auto-Grading & Scoring Engine"]
+        B4["Event Contest & Registration Controller"]
+        B5["Proctoring Heuristics & Violation Aggregator"]
     end
 
-    subgraph DataTier ["3. Persistence & Cloud Tier"]
-        Mongo[("MongoDB Atlas Database")]
-        EmailSvc["EmailJS OTP Delivery Service"]
+    subgraph DataTier["💾 Persistence Tier (MongoDB Atlas & Static CDN)"]
+        C1[("MongoDB Database\n(Users, Exams, Questions, Logs, Events)")]
+        C2["Local File Storage / Static CDN\n(Profile Uploads, Badges)"]
     end
 
-    ClientTier -- "HTTPS REST & Signed Logs" --> ServerTier
-    ServerTier -- "Mongoose ODM" --> Mongo
-    ServerTier -- "OTP Requests" --> EmailSvc
+    ClientTier -->|REST API Calls & JWT Tokens| APITier
+    APITier -->|Mongoose ODM Queries| DataTier
 ```
 
-*For complete vector and high-resolution architecture diagrams, visit the [`/Diagram`](Diagram/README.md) catalog.*
+---
+
+## 👁️ AI Proctoring Engine & Violation Penalty Matrix
+
+SafeExam.Ai executes deep learning inference directly on the client's device using **TensorFlow.js WebAssembly/WebGL hardware acceleration**. The proctoring engine monitors video frames, audio levels, tab visibility, and window focus simultaneously.
+
+Every violation incurs weighted **Demerit Points**. If an examinee accumulates penalty points surpassing the critical threshold, the session triggers an automatic freeze and instant examination auto-submission.
+
+### ⚖️ Violation & Penalty Demerit Matrix
+
+| Violation Category | Detection Method | Penalty Points | Automatic System Action |
+|:---|:---|:---:|:---|
+| 📱 **Cell Phone / Smart Device Detected** | Client-side COCO-SSD Object Recognition | **+4.0 pts** | High-priority flag + Instant warning banner |
+| 👥 **Multiple Faces / Unauthorized Person** | COCO-SSD Multi-Person Detection | **+3.0 pts** | Immediate warning + Evidence snapshot logged |
+| 🔄 **Tab Switching / Window Blur** | HTML5 Page Visibility API & Window Blur | **+2.0 pts** | Instant alert modal + Time-stamped event |
+| 🖥️ **Exiting Fullscreen Mode** | Fullscreen Change Event Monitor | **+2.0 pts** | Warning modal + Auto fullscreen re-request |
+| 👤 **Head Pose / Looking Away / Looking Down** | Face Orientation & Continuous Tracking | **+1.5 pts** | Progressive notification badge |
+| 🎙️ **Ambient Audio / Speech Anomaly** | Web Audio API AudioContext Decibel Analyzer | **+1.0 pts** | Audio spike logged in proctoring audit feed |
+| 📋 **Copy / Paste / DevTools Shortcut** | DOM Clipboard & Keyboard Event Trapping | **+1.5 pts** | Immediate action blockage + Audit record |
+| 🚨 **Threshold Breach (≥ 15.0 pts)** | Heuristic Aggregator | **CRITICAL** | **Automated Exam Lock & Immediate Forced Submission** |
 
 ---
 
-## 📊 Violation Penalty Matrix
+## 🌟 Core System Portals & Features
 
-| Violation Type | Severity | Demerit Penalty | System Consequence |
-| :--- | :---: | :---: | :--- |
-| **Cell Phone Detected** | Critical | **Instant Hold / +5** | 5s Confirm Modal + Snapshot Logged |
-| **Tab Switch / Window Blur** | High | **+2 Demerits** | Audio alarm + 10s countdown countdown |
-| **Multiple Persons in Frame** | High | **+2 Demerits** | On-screen warning modal + Incident recorded |
-| **Prohibited Keyboard Shortcuts** | Medium | **1st: Warn / 2nd: +1** | Keystroke intercepted and nullified |
-| **Browser Reload (F5/Ctrl+R)** | Critical | **Forced Submit** | Session terminated for integrity |
-| **Fullscreen Exit** | Medium | **+1 Demerit** | Locked until fullscreen re-established |
-| **10 Total Demerit Points** | Fatal | **Lockout** | **Automatic Exam Final Submission** |
-| **Network Loss $> 5$ Minutes** | System | **Server Auto-Submit** | Background worker finalizes attempt |
+### 1. 🎓 Student Portal
+- **Active Dashboard & Search:** Real-time search by exam name, course code, or university.
+- **Dynamic Score Presentation:** Formatted as two-digit padded fractional marks (e.g., `03/10`, `08/20`).
+- **Interactive Answersheet:** Color-coded review highlighting correct answers (`Emerald Green`) vs. incorrect student answers (`Rose Red`).
+- **Dual-Tab Community Events:**
+  - *All Events Tab:* Explore upcoming competitions and register instantly.
+  - *Registered Events Tab:* View registered contests, copy secret exam passcodes with one-click, and launch live tests via **"Go for Exam"**.
+- **Automated Pre-Flight Webcam Check:** Progressive device release and permission recovery preventing blank screen errors.
 
----
+### 2. 👨‍🏫 Teacher Portal
+- **100% Manual Exam Live Control:** Teacher explicitly controls exam lifecycle via **"Make Live"** and **"Stop Exam"** buttons (system auto-start interval eliminated).
+- **Auto-Fill Event Password:** Event exams automatically populate the secret passcode into the live authorization modal.
+- **Rich Question Builder:** Multiple choice question creator with support for bulk question import and category tags.
+- **Multi-Select & Bulk Operations:** Bulk delete questions and exams with single-click batch confirmations.
+- **Real-Time Proctoring Monitor:** View live demerit points, violation counts, and suspicious behavior logs.
 
-## 👥 Portal Architecture
+### 3. 🛡️ Admin Master Portal
+- **Enterprise Governance:** Full oversight of Faculty, Students, and System Administrators.
+- **Exams Multi-Select Bulk Delete:**
+  - Header *Select All* checkbox and individual row selectors.
+  - Cascading backend deletion (`Exam`, `ExamQuestion`, `StudentExam`, `StudentAnswer`, `ProctoringLog`).
+  - **Live Exam Safety Lock:** Prevents accidental deletion of exams currently in session.
+- **Events Manager Bulk Delete:** Manage university webinars, competitions, and participant rosters with batch deletion.
+- **Proctoring Audit Logs:** Centralized timeline of all flagged violations with student identities and timestamps.
 
-SafeExam.AI features three strictly isolated, role-guarded portals:
-
-### 🛡️ 1. Administration Portal
-- **Global Overview**: Real-time KPI statistics (Total Teachers, Students, Live Exams, Total Registrations).
-- **Teacher Governance**: Review pending registrations, approve/reject teacher applications, suspend accounts, and bulk delete faculty.
-- **Student Governance**: View complete academic histories, exam attempts, scores, and status flags.
-- **All Exams Oversight**: Live oversight of every test across faculties; instant cancellation or bulk deletion of invalid exams.
-- **Proctoring Log Downloads**: Inspect and download comprehensive proctoring violation logs in PDF.
-- **CSV Bulk Import**: Batch enroll students and instructors.
-
-### 👨‍🏫 2. Teacher Portal
-- **Exam Builder**: Set course codes, custom passwords, duration, start/end dates, and allowed attempt limits (1, 2, 3+).
-- **Question Bank Designer**: Formulate MCQs (with automated grading keys) and Descriptive/Written questions; reorder questions via drag-and-drop.
-- **Live Proctoring Room**: Real-time counter of registered, active, and submitted examinees; second-by-second live incident log feed.
-- **Answersheet Grading Hub**: Color-coded visual evaluation of individual student papers; assign manual marks for descriptive answers.
-- **Publish/Unpublish**: Control when scores and solutions become visible to students.
-- **Events & Contests**: Create and host university events, contests, and hackathons.
-
-### 🎓 3. Student Portal
-- **Exam Lounge**: Filter active and upcoming test sittings; one-click entry using security credentials.
-- **Secure Locked Exam Workspace**: Pre-flight camera and microphone diagnostics; clean fullscreen test layout with countdown timer.
-- **My Results**: Searchable record of past performances, percentages, and teacher remarks.
-- **Subject Insights (Agent-ELI)**: Visual analytics breakdown (radar/bar charts) with AI-curated improvement recommendations.
-- **Registered Events**: View enrolled hackathons and contests, retrieve secret test keys, and launch event tests.
+### 4. 🎨 Modern Dialog System (`AlertContext.jsx`)
+- Complete replacement of default browser dialogs (`safeexamnet.netlify.app says...`).
+- Backdrop blur, scale animations, keyboard `ESC` dismissal, and semantic color-coding.
+- Global window interception ensuring zero ugly browser alerts across all existing and future workflows.
 
 ---
 
-## 🛠️ Technology Stack
+## 📂 Project Directory Structure
 
-| Domain | Technologies |
-| :--- | :--- |
-| **Frontend Framework** | React 18.3, Vite 5.4 |
-| **Styling & Icons** | Tailwind CSS 3.4, Lucide React |
-| **Client-Side AI & CV** | TensorFlow.js (`@tensorflow/tfjs` 4.22), COCO-SSD (`@tensorflow-models/coco-ssd` 2.2) |
-| **Data Visualization** | Recharts 3.10 |
-| **Document Processing** | jsPDF, jspdf-autotable, PapaParse 5.5, React Quill 2.0 |
-| **Backend Runtime** | Node.js (v18+ recommended), Express.js 4.19 |
-| **Database & ODM** | MongoDB Atlas, Mongoose 8.x |
-| **Security & Auth** | JSON Web Tokens (JWT), Bcrypt.js, CORS |
-| **External AI & Cloud** | Google Gemini API, EmailJS REST API |
-
----
-
-## 📂 Project Structure
-
-```
+```plaintext
 safeExam.Ai/
-├── Agent-ELI/                # Standalone AI weights & YOLO model assets
-│   ├── calculator.pt
-│   ├── COCOv11.onnx
-│   ├── COCOv11.pt
-│   └── headphone.pt
-├── backend/                  # Node.js & Express RESTful API Server
-│   ├── src/
-│   │   ├── config/           # MongoDB connection & system configurations
-│   │   ├── controllers/      # admin, teacher, student, event, exam logic
-│   │   ├── middleware/       # JWT auth, role validation (authMiddleware.js)
-│   │   ├── models/           # Mongoose schemas (Exam, Student, ProctoringLog, etc.)
-│   │   ├── routes/           # Express endpoint definitions
-│   │   ├── utils/            # EmailJS sender, helpers
-│   │   └── index.js          # Express entry point & cron task worker
+├── .gitignore
+├── ai.txt                          # Comprehensive master project guide & changelog
+├── dummy_code.txt                  # System audit and dead code removal tracker
+├── README.md                       # Master documentation & architecture guide
+├── run_servers.bat                 # One-click Windows batch server launcher
+├── run.bat                         # Quick shortcut launcher
+├── stop_servers.bat                # One-click server termination utility
+│
+├── backend/                        # Node.js & Express REST API Server
 │   ├── package.json
-│   └── .env
-├── Diagram/                  # High-resolution architectural models & diagrams
-│   ├── 01_System_Architecture_Diagram.png (.svg, .mmd)
-│   ├── 02_Use_Case_Diagram.png (.svg, .mmd)
-│   ├── 03_System_Workflow_Activity_Diagram.png (.svg, .mmd)
-│   ├── 04_Database_ER_Diagram.png (.svg, .mmd)
-│   ├── 05_Proctoring_Violation_Decision_Flowchart.png (.svg, .mmd)
-│   ├── 06_Network_Hold_and_Failure_Sequence_Diagram.png (.svg, .mmd)
-│   ├── index.html            # Interactive diagram viewer
-│   └── README.md
-├── frontend/                 # React 18 SPA (Vite + Tailwind CSS)
 │   ├── src/
-│   │   ├── api/              # Axios configuration & interceptors
-│   │   ├── assets/           # Logos, icons, and illustrations
-│   │   ├── components/       # Modal, Navbar, TopMenu, WelcomeHeader, etc.
-│   │   ├── pages/            # AdminDashboard, TeacherDashboard, StudentDashboard,
-│   │   │                     # ExamInterface, EventsManager, StudentEvents, etc.
-│   │   ├── App.jsx           # Main routing configuration
-│   │   └── main.jsx          # React DOM entry
-│   ├── package.json
-│   ├── tailwind.config.js
-│   ├── vite.config.js
-│   └── .env
-├── ai.txt                    # Project master documentation & revision log
-└── README.md                 # Project README
+│   │   ├── index.js                # Server entry point & Express bootstrap
+│   │   ├── config/
+│   │   │   └── db.js               # MongoDB Mongoose connection
+│   │   ├── controllers/
+│   │   │   ├── adminController.js   # Admin metrics & bulk deletion APIs
+│   │   │   ├── authController.js    # JWT authentication & password reset
+│   │   │   ├── eventController.js   # Events management & registration
+│   │   │   ├── proctorController.js # Proctoring violation logging
+│   │   │   ├── studentController.js # Student exams, scoring & answer sheets
+│   │   │   └── teacherController.js # Exam authoring & manual live toggle
+│   │   ├── middleware/
+│   │   │   └── authMiddleware.js    # JWT verification & role gatekeeper
+│   │   ├── models/                  # Mongoose Schema Definitions
+│   │   │   ├── Admin.js
+│   │   │   ├── Event.js
+│   │   │   ├── EventRegistration.js
+│   │   │   ├── Exam.js
+│   │   │   ├── ExamQuestion.js
+│   │   │   ├── ProctoringLog.js
+│   │   │   ├── Student.js
+│   │   │   ├── StudentAnswer.js
+│   │   │   ├── StudentExam.js
+│   │   │   └── Teacher.js
+│   │   └── routes/                  # Express Router Modules
+│   │       ├── adminRoutes.js
+│   │       ├── authRoutes.js
+│   │       ├── eventRoutes.js
+│   │       ├── proctorRoutes.js
+│   │       ├── studentRoutes.js
+│   │       └── teacherRoutes.js
+│   └── uploads/                     # Static file upload directory
+│
+└── frontend/                       # Vite + React 18 Single Page Application
+    ├── package.json
+    ├── vite.config.js
+    ├── tailwind.config.js
+    └── src/
+        ├── App.jsx                 # Route definitions & AlertProvider wrapper
+        ├── main.jsx                # Application root mounting
+        ├── api/
+        │   └── axiosConfig.js      # Axios instance with interceptors
+        ├── context/
+        │   └── AlertContext.jsx    # Centralized custom modal dialog system
+        ├── components/
+        │   ├── Modal.jsx           # Reusable UI modal
+        │   └── TopMenu.jsx         # Navigation header
+        └── pages/
+            ├── AdminDashboard.jsx  # Admin portal & bulk operations
+            ├── EventsManager.jsx   # Event management & attendee logs
+            ├── ExamInterface.jsx   # Proctoring interface with TF.js COCO-SSD
+            ├── Login.jsx           # Unified multi-role authentication
+            ├── Register.jsx        # Student self-registration with OTP
+            ├── StudentDashboard.jsx# Student exam portal & score analytics
+            ├── StudentEvents.jsx   # Dual-tab community events & registration
+            ├── SubjectInsights.jsx # Analytical subject metrics
+            ├── TeacherDashboard.jsx# Exam creation & live proctoring dashboard
+            └── TeacherProctoring.jsx# Dedicated live exam proctoring grid
 ```
 
 ---
 
-## ⚡ Quick Start & Installation
+## 🚀 Setup & Installation Guide
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18.x or higher)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- [MongoDB Atlas](https://www.mongodb.com/) cluster or local MongoDB instance
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
+- **MongoDB**: Local MongoDB instance or MongoDB Atlas URI
 
----
-
-### Step 1: Clone the Repository
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/mehedi-11/safeExam.Ai.git
+git clone https://github.com/MehediHasan9339/safeExam.Ai.git
 cd safeExam.Ai
 ```
 
----
+### 2. Environment Configuration
+Create a `.env` file inside the `backend/` directory:
+```env
+PORT=5000
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/safeexam?retryWrites=true&w=majority
+JWT_SECRET=your_super_secret_jwt_key_here
+```
 
-### Step 2: Backend Setup
-1. Navigate into the backend directory and install dependencies:
+### 3. Quick Start (Windows — 1-Click Launch)
+Simply double-click **`run_servers.bat`** (or **`run.bat`**) in the root directory.
+
+It will automatically:
+- Start the Backend Server on `http://localhost:5000`
+- Start the Frontend Vite Server on `http://localhost:5173`
+- Open your default browser directly to the application
+
+To stop all servers at once, double-click **`stop_servers.bat`**.
+
+### 4. Manual Start (Cross-Platform)
+
+#### Backend:
 ```bash
 cd backend
 npm install
-```
-
-2. Create a `.env` file in the `backend/` folder:
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/safeexam?retryWrites=true&w=majority
-JWT_SECRET=your_super_secret_jwt_key_here
-GEMINI_API_KEY=your_google_gemini_api_key_here
-```
-
-3. Start the backend server:
-```bash
 npm start
-# Server runs on http://localhost:5000
 ```
 
----
-
-### Step 3: Frontend Setup
-1. Open a new terminal, navigate into the frontend directory, and install dependencies:
+#### Frontend:
 ```bash
 cd frontend
 npm install
-```
-
-2. Create a `.env` file in the `frontend/` folder:
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-3. Launch the Vite development server:
-```bash
 npm run dev
-# Application accessible at http://localhost:5173
 ```
 
 ---
 
-### Step 4: Build for Production
-To generate minified, production-ready frontend bundles:
-```bash
-cd frontend
-npm run build
-```
+## 👨‍💻 Engineering & Development Credits
+
+Developed with ❤️ as the Final Capstone Project for the Department of Computer Science & Engineering, **Primeasia University**:
+
+- **MD Mehedi Hasan** — ID: `232004048`
+- **MST Onamika Jannat Ara** — ID: `232005048`
 
 ---
 
-## 🔒 Security & Privacy Commitments
-
-- **Zero Face Storage**: SafeExam.AI never uploads or persists raw webcam photos or continuous video feeds to cloud storage. Only numeric incident event records are captured.
-- **Stateless Authorization**: Passwords are encrypted using one-way cryptographic hashing (`bcryptjs` with salt factor 10). Session tokens expire automatically.
-- **Input Sanitization**: Database inputs and queries are strictly validated against injection via Mongoose ODM schemas.
-
----
-
-## 👥 Authors & Academic Credits
-
-Developed as a Final Year Capstone Project by:
-
-- **MD Mehedi Hasan** (Student ID: `232004048`) — [GitHub Profile](https://github.com/mehedi-11)
-- **MST Onamika Jannat Ara** (Student ID: `232005048`)
-
----
-
-## 📜 License & Citation
-
-This project is licensed under the **MIT License**. Feel free to use, modify, and distribute for academic and development purposes.
-
-```
-SafeExam.AI: AI-Powered Online Examination & Intelligent Proctoring System.
-Copyright (c) 2026 MD Mehedi Hasan & MST Onamika Jannat Ara.
-```
-
-<div align="center">
-  <sub>Built with ❤️ for academic integrity and fair examination.</sub>
-</div>
+## 📄 License
+This project is proprietary and developed for academic and institutional evaluation. All rights reserved.

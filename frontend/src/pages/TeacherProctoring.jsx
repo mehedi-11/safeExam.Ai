@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import { 
-  ArrowLeft, Camera, RefreshCw, ShieldAlert, Users, 
-  CheckCircle, Clock, LogIn, FileText, Layers, X, Sparkles,
-  WifiOff, Wifi
+  ArrowLeft, RefreshCw, ShieldAlert, Users, 
+  CheckCircle, Clock, LogIn, FileText, Layers, X,
+  WifiOff
 } from "lucide-react";
 
 export default function TeacherProctoring() {

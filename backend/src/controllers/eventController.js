@@ -59,27 +59,6 @@ exports.getEvents = async (req, res) => {
   }
 };
 
-exports.makeEventLive = async (req, res) => {
-  try {
-    if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
-    
-    if (req.user.role === 'teacher' && event.created_by.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Unauthorized: You can only manage your own events' });
-    }
-
-    event.status = 'live';
-    await event.save();
-    return res.json({ message: 'Event is now live', event });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error making event live' });
-  }
-};
-
 exports.getEventDetails = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -206,14 +185,13 @@ exports.deleteEvent = async (req, res) => {
 
     // Optional: Delete associated registrations? 
     await EventRegistration.deleteMany({ event_id: req.params.id });
-    await Exam.updateMany({ event_id: req.params.id }, { $unset: { event_id: "" } });
+
     return res.json({ message: 'Event deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error deleting event' });
   }
 };
-
 
 
 exports.bulkDeleteEvents = async (req, res) => {
@@ -229,74 +207,31 @@ exports.bulkDeleteEvents = async (req, res) => {
 
     const validIds = eventIds.filter(id => mongoose.Types.ObjectId.isValid(id));
     if (validIds.length === 0) {
-      return res.status(400).json({ message: 'No valid event IDs provided' });
+      return res.status(400).json({ message: 'Invalid event IDs provided' });
     }
 
-    let filter = { _id: { $in: validIds } };
+    const query = { _id: { $in: validIds } };
     if (req.user.role === 'teacher') {
-      filter.created_by = req.user.id;
+      query.created_by = req.user.id;
     }
 
-    const eventsToDelete = await Event.find(filter);
-    const deletableIds = eventsToDelete.map(e => e._id);
+    const eventsToDelete = await Event.find(query).select('_id');
+    const idsToDelete = eventsToDelete.map(e => e._id);
 
-    if (deletableIds.length === 0) {
+    if (idsToDelete.length === 0) {
       return res.status(404).json({ message: 'No authorized events found to delete' });
     }
 
-    const result = await Event.deleteMany({ _id: { $in: deletableIds } });
-    await EventRegistration.deleteMany({ event_id: { $in: deletableIds } });
-    await Exam.updateMany({ event_id: { $in: deletableIds } }, { $unset: { event_id: "" } });
+    const result = await Event.deleteMany({ _id: { $in: idsToDelete } });
+    await EventRegistration.deleteMany({ event_id: { $in: idsToDelete } });
 
-    return res.json({
-      message: `${result.deletedCount} event(s) deleted successfully`,
-      deletedCount: result.deletedCount
+    return res.json({ 
+      message: `${result.deletedCount} event(s) and associated registrations deleted successfully`, 
+      deletedCount: result.deletedCount 
     });
   } catch (err) {
     console.error('Error bulk deleting events:', err);
-    return res.status(500).json({ message: 'Server error deleting events' });
-  }
-};
-
-exports.getEventStats = async (req, res) => {
-  try {
-    let matchQuery = {};
-    if (req.user && req.user.role === 'teacher') {
-      matchQuery = { created_by: new mongoose.Types.ObjectId(req.user.id) };
-    }
-
-    const totalEvents = await Event.countDocuments(matchQuery);
-    const liveEvents = await Event.countDocuments({ ...matchQuery, status: 'live' });
-    const closedEvents = await Event.countDocuments({ ...matchQuery, status: 'closed' });
-
-    const events = await Event.find(matchQuery).sort({ created_at: -1 }).lean();
-    const eventIds = events.map(e => e._id);
-
-    const totalRegistrations = await EventRegistration.countDocuments({ event_id: { $in: eventIds } });
-    const totalAttended = await EventRegistration.countDocuments({ event_id: { $in: eventIds }, status: 'attended' });
-
-    const eventsWithStats = await Promise.all(events.map(async (evt) => {
-      const regCount = await EventRegistration.countDocuments({ event_id: evt._id });
-      const attendedCount = await EventRegistration.countDocuments({ event_id: evt._id, status: 'attended' });
-      return {
-        ...evt,
-        id: evt._id,
-        registration_count: regCount,
-        attended_count: attendedCount
-      };
-    }));
-
-    return res.json({
-      totalEvents,
-      liveEvents,
-      closedEvents,
-      totalRegistrations,
-      totalAttended,
-      events: eventsWithStats
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error fetching event statistics' });
+    return res.status(500).json({ message: 'Server error bulk deleting events' });
   }
 };
 

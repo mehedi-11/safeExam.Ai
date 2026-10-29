@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api, { API_BASE_URL } from '../api/axiosConfig';
 import { 
-  Camera, ShieldAlert, AlertTriangle, Play, HelpCircle, 
-  CheckSquare, ArrowLeft, Clock, ShieldCheck, Terminal,
-  Smartphone, EyeOff, CheckCircle, X, WifiOff, Wifi, RefreshCw
+  Camera, ShieldAlert, AlertTriangle, 
+  CheckSquare, ArrowLeft, Clock, Terminal,
+  Smartphone, EyeOff, CheckCircle, X, WifiOff, RefreshCw
 } from 'lucide-react';
 import '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
@@ -12,6 +12,7 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 export default function ExamInterface() {
   const { examId } = useParams();
   const navigate = useNavigate();
+  const { showConfirm } = useAlert();
   const location = useLocation();
 
   // Retrieve password from state, sessionStorage, or localStorage
@@ -26,7 +27,6 @@ export default function ExamInterface() {
   const modelRef = useRef(null);
   const suspiciousTimersRef = useRef({});
   const lastSeenRef = useRef({});
-  const isOutOfScreenRef = useRef(false);
 
   // Exam state
   const [questions, setQuestions] = useState([]);
@@ -50,7 +50,6 @@ export default function ExamInterface() {
   const [limitReached, setLimitReached] = useState(false);
   const [showLogFeed, setShowLogFeed] = useState([]); // Local log stream on exam screen
   const [liveDetections, setLiveDetections] = useState([]); // Current frame detections in real-time
-  const [processedFrame, setProcessedFrame] = useState(null); // Annotated image from backend
   const [showRulesModal, setShowRulesModal] = useState(false);
   
   // Warning Modals & Countdown States
@@ -105,7 +104,7 @@ export default function ExamInterface() {
         reason: 'Auto-Submitted: Student reloaded the exam browser page',
         isAuto: true
       }).finally(() => {
-        customAlert('Browser reload detected! Your exam has been auto-submitted as per rules.', 'Exam Terminated', 'error');
+        alert('Browser reload detected! Your exam has been auto-submitted as per rules.');
         navigate('/dashboard/student');
       });
       return;
@@ -823,7 +822,7 @@ export default function ExamInterface() {
       // Handle locking on the fly
       if (res.data.status === 'completed' && !hasSubmittedRef.current) {
         stopWebcam();
-        customAlert('A critical violation was detected! Your exam has been auto-submitted.', 'Critical Violation', 'error');
+        alert('A critical violation was detected! Your exam has been auto-submitted.');
         navigate('/dashboard/student');
       }
     } catch (err) {
@@ -846,10 +845,10 @@ export default function ExamInterface() {
         reason: submissionReason,
         isAuto
       });
-      customAlert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted successfully.', isAuto ? 'Exam Finalized' : 'Exam Submitted', isAuto ? 'warning' : 'success');
+      alert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted successfully.');
       navigate('/dashboard/student');
     } catch (err) {
-      customAlert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted: ' + (err.response?.data?.message || 'Done'), isAuto ? 'Exam Finalized' : 'Exam Submitted', isAuto ? 'warning' : 'success');
+      alert(isAuto ? `Exam auto-submitted: ${submissionReason}` : 'Exam submitted: ' + (err.response?.data?.message || 'Done'));
       navigate('/dashboard/student');
     }
   };
@@ -981,10 +980,16 @@ export default function ExamInterface() {
             <div>
               <button 
                 onClick={async () => { 
-                  const confirmed = await customConfirm('Abandon exam? Your progress will not be submitted.', { title: 'Abandon Exam', confirmText: 'Abandon', type: 'danger' }); if (confirmed) {
-                    stopWebcam();
-                    navigate('/dashboard/student');
-                  }
+                  const confirmed = await showConfirm({
+                      title: "Abandon Exam",
+                      message: "Are you sure you want to exit? Your progress will not be submitted and this attempt will be closed.",
+                      confirmText: "Exit Exam",
+                      isDanger: true
+                    });
+                    if (confirmed) {
+                      stopWebcam();
+                      navigate('/dashboard/student');
+                    }
                 }} 
                 className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-tomato-400 mb-2 smooth-transition"
               >

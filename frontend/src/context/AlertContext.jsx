@@ -1,208 +1,217 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { CheckCircle2, AlertTriangle, AlertCircle, Info, HelpCircle, X } from 'lucide-react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { CheckCircle, AlertTriangle, XCircle, Info, Trash2, X } from 'lucide-react';
 
 const AlertContext = createContext(null);
-
-let globalShowAlert = null;
-let globalShowConfirm = null;
-
-export const customAlert = (message, title = 'Notification', type = 'info') => {
-  if (globalShowAlert) {
-    return globalShowAlert(message, title, type);
-  } else {
-    console.warn('AlertProvider not mounted yet:', message);
-  }
-};
-
-export const customConfirm = (message, options = {}) => {
-  if (globalShowConfirm) {
-    return globalShowConfirm(message, options);
-  }
-  return Promise.resolve(false);
-};
 
 export const AlertProvider = ({ children }) => {
   const [modal, setModal] = useState({
     isOpen: false,
-    type: 'info', // 'success' | 'error' | 'warning' | 'info' | 'danger'
     title: '',
     message: '',
+    type: 'info', // 'success' | 'error' | 'warning' | 'info' | 'confirm'
     confirmText: 'OK',
     cancelText: 'Cancel',
-    isConfirm: false,
+    isDanger: false,
+    resolve: null
   });
 
-  const resolverRef = useRef(null);
-
-  const closeModal = useCallback(() => {
-    setModal((prev) => ({ ...prev, isOpen: false }));
-    if (resolverRef.current) {
-      resolverRef.current(false);
-      resolverRef.current = null;
-    }
-  }, []);
-
-  const handleConfirm = useCallback(() => {
-    setModal((prev) => ({ ...prev, isOpen: false }));
-    if (resolverRef.current) {
-      resolverRef.current(true);
-      resolverRef.current = null;
-    }
-  }, []);
-
-  const showAlert = useCallback((message, title = 'Notification', type = 'info') => {
-    let detectedType = type;
-    let detectedTitle = title;
-    const msgStr = typeof message === 'string' ? message : JSON.stringify(message);
-
-    if (type === 'info') {
-      if (/success|deleted|updated|added|created|saved|published/i.test(msgStr)) {
-        detectedType = 'success';
-        if (title === 'Notification') detectedTitle = 'Success';
-      } else if (/error|failed|cannot|invalid|wrong|blocked|denied/i.test(msgStr)) {
-        detectedType = 'error';
-        if (title === 'Notification') detectedTitle = 'Notice';
+  // Close and cleanup
+  const handleClose = useCallback((result = false) => {
+    setModal(prev => {
+      if (prev.resolve) {
+        prev.resolve(result);
       }
-    }
-
-    setModal({
-      isOpen: true,
-      type: detectedType,
-      title: detectedTitle,
-      message: msgStr,
-      confirmText: 'OK',
-      cancelText: '',
-      isConfirm: false,
+      return { ...prev, isOpen: false, resolve: null };
     });
   }, []);
 
-  const showConfirm = useCallback((message, options = {}) => {
-    const {
-      title = 'Please Confirm',
-      confirmText = 'Confirm',
-      cancelText = 'Cancel',
-      type = 'warning'
-    } = typeof options === 'string' ? { title: options } : options;
+  // Keyboard shortcut listener (ESC to cancel, ENTER to confirm)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!modal.isOpen) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose(false);
+      } else if (e.key === 'Enter' && modal.type !== 'confirm') {
+        e.preventDefault();
+        handleClose(true);
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modal.isOpen, modal.type, handleClose]);
+
+  // Show Alert (info, success, error, warning)
+  const showAlert = useCallback(({ title, message, type = 'info', confirmText = 'OK' }) => {
     return new Promise((resolve) => {
-      resolverRef.current = resolve;
       setModal({
         isOpen: true,
+        title: title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Notice'),
+        message: message || '',
         type,
-        title,
-        message: String(message || ''),
         confirmText,
-        cancelText,
-        isConfirm: true,
+        cancelText: '',
+        isDanger: false,
+        resolve
       });
     });
   }, []);
 
-  useEffect(() => {
-    globalShowAlert = showAlert;
-    globalShowConfirm = showConfirm;
+  // Quick helper methods
+  const showSuccess = useCallback((message, title = 'Success') => showAlert({ title, message, type: 'success' }), [showAlert]);
+  const showError = useCallback((message, title = 'Error') => showAlert({ title, message, type: 'error' }), [showAlert]);
+  const showWarning = useCallback((message, title = 'Warning') => showAlert({ title, message, type: 'warning' }), [showAlert]);
+  const showInfo = useCallback((message, title = 'Notice') => showAlert({ title, message, type: 'info' }), [showAlert]);
 
-    // Intercept native browser alert
-    const nativeAlert = window.alert;
+  // Show Confirmation Modal (e.g., delete confirmation)
+  const showConfirm = useCallback(({
+    title = 'Confirm Action',
+    message = 'Are you sure you want to proceed?',
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    isDanger = false
+  }) => {
+    return new Promise((resolve) => {
+      setModal({
+        isOpen: true,
+        title,
+        message,
+        type: 'confirm',
+        confirmText,
+        cancelText,
+        isDanger,
+        resolve
+      });
+    });
+  }, []);
+
+  // Global window.alert and window.customConfirm interception
+  useEffect(() => {
+    const originalAlert = window.alert;
+
     window.alert = (msg) => {
-      showAlert(msg);
+      showAlert({
+        title: 'System Notice',
+        message: String(msg || ''),
+        type: 'info'
+      });
+    };
+
+    window.customConfirm = (message, title = 'Confirm Action', isDanger = true) => {
+      return showConfirm({
+        title,
+        message,
+        confirmText: isDanger ? 'Delete' : 'Confirm',
+        cancelText: 'Cancel',
+        isDanger
+      });
     };
 
     return () => {
-      window.alert = nativeAlert;
-      globalShowAlert = null;
-      globalShowConfirm = null;
+      window.alert = originalAlert;
     };
   }, [showAlert, showConfirm]);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && modal.isOpen) {
-        closeModal();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [modal.isOpen, closeModal]);
+  // Get icon and color theme based on type
+  const getTheme = () => {
+    switch (modal.type) {
+      case 'success':
+        return {
+          icon: <CheckCircle className="w-8 h-8 text-emerald-600" />,
+          bg: 'bg-emerald-50 border-emerald-100',
+          titleColor: 'text-emerald-950',
+          confirmBtn: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
+        };
+      case 'error':
+        return {
+          icon: <XCircle className="w-8 h-8 text-rose-600" />,
+          bg: 'bg-rose-50 border-rose-100',
+          titleColor: 'text-rose-950',
+          confirmBtn: 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-500/20'
+        };
+      case 'warning':
+        return {
+          icon: <AlertTriangle className="w-8 h-8 text-amber-600" />,
+          bg: 'bg-amber-50 border-amber-100',
+          titleColor: 'text-amber-950',
+          confirmBtn: 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/20'
+        };
+      case 'confirm':
+        return {
+          icon: modal.isDanger ? <Trash2 className="w-8 h-8 text-rose-600" /> : <AlertTriangle className="w-8 h-8 text-amber-600" />,
+          bg: modal.isDanger ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100',
+          titleColor: modal.isDanger ? 'text-rose-950' : 'text-gray-900',
+          confirmBtn: modal.isDanger ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-500/25' : 'bg-gray-900 hover:bg-black text-white'
+        };
+      case 'info':
+      default:
+        return {
+          icon: <Info className="w-8 h-8 text-indigo-600" />,
+          bg: 'bg-indigo-50 border-indigo-100',
+          titleColor: 'text-gray-900',
+          confirmBtn: 'bg-gray-900 hover:bg-black text-white shadow-gray-900/20'
+        };
+    }
+  };
+
+  const theme = getTheme();
 
   return (
-    <AlertContext.Provider
-      value={{
-        showAlert,
-        showConfirm,
-        showSuccess: (m, t) => showAlert(m, t || 'Success', 'success'),
-        showError: (m, t) => showAlert(m, t || 'Error', 'error'),
-        showWarning: (m, t) => showAlert(m, t || 'Warning', 'warning'),
-      }}
-    >
+    <AlertContext.Provider value={{ showAlert, showSuccess, showError, showWarning, showInfo, showConfirm }}>
       {children}
 
-      {/* Modern Pop-up Modal */}
+      {/* Modern Backdrop & Popup Modal */}
       {modal.isOpen && (
         <div 
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-          onClick={modal.isConfirm ? closeModal : closeModal}
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm transition-opacity duration-200 animate-fade-in"
+          onClick={() => handleClose(false)}
         >
           <div 
-            className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden animate-scale-up"
+            className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-gray-100 transform transition-all scale-100 animate-scale-up relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Body */}
-            <div className="p-6">
-              <div className="flex items-start gap-4">
-                {/* Icon Container */}
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${
-                  modal.type === 'success' ? 'bg-emerald-100 text-emerald-600' :
-                  modal.type === 'error' ? 'bg-rose-100 text-rose-600' :
-                  modal.type === 'danger' ? 'bg-red-100 text-red-600' :
-                  modal.type === 'warning' ? 'bg-amber-100 text-amber-600' :
-                  'bg-indigo-100 text-indigo-600'
-                }`}>
-                  {modal.type === 'success' && <CheckCircle2 size={26} strokeWidth={2.2} />}
-                  {(modal.type === 'error' || modal.type === 'danger') && <AlertTriangle size={26} strokeWidth={2.2} />}
-                  {modal.type === 'warning' && (modal.isConfirm ? <HelpCircle size={26} strokeWidth={2.2} /> : <AlertCircle size={26} strokeWidth={2.2} />)}
-                  {modal.type === 'info' && <Info size={26} strokeWidth={2.2} />}
-                </div>
+            {/* Close Cross Button */}
+            <button
+              onClick={() => handleClose(false)}
+              className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+              title="Close (Esc)"
+            >
+              <X size={18} />
+            </button>
 
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-base font-bold text-gray-900 tracking-tight">
-                      {modal.title}
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-600 leading-relaxed whitespace-pre-line font-normal">
-                    {modal.message}
-                  </p>
-                </div>
+            {/* Icon Header */}
+            <div className="flex flex-col items-center text-center">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border mb-4 shadow-sm ${theme.bg}`}>
+                {theme.icon}
+              </div>
+
+              {/* Title */}
+              <h3 className={`text-xl font-bold tracking-tight ${theme.titleColor}`}>
+                {modal.title}
+              </h3>
+
+              {/* Message */}
+              <div className="text-sm text-gray-600 mt-2.5 leading-relaxed font-normal whitespace-pre-line max-h-60 overflow-y-auto px-1">
+                {modal.message}
               </div>
             </div>
 
-            {/* Modal Actions Footer */}
-            <div className="bg-gray-50/90 px-6 py-3.5 border-t border-gray-100 flex items-center justify-end gap-2.5">
-              {modal.isConfirm ? (
+            {/* Action Buttons */}
+            <div className="mt-6 flex items-center gap-3">
+              {modal.type === 'confirm' ? (
                 <>
                   <button
                     type="button"
-                    onClick={closeModal}
-                    className="px-4 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl transition shadow-sm cursor-pointer"
+                    onClick={() => handleClose(false)}
+                    className="flex-1 py-2.5 px-4 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition duration-150 cursor-pointer"
                   >
                     {modal.cancelText || 'Cancel'}
                   </button>
                   <button
                     type="button"
-                    onClick={handleConfirm}
-                    className={`px-4.5 py-2 text-xs font-bold text-white rounded-xl transition shadow-sm cursor-pointer ${
-                      modal.type === 'danger' || modal.type === 'error' 
-                        ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20' 
-                        : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20'
-                    }`}
+                    onClick={() => handleClose(true)}
+                    className={`flex-1 py-2.5 px-4 text-sm font-semibold rounded-xl shadow-md transition duration-150 cursor-pointer ${theme.confirmBtn}`}
                   >
                     {modal.confirmText || 'Confirm'}
                   </button>
@@ -210,10 +219,10 @@ export const AlertProvider = ({ children }) => {
               ) : (
                 <button
                   type="button"
-                  onClick={closeModal}
-                  className="px-5 py-2 text-xs font-bold text-white bg-gray-900 hover:bg-black rounded-xl transition shadow-sm cursor-pointer"
+                  onClick={() => handleClose(true)}
+                  className={`w-full py-2.5 px-4 text-sm font-semibold rounded-xl shadow-md transition duration-150 cursor-pointer ${theme.confirmBtn}`}
                 >
-                  {modal.confirmText || 'OK'}
+                  {modal.confirmText || 'Got it'}
                 </button>
               )}
             </div>
@@ -227,16 +236,15 @@ export const AlertProvider = ({ children }) => {
 export const useAlert = () => {
   const context = useContext(AlertContext);
   if (!context) {
+    // Graceful fallback if used outside Provider
     return {
-      showAlert: customAlert,
-      showConfirm: customConfirm,
-      showSuccess: (m, t) => customAlert(m, t, 'success'),
-      showError: (m, t) => customAlert(m, t, 'error'),
-      showWarning: (m, t) => customAlert(m, t, 'warning'),
+      showAlert: ({ message }) => { window.alert(message); return Promise.resolve(); },
+      showSuccess: (msg) => { window.alert(msg); return Promise.resolve(); },
+      showError: (msg) => { window.alert(msg); return Promise.resolve(); },
+      showWarning: (msg) => { window.alert(msg); return Promise.resolve(); },
+      showInfo: (msg) => { window.alert(msg); return Promise.resolve(); },
+      showConfirm: ({ message }) => Promise.resolve(window.confirm(message))
     };
   }
   return context;
 };
-
-export default AlertContext;
-

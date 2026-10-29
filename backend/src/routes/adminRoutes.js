@@ -46,8 +46,6 @@ router.get('/student-exams/:studentId', adminController.getStudentExamsDetails);
 
 
 
-router.get('/settings', adminController.getSettings);
-router.put('/settings', adminController.updateSettings);
 router.get('/analytics', adminController.getAnalytics);
 
 module.exports = router;

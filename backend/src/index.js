@@ -76,27 +76,6 @@ app.listen(PORT, () => {
       if (stoppedCount > 0) {
         console.log(`[Auto-Stop] Stopped ${stoppedCount} exam(s) exceeding scheduled duration.`);
       }
-
-      // 2. Auto-Start scheduled offline exams within their active window
-      const offlineExams = await Exam.find({ is_live: false, exam_date: { $exists: true, $ne: null } });
-      let startedCount = 0;
-      for (const exam of offlineExams) {
-        const examStartTime = new Date(exam.exam_date).getTime();
-        if (isNaN(examStartTime)) continue;
-
-        const duration = exam.duration_minutes || 60;
-        const examEndTime = new Date(examStartTime + (duration + 5) * 60000);
-
-        if (now >= new Date(examStartTime) && now < examEndTime) {
-          exam.is_live = true;
-          await exam.save();
-          startedCount++;
-        }
-      }
-      if (startedCount > 0) {
-        console.log(`[Auto-Start] Started ${startedCount} scheduled exam(s) within active window.`);
-      }
-
     } catch (err) {
       console.error('[Auto-Job] Error checking exams:', err.message);
     }

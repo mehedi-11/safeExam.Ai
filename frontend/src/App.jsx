@@ -1,3 +1,4 @@
+import { AlertProvider } from './context/AlertContext';
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
@@ -27,7 +28,8 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 
 function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <AlertProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/login/student" replace />} />
@@ -118,6 +120,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </AlertProvider>
   );
 }
 

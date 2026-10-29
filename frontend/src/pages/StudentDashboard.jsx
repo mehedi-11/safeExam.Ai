@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WelcomeHeader from "../components/WelcomeHeader";
 import TopMenu from "../components/TopMenu";
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import api, { API_BASE_URL } from '../api/axiosConfig';
+import api from '../api/axiosConfig';
 import StudentEvents from './StudentEvents';
 import SubjectInsights from './SubjectInsights';
 import {
@@ -219,6 +219,19 @@ export default function StudentDashboard({ defaultTab }) {
   };
 
 
+
+  const formatScore = (score, total) => {
+    if (score === null || score === undefined) return '--';
+    const s = Number(score);
+    const t = Number(total);
+    if (isNaN(s)) return String(score);
+    const formattedScore = (s >= 0 && s < 10) ? `0${s}` : `${s}`;
+    if (!isNaN(t) && t > 0) {
+      const formattedTotal = (t >= 0 && t < 10) ? `0${t}` : `${t}`;
+      return `${formattedScore}/${formattedTotal}`;
+    }
+    return formattedScore;
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row">
@@ -537,8 +550,8 @@ export default function StudentDashboard({ defaultTab }) {
                               </div>
                               <p className="text-[11px] text-gray-500 mt-0.5">{new Date(exam.finished_at).toLocaleDateString()}</p>
                             </div>
-                            <div className="shrink-0 bg-tomato-50 text-tomato-700 font-black text-sm px-3 py-1.5 rounded-lg border border-tomato-200">
-                              {exam.score}
+                            <div className="shrink-0 bg-tomato-50 text-tomato-700 font-black text-sm px-3 py-1.5 rounded-lg border border-tomato-200 font-mono">
+                              {formatScore(exam.score, exam.total_marks)}
                             </div>
                           </div>
                         ))}
@@ -606,7 +619,6 @@ export default function StudentDashboard({ defaultTab }) {
 
           {/* TAB: EXAMS */}
           {activeTab === 'exams' && (() => {
-            const now = new Date();
             const filteredExams = exams.filter(exam => {
               const q = searchQuery.toLowerCase();
               const matchesSearch = (
@@ -721,7 +733,7 @@ export default function StudentDashboard({ defaultTab }) {
                               </td>
                               <td className="px-6 py-4">
                                 {exam.exam_status === 'completed' ? (
-                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-2.5 py-0.5 rounded text-[10px]">Score: {exam.score}</span>
+                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-2.5 py-0.5 rounded text-[10px] font-mono">Score: {formatScore(exam.score, exam.total_marks)}</span>
                                 ) : isBlocked ? (
                                   <span className="bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded text-[10px] flex items-center w-fit gap-1 animate-pulse">
                                     <ShieldAlert size={12} /> Locked
@@ -752,7 +764,6 @@ export default function StudentDashboard({ defaultTab }) {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredExams.map(exam => {
-                      const isUpcoming = new Date(exam.exam_date) > new Date();
                       const isFinished = exam.exam_status === 'completed' && (exam.attempts ?? 0) >= (exam.max_attempts || 1);
                       const isBlocked = exam.block_until && new Date(exam.block_until) > new Date();
 
@@ -932,8 +943,8 @@ export default function StudentDashboard({ defaultTab }) {
                               </td>
                               <td className="px-6 py-4 text-center">
                                 {isPublished ? (
-                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs shadow-md shadow-gray-200/50">
-                                    {exam.score}
+                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs font-bold shadow-md shadow-gray-200/50 font-mono">
+                                    {formatScore(exam.score, exam.total_marks)}
                                   </span>
                                 ) : (
                                   <span className="bg-orange-50 text-orange-600 border border-orange-200 px-2 py-1 rounded text-[10px]">

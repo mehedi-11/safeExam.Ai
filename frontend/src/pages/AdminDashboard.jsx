@@ -3,6 +3,7 @@ import WelcomeHeader from "../components/WelcomeHeader";
 import TopMenu from "../components/TopMenu";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
+import { useAlert } from "../context/AlertContext";
 import {
   Users,
   UserCheck,
@@ -36,7 +37,6 @@ import {
   Clock,
 } from "lucide-react";
 import Modal from "../components/Modal";
-import { customAlert, customConfirm } from "../context/AlertContext";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -144,9 +144,10 @@ export default function AdminDashboard() {
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [isBulkDeletingStudents, setIsBulkDeletingStudents] = useState(false);
   const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
-  const [isBulkDeletingTeachers, setIsBulkDeletingTeachers] = useState(false);
   const [selectedExamIds, setSelectedExamIds] = useState([]);
   const [isBulkDeletingExams, setIsBulkDeletingExams] = useState(false);
+  const { showConfirm, showSuccess, showError, showWarning } = useAlert();
+  const [isBulkDeletingTeachers, setIsBulkDeletingTeachers] = useState(false);
 
   // Student Exams Modal State
   const [selectedStudentForModal, setSelectedStudentForModal] = useState(null);
@@ -314,10 +315,11 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteTeacher = async (id) => {
-    const confirmed = await customConfirm("Are you sure you want to delete this teacher?", {
+    const confirmed = await showConfirm({
       title: "Delete Teacher",
-      confirmText: "Delete",
-      type: "danger"
+      message: "Are you sure you want to delete this teacher account? This will also remove access to their exams.",
+      confirmText: "Delete Teacher",
+      isDanger: true
     });
     if (!confirmed) return;
     try {
@@ -341,10 +343,11 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteStudent = async (id) => {
-    const confirmed = await customConfirm("Are you sure you want to delete this student?", {
+    const confirmed = await showConfirm({
       title: "Delete Student",
-      confirmText: "Delete",
-      type: "danger"
+      message: "Are you sure you want to delete this student account? This will remove all their submissions and registrations.",
+      confirmText: "Delete Student",
+      isDanger: true
     });
     if (!confirmed) return;
     try {
@@ -358,15 +361,13 @@ export default function AdminDashboard() {
 
   const handleBulkDeleteStudents = async () => {
     if (selectedStudentIds.length === 0) return;
-    const confirmed = await customConfirm(
-      `Are you sure you want to delete ${selectedStudentIds.length} selected student(s)? This will also delete their registrations and exam results.`,
-      {
-        title: "Bulk Delete Students",
-        confirmText: `Delete (${selectedStudentIds.length})`,
-        type: "danger"
-      }
-    );
-    if (!confirmed) return;
+    const confirmedStudents = await showConfirm({
+      title: "Delete Selected Students",
+      message: `Are you sure you want to delete ${selectedStudentIds.length} selected student(s)? This will also delete their registrations and exam results.`,
+      confirmText: `Delete (${selectedStudentIds.length}) Students`,
+      isDanger: true
+    });
+    if (!confirmedStudents) return;
 
     try {
       setIsBulkDeletingStudents(true);
@@ -383,17 +384,76 @@ export default function AdminDashboard() {
     }
   };
 
+  
+  const handleDeleteExam = async (exam) => {
+    const examId = exam.id || exam._id;
+    if (exam.is_live) {
+      showWarning("Live exams cannot be deleted while they are in progress. Please stop the exam first.", "Live Exam Protected");
+      return;
+    }
+
+    const confirmed = await showConfirm({
+      title: "Delete Exam",
+      message: `Are you sure you want to delete "${exam.title}"?\n\nThis will permanently delete the exam, its questions, student scores, answers, and proctoring logs.`,
+      confirmText: "Delete Exam",
+      isDanger: true
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const res = await api.delete(`/admin/exams/${examId}`);
+      showSuccess(res.data.message || "Exam deleted successfully");
+      setSelectedExamIds(prev => prev.filter(id => id !== examId));
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.message || "Failed to delete exam");
+    }
+  };
+
+  const handleBulkDeleteExams = async () => {
+    if (selectedExamIds.length === 0) return;
+
+    // Filter out any live exams
+    const liveSelected = allExams.filter(e => selectedExamIds.includes(e.id || e._id) && e.is_live);
+    if (liveSelected.length > 0) {
+      showWarning(`Some selected exams are currently LIVE (${liveSelected.map(e => e.title).join(", ")}). Please stop them before deleting.`, "Live Exam Protected");
+      return;
+    }
+
+    const confirmed = await showConfirm({
+      title: "Bulk Delete Exams",
+      message: `Are you sure you want to permanently delete ${selectedExamIds.length} selected exam(s)?\n\nThis will permanently purge all associated questions, student submissions, and logs.`,
+      confirmText: `Delete (${selectedExamIds.length}) Exams`,
+      isDanger: true
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setIsBulkDeletingExams(true);
+      const res = await api.post("/admin/exams/bulk-delete", {
+        examIds: selectedExamIds
+      });
+      showSuccess(res.data.message || "Selected exams deleted successfully");
+      setSelectedExamIds([]);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.message || "Failed to bulk delete exams");
+    } finally {
+      setIsBulkDeletingExams(false);
+    }
+  };
+
   const handleBulkDeleteTeachers = async () => {
     if (selectedTeacherIds.length === 0) return;
-    const confirmed = await customConfirm(
-      `Are you sure you want to delete ${selectedTeacherIds.length} selected teacher(s)?`,
-      {
-        title: "Bulk Delete Teachers",
-        confirmText: `Delete (${selectedTeacherIds.length})`,
-        type: "danger"
-      }
-    );
-    if (!confirmed) return;
+    const confirmedTeachers = await showConfirm({
+      title: "Delete Selected Teachers",
+      message: `Are you sure you want to delete ${selectedTeacherIds.length} selected teacher(s)?`,
+      confirmText: `Delete (${selectedTeacherIds.length}) Teachers`,
+      isDanger: true
+    });
+    if (!confirmedTeachers) return;
 
     try {
       setIsBulkDeletingTeachers(true);
@@ -407,71 +467,6 @@ export default function AdminDashboard() {
       setError(err.response?.data?.message || "Error bulk deleting teachers");
     } finally {
       setIsBulkDeletingTeachers(false);
-    }
-  };
-
-  const handleDeleteExam = async (exam) => {
-    if (exam.is_live) {
-      customAlert("Active LIVE exams cannot be deleted. Please make the exam inactive/not live first.", "Live Exam Active", "warning");
-      return;
-    }
-    const confirmed = await customConfirm(
-      `Are you sure you want to delete exam "${exam.title}"? This will permanently delete all associated questions, student submissions, and logs.`,
-      {
-        title: "Delete Exam",
-        confirmText: "Delete",
-        type: "danger"
-      }
-    );
-    if (!confirmed) return;
-    try {
-      const examId = exam.id || exam._id;
-      const res = await api.delete(`/admin/exams/${examId}`);
-      triggerSuccess(res.data.message || "Exam deleted successfully");
-      setSelectedExamIds((prev) => prev.filter((id) => id !== examId));
-      fetchData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Error deleting exam");
-    }
-  };
-
-  const handleBulkDeleteExams = async () => {
-    if (selectedExamIds.length === 0) return;
-
-    const liveSelected = allExams.filter(
-      (e) => selectedExamIds.includes(e.id || e._id) && e.is_live
-    );
-    if (liveSelected.length > 0) {
-      customAlert(
-        `Cannot delete: ${liveSelected.length} selected exam(s) are currently LIVE. Live exams cannot be deleted. Stop them first.`,
-        "Action Blocked",
-        "warning"
-      );
-      return;
-    }
-
-    const confirmed = await customConfirm(
-      `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently delete all associated questions, submissions, and proctoring logs.`,
-      {
-        title: "Bulk Delete Exams",
-        confirmText: `Delete (${selectedExamIds.length})`,
-        type: "danger"
-      }
-    );
-    if (!confirmed) return;
-
-    try {
-      setIsBulkDeletingExams(true);
-      const res = await api.post("/admin/exams/bulk-delete", {
-        examIds: selectedExamIds,
-      });
-      triggerSuccess(res.data.message || "Selected exams deleted successfully");
-      setSelectedExamIds([]);
-      fetchData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Error bulk deleting exams");
-    } finally {
-      setIsBulkDeletingExams(false);
     }
   };
 
@@ -1901,8 +1896,8 @@ export default function AdminDashboard() {
                           const expireTime = new Date(examDate.getTime() + durationMs);
                           const now = new Date();
 
-                          const isLive = now >= examDate && now <= expireTime;
-                          const isEnded = now > expireTime;
+                          const isLive = Boolean(exam.is_live);
+                          const isEnded = !isLive && now > expireTime;
                           const eId = exam._id || exam.id;
 
                           return (
@@ -2165,7 +2160,6 @@ export default function AdminDashboard() {
                   />
                 </div>
               </div>
-
               {/* Bulk Actions Bar for Exams */}
               {selectedExamIds.length > 0 && (
                 <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 text-xs animate-fade-in">
@@ -2174,7 +2168,6 @@ export default function AdminDashboard() {
                       {selectedExamIds.length} exam{selectedExamIds.length > 1 ? "s" : ""} selected
                     </span>
                     <button
-                      type="button"
                       onClick={() => setSelectedExamIds([])}
                       className="text-indigo-600 hover:text-indigo-800 underline text-xs ml-2 cursor-pointer"
                     >
@@ -2182,7 +2175,6 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   <button
-                    type="button"
                     onClick={handleBulkDeleteExams}
                     disabled={isBulkDeletingExams}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
@@ -2200,39 +2192,34 @@ export default function AdminDashboard() {
                   <table className="w-full text-left text-sm text-gray-500">
                     <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
                       <tr className="border-b border-gray-200">
-                        <th className="p-4 font-bold text-center w-12">
+                        <th className="px-4 py-4 w-12 text-center">
                           <input
                             type="checkbox"
-                            checked={
-                              (() => {
-                                const query = allExamsSearch.toLowerCase();
-                                const filtered = allExams.filter((exam) => {
-                                  const titleMatch = exam.title?.toLowerCase().includes(query);
-                                  const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
-                                  return titleMatch || teacherMatch;
-                                });
-                                return (
-                                  filtered.length > 0 &&
-                                  filtered.every((exam) => selectedExamIds.includes(exam.id || exam._id))
-                                );
-                              })()
-                            }
+                            className="rounded border-gray-300 text-gray-900 focus:ring-gray-900 h-4 w-4 cursor-pointer"
+                            checked={(() => {
+                              const query = allExamsSearch.toLowerCase();
+                              const eligible = allExams.filter(e => {
+                                const titleMatch = e.title?.toLowerCase().includes(query);
+                                const teacherMatch = e.teacher_name?.toLowerCase().includes(query);
+                                return (titleMatch || teacherMatch) && !e.is_live;
+                              });
+                              return eligible.length > 0 && eligible.every(e => selectedExamIds.includes(e.id || e._id));
+                            })()}
                             onChange={(e) => {
                               const query = allExamsSearch.toLowerCase();
-                              const filtered = allExams.filter((exam) => {
-                                const titleMatch = exam.title?.toLowerCase().includes(query);
-                                const teacherMatch = exam.teacher_name?.toLowerCase().includes(query);
-                                return titleMatch || teacherMatch;
+                              const eligible = allExams.filter(ex => {
+                                const titleMatch = ex.title?.toLowerCase().includes(query);
+                                const teacherMatch = ex.teacher_name?.toLowerCase().includes(query);
+                                return (titleMatch || teacherMatch) && !ex.is_live;
                               });
-                              const filteredIds = filtered.map((e) => e.id || e._id);
+                              const eligibleIds = eligible.map(ex => ex.id || ex._id);
                               if (e.target.checked) {
-                                setSelectedExamIds(Array.from(new Set([...selectedExamIds, ...filteredIds])));
+                                setSelectedExamIds(Array.from(new Set([...selectedExamIds, ...eligibleIds])));
                               } else {
-                                setSelectedExamIds(selectedExamIds.filter((id) => !filteredIds.includes(id)));
+                                setSelectedExamIds(selectedExamIds.filter(id => !eligibleIds.includes(id)));
                               }
                             }}
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                            title="Select all exams"
+                            title="Select all non-live exams"
                           />
                         </th>
                         <th className="px-6 py-4 font-bold text-left">Exam Title</th>
@@ -2257,37 +2244,41 @@ export default function AdminDashboard() {
                           filteredExams.map((exam) => {
                             const examId = exam.id || exam._id;
                             const isSelected = selectedExamIds.includes(examId);
+                            const isLive = Boolean(exam.is_live);
+
                             return (
-                              <tr key={examId} className={`hover:bg-white transition-colors ${isSelected ? "bg-indigo-50/50" : ""}`}>
-                                <td className="p-4 text-center w-12">
+                              <tr key={examId} className={`hover:bg-gray-50/60 transition-colors ${isSelected ? 'bg-indigo-50/40' : ''}`}>
+                                <td className="px-4 py-4 text-center">
                                   <input
                                     type="checkbox"
+                                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900 h-4 w-4 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                                     checked={isSelected}
-                                    onChange={() => {
-                                      if (isSelected) {
-                                        setSelectedExamIds(selectedExamIds.filter((id) => id !== examId));
+                                    disabled={isLive}
+                                    title={isLive ? "Cannot delete or select live exam" : "Select exam"}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedExamIds(prev => [...prev, examId]);
                                       } else {
-                                        setSelectedExamIds([...selectedExamIds, examId]);
+                                        setSelectedExamIds(prev => prev.filter(id => id !== examId));
                                       }
                                     }}
-                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                                   />
                                 </td>
                                 <td className="px-6 py-4 text-gray-900 font-medium">{exam.title}</td>
-                                <td className="px-6 py-4">{exam.teacher_name || "-"}</td>
-                                <td className="px-6 py-4">{new Date(exam.exam_date).toLocaleDateString()}</td>
-                                <td className="px-6 py-4">{exam.duration_minutes} mins</td>
+                                <td className="px-6 py-4 text-gray-600">{exam.teacher_name || "-"}</td>
+                                <td className="px-6 py-4 text-gray-500">{new Date(exam.exam_date).toLocaleDateString()}</td>
+                                <td className="px-6 py-4 text-gray-500">{exam.duration_minutes} mins</td>
                                 <td className="px-6 py-4 text-center">
-                                  <span className={`inline-block px-3 py-1 rounded-full text-xs ${exam.is_live ? "bg-tomato-100 text-tomato-700 border border-tomato-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
-                                    {exam.is_live ? "Live" : "Not Live"}
+                                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${isLive ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                    {isLive ? "Live" : "Not Live"}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                   <button
-                                    type="button"
                                     onClick={() => handleDeleteExam(exam)}
-                                    className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Delete Exam"
+                                    disabled={isLive}
+                                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${isLive ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-red-600 hover:bg-red-50'}`}
+                                    title={isLive ? "Cannot delete live exam" : "Delete exam"}
                                   >
                                     <Trash2 size={16} />
                                   </button>

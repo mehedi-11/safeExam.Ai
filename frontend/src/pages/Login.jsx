@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import { KeyRound, Mail, UserSquare, ShieldAlert, ArrowLeft, Eye, EyeOff, Lock, CheckCircle2, Loader2 } from 'lucide-react';
+import { KeyRound, Mail, UserSquare, ShieldAlert, Eye, EyeOff, Lock, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const { role } = useParams(); // 'admin', 'teacher', 'student'
@@ -24,8 +24,6 @@ export default function Login() {
   const [resetMode, setResetMode] = useState(false);
   const [resetStep, setResetStep] = useState(1);
   const [resetIdentifier, setResetIdentifier] = useState('');
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetName, setResetName] = useState('');
   const [enteredOtp, setEnteredOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -134,8 +132,6 @@ export default function Login() {
           return;
         }
 
-        setResetEmail(res.data.email);
-        setResetName(res.data.name);
         setSuccess('OTP has been sent to your registered Gmail.');
         setResetStep(2);
       } else if (resetStep === 2) {

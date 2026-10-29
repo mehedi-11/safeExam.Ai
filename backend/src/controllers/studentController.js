@@ -102,10 +102,21 @@ exports.getExams = async (req, res) => {
 
     const studentExams = await StudentExam.find({ student_id: req.user.id }).sort({ _id: -1 }).lean();
     
+    const questionStats = await ExamQuestion.aggregate([
+      { $group: { _id: "$exam_id", totalMarks: { $sum: "$marks" }, count: { $sum: 1 } } }
+    ]);
+    const marksMap = {};
+    questionStats.forEach(qs => {
+      if (qs._id) marksMap[qs._id.toString()] = qs.totalMarks || qs.count || 0;
+    });
+
     const result = [];
     for (const exam of exams) {
       const attempts = studentExams.filter(se => se.exam_id && se.exam_id.toString() === exam._id.toString());
       const attemptsCount = attempts.length;
+      const examTotalMarks = (exam.total_marks !== undefined && exam.total_marks !== null && Number(exam.total_marks) > 0)
+        ? Number(exam.total_marks)
+        : (marksMap[exam._id.toString()] || 0);
 
       if (attemptsCount === 0) {
         result.push({
@@ -113,6 +124,7 @@ exports.getExams = async (req, res) => {
           id: exam._id,
           unique_id: exam._id.toString(),
           title: exam.title,
+          total_marks: examTotalMarks,
           attempt_id: null,
           score: null,
           started_at: null,
@@ -143,6 +155,7 @@ exports.getExams = async (req, res) => {
           id: exam._id,
           unique_id: exam._id.toString(),
           title: exam.title,
+          total_marks: examTotalMarks,
           attempt_id: currentAttempt._id,
           score: effectiveScore,
           started_at: currentAttempt.started_at,

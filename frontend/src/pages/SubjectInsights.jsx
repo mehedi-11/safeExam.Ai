@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Sparkles, TrendingUp, Award, AlertTriangle, CheckCircle2, 
-  BookOpen, Target, Brain, Search, RefreshCw, 
-  ArrowUpRight, CheckSquare, Square, Lightbulb, BarChart3, 
-  ShieldCheck, ShieldAlert, ChevronRight, GraduationCap,
-  Calendar, FileText, ArrowRight, Clock
+  Sparkles, Award, AlertTriangle, CheckCircle2, 
+  Target, Brain, Search, RefreshCw, 
+  CheckSquare, Square, Lightbulb, BarChart3, 
+  ShieldCheck, ChevronRight, GraduationCap,
+  Clock
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -18,9 +18,8 @@ import {
 } from 'recharts';
 import api from '../api/axiosConfig';
 
-export default function SubjectInsights({ exams: propExams, profile: propProfile, onRefresh }) {
+export default function SubjectInsights({ exams: propExams, onRefresh }) {
   const [exams, setExams] = useState(propExams || []);
-  const [profile, setProfile] = useState(propProfile || {});
   const [loading, setLoading] = useState(!propExams);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all'); // 'all', 'strengths', 'moderate', 'attention'
@@ -87,10 +86,6 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
   useEffect(() => {
     if (propExams) setExams(propExams);
   }, [propExams]);
-
-  useEffect(() => {
-    if (propProfile) setProfile(propProfile);
-  }, [propProfile]);
 
   // Fetch data if standalone
   useEffect(() => {

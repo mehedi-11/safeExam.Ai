@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import WelcomeHeader from "../components/WelcomeHeader";
 import TopMenu from "../components/TopMenu";
 import { useNavigate } from "react-router-dom";
-import api, { API_BASE_URL } from "../api/axiosConfig";
+import api from "../api/axiosConfig";
+import { useAlert } from "../context/AlertContext";
 import {
   BookOpen,
   Plus,
@@ -17,7 +18,6 @@ import {
   AlertCircle,
   RefreshCw,
   Download,
-  Trash,
   Award,
   Menu,
   LogOut,
@@ -34,12 +34,10 @@ import {
   Key,
   Eye,
   EyeOff,
-  KeyRound,
   LayoutDashboard,
   Search,
   GripVertical,
   Sparkles,
-  TrendingUp,
 } from "lucide-react";
 import Modal from "../components/Modal";
 import Loader from "../components/Loader";
@@ -77,10 +75,6 @@ export default function TeacherDashboard() {
     useState(null);
   const [studentAnswers, setStudentAnswers] = useState([]);
   const [manualGrades, setManualGrades] = useState({});
-
-  // Proctor Logs State
-  const [selectedLogExamId, setSelectedLogExamId] = useState("");
-  const [examStudents, setExamStudents] = useState([]);
 
   // UI State
   const [loading, setLoading] = useState(false);
@@ -163,6 +157,7 @@ export default function TeacherDashboard() {
   const [isBulkDeletingExams, setIsBulkDeletingExams] = useState(false);
   const [selectedQuestionIds, setSelectedQuestionIds] = useState([]);
   const [isBulkDeletingQuestions, setIsBulkDeletingQuestions] = useState(false);
+  const { showConfirm, showSuccess, showError, showWarning } = useAlert();
 
   // Axios Instance with JWT auth is now centralized in api
 
@@ -229,18 +224,6 @@ export default function TeacherDashboard() {
     }
   };
 
-  const fetchExamStudents = async (examId) => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/teacher/exams/${examId}/students`);
-      setExamStudents(res.data);
-    } catch (err) {
-      setError("Error fetching exam students");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const triggerSuccess = (msg) => {
     setSuccess(msg);
     setTimeout(() => {
@@ -257,7 +240,7 @@ export default function TeacherDashboard() {
       setSelectedEventRegistrations(res.data);
     } catch (err) {
       console.error(err);
-      customAlert('Failed to fetch registrations', 'Error', 'error');
+      alert('Failed to fetch registrations');
       setSelectedEventRegistrations([]);
     } finally {
       setRegistrationsLoading(false);
@@ -338,10 +321,12 @@ export default function TeacherDashboard() {
       setError("Live exam cannot be deleted. Please stop the exam first.");
       return;
     }
-    const confirmed = await customConfirm(
-      "Delete this exam? This will wipe all its questions and grades.",
-      { title: "Delete Exam", confirmText: "Delete", type: "danger" }
-    );
+    const confirmed = await showConfirm({
+      title: "Delete Exam",
+      message: "Are you sure you want to delete this exam? This will permanently wipe all its questions and grades.",
+      confirmText: "Delete Exam",
+      isDanger: true
+    });
     if (!confirmed) return;
     try {
       await api.delete(`/teacher/exams/${id}`);
@@ -362,10 +347,12 @@ export default function TeacherDashboard() {
 
   const handleBulkDeleteExams = async () => {
     if (selectedExamIds.length === 0) return;
-    const confirmed = await customConfirm(
-      `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently wipe all questions and results.`,
-      { title: "Bulk Delete Exams", confirmText: `Delete (${selectedExamIds.length})`, type: "danger" }
-    );
+    const confirmed = await showConfirm({
+      title: "Bulk Delete Exams",
+      message: `Are you sure you want to delete ${selectedExamIds.length} selected exam(s)? This will permanently wipe all questions and results.`,
+      confirmText: `Delete (${selectedExamIds.length}) Exams`,
+      isDanger: true
+    });
     if (!confirmed) return;
 
     setIsBulkDeletingExams(true);
@@ -502,10 +489,11 @@ export default function TeacherDashboard() {
   };
 
   const handleDeleteQuestion = async (id) => {
-    const confirmed = await customConfirm("Delete this question?", {
+    const confirmed = await showConfirm({
       title: "Delete Question",
-      confirmText: "Delete",
-      type: "danger"
+      message: "Are you sure you want to delete this question?",
+      confirmText: "Delete Question",
+      isDanger: true
     });
     if (!confirmed) return;
     try {
@@ -520,10 +508,11 @@ export default function TeacherDashboard() {
 
   const handleBulkDeleteQuestions = async () => {
     if (selectedQuestionIds.length === 0 || !selectedExamId) return;
-    const confirmed = await customConfirm(`Delete ${selectedQuestionIds.length} selected question(s)?`, {
-      title: "Delete Questions",
-      confirmText: `Delete (${selectedQuestionIds.length})`,
-      type: "danger"
+    const confirmed = await showConfirm({
+      title: "Bulk Delete Questions",
+      message: `Are you sure you want to delete ${selectedQuestionIds.length} selected question(s)?`,
+      confirmText: `Delete (${selectedQuestionIds.length}) Questions`,
+      isDanger: true
     });
     if (!confirmed) return;
 
@@ -538,7 +527,7 @@ export default function TeacherDashboard() {
       fetchQuestions(selectedExamId);
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to bulk delete questions");
+      setError(err.response?.data?.message || "Failed to delete selected questions");
     } finally {
       setIsBulkDeletingQuestions(false);
     }
@@ -595,33 +584,6 @@ export default function TeacherDashboard() {
       setError("Error saving manual grades");
     } finally {
       setSavingGrades(false);
-    }
-  };
-
-  // Raw download file
-  const downloadLogs = () => {
-    const blob = new Blob([rawLogs], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "cheating_activity_report.log");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleClearLogs = async () => {
-    const confirmed = await customConfirm(
-      "Are you sure you want to permanently clear the proctoring log file?",
-      { title: "Clear Proctoring Logs", confirmText: "Clear Logs", type: "danger" }
-    );
-    if (!confirmed) return;
-    try {
-      await api.delete("/proctor/raw-logs");
-      setRawLogs("");
-      triggerSuccess("Logs cleared successfully.");
-    } catch (err) {
-      setError("Error clearing logs");
     }
   };
 

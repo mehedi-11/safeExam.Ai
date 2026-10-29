@@ -147,7 +147,8 @@ exports.createExam = async (req, res) => {
       course_code: course_code || null,
       university_name: university_name || null,
       max_attempts: max_attempts || 1,
-      total_marks: 0
+      total_marks: 0,
+      is_live: false
     });
     await newExam.save();
 
@@ -473,24 +474,6 @@ exports.reorderQuestions = async (req, res) => {
 
 // --- EXAM RESULTS & GRADING ---
 
-exports.togglePublishResults = async (req, res) => {
-  const { examId, studentId } = req.params;
-  const { results_published } = req.body;
-  try {
-    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
-    if (!exam) return res.status(404).json({ message: 'Exam not found' });
-
-    const studentExam = await StudentExam.findOne({ exam_id: examId, student_id: studentId });
-    if (!studentExam) return res.status(404).json({ message: 'Student exam record not found' });
-
-    await StudentExam.updateOne({ _id: studentExam._id }, { $set: { results_published: results_published ? true : false } });
-    return res.json({ message: 'Student results publish status updated successfully' });
-  } catch (error) {
-    console.error('Error toggling publish status:', error);
-    return res.status(500).json({ message: 'Server error updating publish status' });
-  }
-};
-
 exports.toggleExamPublishResults = async (req, res) => {
   const { examId } = req.params;
   const { results_published } = req.body;
@@ -530,36 +513,6 @@ exports.getExamResults = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error fetching exam results' });
-  }
-};
-
-exports.downloadStudentLog = async (req, res) => {
-  const { examId, studentId } = req.params;
-  try {
-    const exam = await Exam.findOne({ _id: examId, teacher_id: req.user.id });
-    if (!exam) return res.status(403).json({ message: 'Unauthorized' });
-
-    const logs = await ProctoringLog.find({ exam_id: examId, student_id: studentId }).sort({ timestamp: 1 });
-
-    let logText = `AI Proctoring Log Feed\nExam: ${exam.title}\nStudent ID: ${studentId}\n-----------------------------------\n\n`;
-
-    if (logs.length === 0) {
-      logText += "No anomalies or alerts detected for this student.\n";
-    } else {
-      logs.forEach(log => {
-        const time = new Date(log.timestamp).toLocaleString();
-        logText += `[${time}] ${log.activity_type.toUpperCase()} (Points: ${log.demerit_points})\n`;
-        if (log.details) logText += `Details: ${log.details}\n`;
-        logText += `\n`;
-      });
-    }
-
-    res.setHeader('Content-disposition', `attachment; filename=log_${examId}_${studentId}.txt`);
-    res.setHeader('Content-type', 'text/plain');
-    return res.send(logText);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error generating log' });
   }
 };
 
