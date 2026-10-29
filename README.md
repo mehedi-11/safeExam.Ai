@@ -240,3 +240,4 @@ Developed with ❤️ as the Final Capstone Project for the Department of Comput
 
 ## 📄 License
 This project is proprietary and developed for academic and institutional evaluation. All rights reserved.
+
