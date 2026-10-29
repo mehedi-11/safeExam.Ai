@@ -105,10 +105,52 @@ const EventsManager = ({ isAdmin = false }) => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
     try {
       await api.delete(`/events/${id}`);
+      setSelectedEventIds((prev) => prev.filter((item) => item !== id));
       fetchEvents();
     } catch (err) {
       console.error(err);
       alert('Failed to delete event');
+    }
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allFilteredIds = filteredEvents.map((e) => e._id || e.id);
+      setSelectedEventIds(Array.from(new Set([...selectedEventIds, ...allFilteredIds])));
+    } else {
+      const filteredIds = filteredEvents.map((e) => e._id || e.id);
+      setSelectedEventIds(selectedEventIds.filter((id) => !filteredIds.includes(id)));
+    }
+  };
+
+  const handleToggleSelect = (id) => {
+    if (selectedEventIds.includes(id)) {
+      setSelectedEventIds(selectedEventIds.filter((item) => item !== id));
+    } else {
+      setSelectedEventIds([...selectedEventIds, id]);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedEventIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedEventIds.length} selected event(s)? This will also delete their registrations.`
+      )
+    ) {
+      return;
+    }
+    setIsBulkDeleting(true);
+    try {
+      const res = await api.post('/events/bulk-delete', { eventIds: selectedEventIds });
+      alert(res.data.message || 'Events deleted successfully');
+      setSelectedEventIds([]);
+      fetchEvents();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to bulk delete events');
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
