@@ -115,6 +115,16 @@ export const AlertProvider = ({ children }) => {
     };
   }, [showAlert, showConfirm]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && modal.isOpen) {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modal.isOpen, closeModal]);
+
   return (
     <AlertContext.Provider
       value={{
@@ -229,3 +239,4 @@ export const useAlert = () => {
 };
 
 export default AlertContext;
+
