@@ -87,18 +87,8 @@ exports.getExams = async (req, res) => {
     const rawExams = await Exam.find().sort({ _id: -1 }).lean();
     const now = new Date();
     
-    // Evaluate active status directly from Exam model
-    const exams = rawExams.map(exam => {
-      if (exam.is_live && exam.exam_date) {
-        const examDate = new Date(exam.exam_date);
-        const durationMs = ((exam.duration_minutes || 60) + 5) * 60000;
-        const expireTime = new Date(examDate.getTime() + durationMs);
-        if (now > expireTime) {
-          exam.is_live = false;
-        }
-      }
-      return exam;
-    });
+    // 100% manual live control: is_live is governed directly by teacher's manual toggle
+    const exams = rawExams;
 
     const studentExams = await StudentExam.find({ student_id: req.user.id }).sort({ _id: -1 }).lean();
     
@@ -226,16 +216,8 @@ exports.startExam = async (req, res) => {
       }
     }
 
-    // Checking is_live for NEW attempts
-    let actualIsLive = examDetails.is_live;
-    if (actualIsLive && examDetails.exam_date) {
-      const examDate = new Date(examDetails.exam_date);
-      const durationMs = ((examDetails.duration_minutes || 60) + 5) * 60000;
-      const expireTime = new Date(examDate.getTime() + durationMs);
-      if (new Date() > expireTime) {
-        actualIsLive = false;
-      }
-    }
+    // Checking is_live for NEW attempts (100% manual live control: stays live until teacher stops it)
+    let actualIsLive = Boolean(examDetails.is_live);
 
     if (actualIsLive) {
       if (!exam_password || exam_password !== examDetails.exam_password) {

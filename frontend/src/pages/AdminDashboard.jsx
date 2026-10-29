@@ -1892,12 +1892,8 @@ export default function AdminDashboard() {
 
                         return filteredExams.map((exam) => {
                           const examDate = new Date(exam.exam_date);
-                          const durationMs = (exam.duration_minutes + 5) * 60000;
-                          const expireTime = new Date(examDate.getTime() + durationMs);
-                          const now = new Date();
-
                           const isLive = Boolean(exam.is_live);
-                          const isEnded = !isLive && now > expireTime;
+                          const isEnded = !isLive;
                           const eId = exam._id || exam.id;
 
                           return (

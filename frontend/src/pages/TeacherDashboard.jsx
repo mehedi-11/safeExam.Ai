@@ -1213,19 +1213,15 @@ export default function TeacherDashboard() {
                               exam.course_code.toLowerCase().includes(sq));
 
                           const examDate = new Date(exam.exam_date);
-                          const durationMs = (exam.duration_minutes + 5) * 60000;
-                          const expireTime = new Date(
-                            examDate.getTime() + durationMs,
-                          );
 
                           let matchesFilter = false;
                           if (examFilter === "all") matchesFilter = true;
                           else if (examFilter === "live")
                             matchesFilter = exam.is_live;
                           else if (examFilter === "upcoming")
-                            matchesFilter = now < examDate;
+                            matchesFilter = !exam.is_live && now < examDate;
                           else if (examFilter === "ended")
-                            matchesFilter = now > expireTime;
+                            matchesFilter = !exam.is_live;
 
                           return matchesSearch && matchesFilter;
                         });
@@ -1750,12 +1746,8 @@ export default function TeacherDashboard() {
 
                         return filteredExams.map((exam) => {
                           const examDate = new Date(exam.exam_date);
-                          const durationMs = (exam.duration_minutes + 5) * 60000;
-                          const expireTime = new Date(examDate.getTime() + durationMs);
-                          const now = new Date();
-
                           const isLive = exam.is_live === true;
-                          const isEnded = !isLive && now > expireTime;
+                          const isEnded = !isLive;
                           const eId = exam._id || exam.id;
 
                           return (

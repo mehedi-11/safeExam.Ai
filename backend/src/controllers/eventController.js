@@ -271,17 +271,7 @@ exports.getMyRegistrations = async (req, res) => {
       let examInfo = null;
       if (exam) {
         let isLive = Boolean(exam.is_live);
-        let isEnded = false;
-
-        if (exam.exam_date) {
-          const examDate = new Date(exam.exam_date);
-          const durationMs = ((exam.duration_minutes || 60) + 5) * 60000;
-          const expireTime = new Date(examDate.getTime() + durationMs);
-          if (now > expireTime) {
-            isEnded = true;
-            isLive = false;
-          }
-        }
+        let isEnded = !isLive;
 
         // Check if student has an existing attempt
         const existingAttempt = await StudentExam.findOne({
