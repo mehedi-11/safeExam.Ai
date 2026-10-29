@@ -4,7 +4,7 @@ import api from "../api/axiosConfig";
 import { 
   ArrowLeft, RefreshCw, ShieldAlert, Users, 
   CheckCircle, Clock, LogIn, FileText, Layers, X,
-  WifiOff
+  WifiOff, Smartphone, BookOpen, EyeOff, Volume2
 } from "lucide-react";
 
 export default function TeacherProctoring() {
@@ -222,9 +222,16 @@ export default function TeacherProctoring() {
                       const isJoin = lowerIncident.includes('student join') || lowerIncident.includes('joined the exam') || lowerIncident.includes('re-entered');
                       const isShortcut = lowerIncident.includes('shortcut') || lowerIncident.includes('clipboard') || lowerIncident.includes('copy') || lowerIncident.includes('paste');
                       const isTabSwitch = lowerIncident.includes('tab switch') || lowerIncident.includes('window blur') || lowerIncident.includes('left exam page') || lowerIncident.includes('lost window focus');
+                      const isPhone = lowerIncident.includes('phone') || lowerIncident.includes('mobile');
+                      const isMultiplePersons = lowerIncident.includes('multiple persons');
+                      const isBook = lowerIncident.includes('book') || lowerIncident.includes('notebook');
+                      const isAbsent = lowerIncident.includes('absent') || lowerIncident.includes('no face');
+                      const isTalking = lowerIncident.includes('talking') || lowerIncident.includes('speaking') || lowerIncident.includes('verbal');
 
                       let rowBg = 'hover:bg-red-50/20 bg-red-50/5';
-                      if (isReload) {
+                      if (isPhone || isMultiplePersons || isBook || isAbsent) {
+                        rowBg = 'hover:bg-red-50/40 bg-red-50/15';
+                      } else if (isReload) {
                         rowBg = 'hover:bg-red-50/40 bg-red-50/15';
                       } else if (isNetwork) {
                         rowBg = 'hover:bg-amber-50/40 bg-amber-50/15';
@@ -234,7 +241,7 @@ export default function TeacherProctoring() {
                         rowBg = 'hover:bg-blue-50/40 bg-blue-50/10';
                       } else if (isShortcut) {
                         rowBg = 'hover:bg-purple-50/40 bg-purple-50/10';
-                      } else if (isTabSwitch) {
+                      } else if (isTabSwitch || isTalking) {
                         rowBg = 'hover:bg-amber-50/40 bg-amber-50/10';
                       }
 
@@ -248,7 +255,32 @@ export default function TeacherProctoring() {
                             <div className="text-gray-500 font-mono text-[10px] font-normal">{id}</div>
                           </td>
                           <td className="py-2.5 px-4">
-                            {isReload ? (
+                            {isPhone ? (
+                              <span className="text-red-700 bg-red-50 border border-red-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-bold shadow-sm">
+                                <Smartphone size={13} className="text-red-600 shrink-0 animate-pulse" />
+                                <span>{incident}</span>
+                              </span>
+                            ) : isMultiplePersons ? (
+                              <span className="text-red-700 bg-red-50 border border-red-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-bold shadow-sm">
+                                <Users size={13} className="text-red-600 shrink-0 animate-pulse" />
+                                <span>{incident}</span>
+                              </span>
+                            ) : isBook ? (
+                              <span className="text-red-700 bg-red-50 border border-red-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-bold shadow-sm">
+                                <BookOpen size={13} className="text-red-600 shrink-0" />
+                                <span>{incident}</span>
+                              </span>
+                            ) : isAbsent ? (
+                              <span className="text-red-700 bg-red-50 border border-red-300 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-bold shadow-sm">
+                                <EyeOff size={13} className="text-red-600 shrink-0" />
+                                <span>{incident}</span>
+                              </span>
+                            ) : isTalking ? (
+                              <span className="text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-medium">
+                                <Volume2 size={13} className="text-amber-600 shrink-0" />
+                                <span>{incident}</span>
+                              </span>
+                            ) : isReload ? (
                               <span className="text-red-700 bg-red-50 border border-red-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1.5 font-medium">
                                 <RefreshCw size={12} className="text-red-600 shrink-0" />
                                 <span>{incident}</span>

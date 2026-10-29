@@ -52,37 +52,24 @@ export default function ExamInterface() {
   const [liveDetections, setLiveDetections] = useState([]); // Current frame detections in real-time
   const [showRulesModal, setShowRulesModal] = useState(false);
   
-  // Warning Modals & Countdown States
-  const [showShortcutModal, setShowShortcutModal] = useState(false);
-  const hasWarnedShortcutRef = useRef(false);
-
-  const [showTabSwitchModal, setShowTabSwitchModal] = useState(false);
-  const [tabCountdown, setTabCountdown] = useState(5);
-  const tabCountdownIntervalRef = useRef(null);
-  const tabWarningTriggeredRef = useRef(false);
-
-  const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [phoneCountdown, setPhoneCountdown] = useState(5);
-  const phoneCountdownIntervalRef = useRef(null);
-  const phoneWarningActiveRef = useRef(false);
-
-  const [showAbsenceModal, setShowAbsenceModal] = useState(false);
-  const [absenceCountdown, setAbsenceCountdown] = useState(5);
-  const absenceCountdownIntervalRef = useRef(null);
-  const absenceWarningActiveRef = useRef(false);
-
-  const [showDemeritModal, setShowDemeritModal] = useState(false);
+  // Modal States
+  const [showReloadModal, setShowReloadModal] = useState(false);
   const hasSubmittedRef = useRef(false);
-  const bookTicksRef = useRef(0);
   
-  // Network Offline / Hold States (5-minute countdown)
+  // Audio Speech Monitoring
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const speechStartRef = useRef(null);
+  const lastSpeechLogRef = useRef(0);
+
+  // Network Offline / Hold States (30-second countdown)
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [offlineCountdown, setOfflineCountdown] = useState(300); // 5 minutes = 300 seconds
+  const [offlineCountdown, setOfflineCountdown] = useState(30); // 30 seconds
   const offlineCountdownIntervalRef = useRef(null);
   const offlineStartTimeRef = useRef(null);
 
-  const tabHideTimeRef = useRef(null);
-  const blurTimeRef = useRef(null);
+  const lastBlurLogRef = useRef(0);
+  const lastShortcutLogRef = useRef(0);
 
   // API setup centralized in axiosConfig
   // 1. Initial Exam Check & Webcam access + Reload Check
@@ -124,51 +111,12 @@ export default function ExamInterface() {
     };
   }, [examId]);
 
-  const lastShortcutLogRef = useRef(0);
-
-  // Trigger prohibited shortcut or mouse action (1st time warning modal, 2nd time onwards 1 demerit)
+  // Shortcut key handler (+1 demerit point)
   const triggerShortcutAction = (actionName) => {
     const now = Date.now();
-    if (now - lastShortcutLogRef.current < 700) return;
+    if (now - lastShortcutLogRef.current < 800) return;
     lastShortcutLogRef.current = now;
-
-    if (!hasWarnedShortcutRef.current) {
-      hasWarnedShortcutRef.current = true;
-      setShowShortcutModal(true);
-    } else {
-      logCheating('Shortcut Activity', `Student attempted prohibited action (${actionName})`, 1, false);
-    }
-  };
-
-  // Trigger Tab / Window Blur auto-submit countdown modal
-  const triggerTabAutoSubmitCountdown = () => {
-    if (tabWarningTriggeredRef.current || hasSubmittedRef.current) return;
-    tabWarningTriggeredRef.current = true;
-    setShowTabSwitchModal(true);
-    setTabCountdown(5);
-
-    if (tabCountdownIntervalRef.current) clearInterval(tabCountdownIntervalRef.current);
-    let count = 5;
-    tabCountdownIntervalRef.current = setInterval(() => {
-      count -= 1;
-      setTabCountdown(count);
-      if (count <= 0) {
-        clearInterval(tabCountdownIntervalRef.current);
-        handleSubmitExam(true, 'Auto-Submitted: Left exam page or switched tabs for more than 10 seconds');
-      }
-    }, 1000);
-  };
-
-  const handleDismissTabModal = () => {
-    if (tabCountdownIntervalRef.current) clearInterval(tabCountdownIntervalRef.current);
-    setShowTabSwitchModal(false);
-    handleSubmitExam(true, 'Auto-Submitted: Closed tab switch warning modal');
-  };
-
-  const handleDismissAbsenceModal = () => {
-    if (absenceCountdownIntervalRef.current) clearInterval(absenceCountdownIntervalRef.current);
-    setShowAbsenceModal(false);
-    handleSubmitExam(true, 'Auto-Submitted: Closed absence warning modal');
+    logCheating('Shortcut Activity', `Prohibited shortcut pressed (${actionName})`, 1, false);
   };
 
   // 2. Client-side cheating triggers (Copy/Paste hooks, Focus tracking, Shortcuts)
@@ -177,13 +125,14 @@ export default function ExamInterface() {
 
     // Detect prohibited shortcuts (Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+A) and Reload (F5, Ctrl+R)
     const handleKeyDown = (e) => {
-      // Condition 1: Block F5 or Ctrl/Cmd + R and auto-submit
+      // Rule 8: Reload Modal Interceptor
       if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r')) {
         e.preventDefault();
-        handleSubmitExam(true, 'Auto-Submitted: Student pressed reload key (F5/Ctrl+R)');
+        setShowReloadModal(true);
         return;
       }
 
+      // Rule 1: Copy/Paste/Cut/Select All: +1 point
       if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a'].includes(e.key.toLowerCase())) {
         e.preventDefault();
         triggerShortcutAction(`${e.ctrlKey ? 'Ctrl' : 'Cmd'}+${e.key.toUpperCase()}`);
@@ -196,53 +145,29 @@ export default function ExamInterface() {
       triggerShortcutAction(`Mouse ${e.type}`);
     };
 
-    // Detect Tab Switching
+    // Rule 2: Tab Switching or Minimized: +2 points
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        tabHideTimeRef.current = Date.now();
-        logCheating('Tab Switching', 'Student switched to another tab', 2, false);
-      } else {
-        if (tabHideTimeRef.current) {
-          const duration = Date.now() - tabHideTimeRef.current;
-          if (duration >= 10000) {
-            triggerTabAutoSubmitCountdown();
-          }
-          tabHideTimeRef.current = null;
+        const now = Date.now();
+        if (now - lastBlurLogRef.current > 1200) {
+          lastBlurLogRef.current = now;
+          logCheating('Tab Switching', 'Student switched to another tab or minimized browser', 2, false);
         }
       }
     };
 
-    // Detect clicking outside the window
+    // Rule 2: Clicking outside exam screen / window blur: +2 points
     const handleWindowBlur = () => {
-      blurTimeRef.current = Date.now();
-      logCheating('Window Blur', 'Student clicked outside or lost window focus', 2, false);
-    };
-
-    const handleWindowFocus = () => {
-      if (blurTimeRef.current) {
-        const duration = Date.now() - blurTimeRef.current;
-        if (duration >= 10000) {
-          triggerTabAutoSubmitCountdown();
-        }
-        blurTimeRef.current = null;
-      }
-    };
-
-    // Constant 1s checker if student remains away for >= 10s
-    const awayMonitorTimer = setInterval(() => {
       const now = Date.now();
-      if (tabHideTimeRef.current && (now - tabHideTimeRef.current >= 10000)) {
-        triggerTabAutoSubmitCountdown();
+      if (now - lastBlurLogRef.current > 1200) {
+        lastBlurLogRef.current = now;
+        logCheating('Window Blur', 'Student clicked outside the exam window', 2, false);
       }
-      if (blurTimeRef.current && (now - blurTimeRef.current >= 10000)) {
-        triggerTabAutoSubmitCountdown();
-      }
-    }, 1000);
+    };
 
     window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleWindowBlur);
-    window.addEventListener('focus', handleWindowFocus);
     document.addEventListener('contextmenu', handleMouseBlock);
     document.addEventListener('copy', handleMouseBlock);
     document.addEventListener('cut', handleMouseBlock);
@@ -318,16 +243,16 @@ export default function ExamInterface() {
     const handleOffline = () => {
       setIsOffline(true);
       offlineStartTimeRef.current = Date.now();
-      setOfflineCountdown(300); // 5 minutes
+      setOfflineCountdown(30); // 30 seconds
 
       if (offlineCountdownIntervalRef.current) clearInterval(offlineCountdownIntervalRef.current);
-      let count = 300;
+      let count = 30;
       offlineCountdownIntervalRef.current = setInterval(() => {
         count -= 1;
         setOfflineCountdown(count);
         if (count <= 0) {
           clearInterval(offlineCountdownIntervalRef.current);
-          handleSubmitExam(true, 'Auto-Submitted: Network disconnected for more than 5 minutes');
+          handleSubmitExam(true, 'Auto-Submitted: Internet disconnected for more than 30 seconds');
         }
       }, 1000);
     };
@@ -368,14 +293,10 @@ export default function ExamInterface() {
     return () => clearInterval(heartbeatTimer);
   }, [examStarted, isBlocked, isOffline, examId]);
 
-  // Handle 10+ demerit points auto-submit
+  // Rule 4: Handle 5+ demerit points auto-submit
   useEffect(() => {
-    if (examStarted && demerits >= 10 && !hasSubmittedRef.current) {
-      setShowDemeritModal(true);
-      const timer = setTimeout(() => {
-        handleSubmitExam(true, 'Auto-Submitted: Exceeded 10 demerit points threshold');
-      }, 3500);
-      return () => clearTimeout(timer);
+    if (examStarted && demerits >= 5 && !hasSubmittedRef.current) {
+      handleSubmitExam(true, 'Auto-Submitted: Demerit points reached threshold (5+ points)');
     }
   }, [demerits, examStarted]);
 
@@ -524,6 +445,26 @@ export default function ExamInterface() {
             videoRef.current?.play().catch(e => console.warn('Video play error:', e));
           };
         }
+
+        // Setup Web Audio API Speech / Voice monitoring (Rule 3)
+        try {
+          const audioTracks = mediaStream.getAudioTracks();
+          if (audioTracks && audioTracks.length > 0) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+              const audioCtx = new AudioContextClass();
+              const source = audioCtx.createMediaStreamSource(mediaStream);
+              const analyser = audioCtx.createAnalyser();
+              analyser.fftSize = 256;
+              source.connect(analyser);
+              audioContextRef.current = audioCtx;
+              analyserRef.current = analyser;
+            }
+          }
+        } catch (audioErr) {
+          console.warn('Audio analyser setup error:', audioErr);
+        }
+
         setWebcamReady(true);
         setWebcamError(null);
       } else {
@@ -685,26 +626,22 @@ export default function ExamInterface() {
               } else {
                 const elapsed = now - timers[item];
 
-                // Rule 3: Mobile phone detected for >= 5s -> show warning modal with 5s countdown
+                // Auto-Submit Rule 1: Mobile phone detected for >= 5s -> Instant Auto-Submit (No modal)
                 if (item === 'cell phone') {
-                  if (elapsed >= 5000 && !phoneWarningActiveRef.current) {
-                    triggerPhoneWarningModal();
+                  if (elapsed >= 5000 && !hasSubmittedRef.current) {
+                    handleSubmitExam(true, 'Auto-Submitted: Mobile phone detected on camera for 5 seconds');
                   }
                 } 
-                // Rule 5: Book / Notebook detected -> 1 demerit point for every 5s
-                else if (item === 'book') {
-                  const currentTicks = Math.floor(elapsed / 5000);
-                  const prevTicks = bookTicksRef.current || 0;
-                  if (currentTicks > prevTicks) {
-                    bookTicksRef.current = currentTicks;
-                    logCheating('AI Detection', `Notebook / Notes detected in camera (${currentTicks * 5}s)`, 1, false);
-                  }
-                } 
-                // Multiple persons detected -> 2 points every 5s
+                // Auto-Submit Rule 2: Multiple persons detected for >= 5s -> Instant Auto-Submit (No modal)
                 else if (item === 'multiple persons') {
-                  if (elapsed >= 4000 && (!timers['mp_logged'] || now - timers['mp_logged'] >= 5000)) {
-                    timers['mp_logged'] = now;
-                    logCheating('AI Detection', 'Multiple persons detected in camera', 2, false);
+                  if (elapsed >= 5000 && !hasSubmittedRef.current) {
+                    handleSubmitExam(true, 'Auto-Submitted: Multiple persons detected in camera for 5 seconds');
+                  }
+                }
+                // Auto-Submit Rule 3: Book / Notebook detected for >= 5s -> Instant Auto-Submit
+                else if (item === 'book') {
+                  if (elapsed >= 5000 && !hasSubmittedRef.current) {
+                    handleSubmitExam(true, 'Auto-Submitted: Book/Notebook detected in camera for 5 seconds');
                   }
                 }
               }
@@ -712,26 +649,52 @@ export default function ExamInterface() {
 
             // Clear timers only if item hasn't been seen for > 2.5 seconds (resilient to motion blur)
             Object.keys(timers).forEach(item => {
-              if (item !== 'no person visible' && item !== 'mp_logged') {
+              if (item !== 'no person visible') {
                 if (now - (lastSeen[item] || 0) > 2500) {
                   delete timers[item];
-                  if (item === 'book') bookTicksRef.current = 0;
                 }
               }
             });
 
-            // Rule 4: Out of screen / person absent for >= 10s -> trigger absence auto-submit modal
+            // Auto-Submit Rule 5: Camera blur / Student absent from camera for >= 5s -> Instant Auto-Submit
             if (detectedItems.has('no person visible')) {
               if (!timers['no person visible']) {
                 timers['no person visible'] = now;
               } else {
                 const outDuration = now - timers['no person visible'];
-                if (outDuration >= 10000 && !absenceWarningActiveRef.current) {
-                  triggerAbsenceAutoSubmitModal();
+                if (outDuration >= 5000 && !hasSubmittedRef.current) {
+                  handleSubmitExam(true, 'Auto-Submitted: Student absent / no face detected in camera for 5 seconds');
                 }
               }
             } else {
               delete timers['no person visible'];
+            }
+
+            // Behavioral Rule 3: Check voice / speaking via Web Audio API (+1 demerit)
+            if (analyserRef.current && !hasSubmittedRef.current) {
+              try {
+                const bufferLength = analyserRef.current.frequencyBinCount;
+                const audioData = new Uint8Array(bufferLength);
+                analyserRef.current.getByteFrequencyData(audioData);
+                let audioSum = 0;
+                for (let i = 0; i < bufferLength; i++) audioSum += audioData[i];
+                const avgVolume = audioSum / bufferLength;
+
+                if (avgVolume > 38) {
+                  if (!speechStartRef.current) {
+                    speechStartRef.current = now;
+                  } else if (now - speechStartRef.current >= 1500) {
+                    if (!lastSpeechLogRef.current || now - lastSpeechLogRef.current > 6000) {
+                      lastSpeechLogRef.current = now;
+                      logCheating('talking', 'Student speaking or verbal communication detected', 1, false);
+                    }
+                  }
+                } else {
+                  speechStartRef.current = null;
+                }
+              } catch (micErr) {
+                // Ignore audio read errors
+              }
             }
 
             const base64Frame = canvas.toDataURL('image/jpeg', 0.6);
@@ -749,56 +712,7 @@ export default function ExamInterface() {
     };
   }, [examStarted, examDetails, webcamReady, modelReady]);
 
-  // Trigger Phone Warning Modal with 5s countdown
-  const triggerPhoneWarningModal = () => {
-    if (phoneWarningActiveRef.current || hasSubmittedRef.current) return;
-    phoneWarningActiveRef.current = true;
-    setShowPhoneModal(true);
-    setPhoneCountdown(5);
 
-    logCheating('AI Detection', 'Cell phone detected in camera (Warning issued)', 0, false);
-
-    if (phoneCountdownIntervalRef.current) clearInterval(phoneCountdownIntervalRef.current);
-    let count = 5;
-    phoneCountdownIntervalRef.current = setInterval(() => {
-      count -= 1;
-      setPhoneCountdown(count);
-      if (count <= 0) {
-        clearInterval(phoneCountdownIntervalRef.current);
-        handleSubmitExam(true, 'Auto-Submitted: Mobile phone detected and warning not confirmed within 5s');
-      }
-    }, 1000);
-  };
-
-  const handleConfirmPhoneRemoved = () => {
-    if (phoneCountdownIntervalRef.current) clearInterval(phoneCountdownIntervalRef.current);
-    setShowPhoneModal(false);
-    phoneWarningActiveRef.current = false;
-    if (suspiciousTimersRef.current) {
-      delete suspiciousTimersRef.current['cell phone'];
-    }
-  };
-
-  // Trigger Absence Warning Modal with 5s countdown
-  const triggerAbsenceAutoSubmitModal = () => {
-    if (absenceWarningActiveRef.current || hasSubmittedRef.current) return;
-    absenceWarningActiveRef.current = true;
-    setShowAbsenceModal(true);
-    setAbsenceCountdown(5);
-
-    logCheating('AI Detection', 'Student absent from camera screen for > 10s', 0, false);
-
-    if (absenceCountdownIntervalRef.current) clearInterval(absenceCountdownIntervalRef.current);
-    let count = 5;
-    absenceCountdownIntervalRef.current = setInterval(() => {
-      count -= 1;
-      setAbsenceCountdown(count);
-      if (count <= 0) {
-        clearInterval(absenceCountdownIntervalRef.current);
-        handleSubmitExam(true, 'Auto-Submitted: Left camera view for more than 10 seconds');
-      }
-    }, 1000);
-  };
 
   // Log a cheating event (Actual copy/paste or Agent ELI detection)
   const logCheating = async (activityType, details, overrideDemerits = undefined, forceSubmit = false) => {
@@ -906,17 +820,18 @@ export default function ExamInterface() {
           <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative">
             <h2 className="text-2xl font-black text-gray-900 mb-4 border-b pb-4">Exam Rules & Proctoring Policies</h2>
             <div className="space-y-4 text-sm text-gray-700 max-h-[60vh] overflow-y-auto pr-4">
-              <p className="font-semibold text-tomato-600 mb-2">Please read the following rules carefully before starting. Violations will add demerit points. Reaching 10 points will result in automatic submission.</p>
+              <p className="font-semibold text-tomato-600 mb-2">Please read the updated proctoring rules carefully before starting. Reaching 5 demerit points or violating critical AI rules will result in immediate automatic submission.</p>
               <ul className="list-disc pl-5 space-y-2">
-                <li><span className="font-bold">Copy/Paste/Cut/Select (Shortcut/Mouse):</span> 1st attempt shows warning; 2nd attempt onwards adds 1 demerit point.</li>
-                <li><span className="font-bold">Tab Switching / Window Focus Lost:</span> 2 demerit points. If away for &gt;10s, 5s countdown auto-submit modal triggers.</li>
-                <li><span className="font-bold">Browser Reload / Refresh:</span> Reloading or refreshing the page will immediately auto-submit your exam.</li>
-                <li><span className="font-bold">Network Disconnection:</span> Exam is placed on hold (no answering allowed) until connection returns. If offline for &gt;5 minutes, exam auto-submits.</li>
-                <li><span className="font-bold">Mobile Phone Detected (&gt;5s):</span> Warning modal with 5s countdown triggers to confirm removal.</li>
-                <li><span className="font-bold">Notebook / Book Detected:</span> 1 demerit point added for every 5 seconds visible.</li>
-                <li><span className="font-bold">Multiple Persons Detected (&gt;4s):</span> 2 demerit points.</li>
-                <li><span className="font-bold">Left Screen / Absence (&gt;10s):</span> Warning modal with 5s countdown to auto-submit.</li>
-                <li><span className="font-bold">Accumulated 10 Demerits:</span> Immediate auto-submission of the exam.</li>
+                <li><span className="font-bold">Copy / Paste / Cut / Select All (Ctrl+C, Ctrl+V, etc.):</span> Adds 1 Demerit Point per attempt.</li>
+                <li><span className="font-bold">Tab Switching / Window Blur / Minimize:</span> Adds 2 Demerit Points per event.</li>
+                <li><span className="font-bold">Talking / Speaking:</span> Voice or talking detected adds 1 Demerit Point.</li>
+                <li><span className="font-bold text-red-600">Demerit Threshold:</span> Reaching 5+ demerit points results in immediate Auto-Submission.</li>
+                <li><span className="font-bold text-red-600">Mobile Phone (5s):</span> Mobile phone detected for 5 seconds triggers immediate Auto-Submission.</li>
+                <li><span className="font-bold text-red-600">Multiple Persons (5s):</span> More than 1 person visible for 5 seconds triggers immediate Auto-Submission.</li>
+                <li><span className="font-bold text-red-600">Book / Notebook (5s):</span> Book/notebook in hand or view for 5 seconds triggers immediate Auto-Submission.</li>
+                <li><span className="font-bold text-red-600">Absence / Camera Blur (5s):</span> Leaving camera view or blurred camera for 5 seconds triggers immediate Auto-Submission.</li>
+                <li><span className="font-bold">Network Disconnection:</span> If offline for more than 30 seconds, exam auto-submits.</li>
+                <li><span className="font-bold">Page Reload:</span> Confirmation modal appears; confirming reload will auto-submit exam paper.</li>
               </ul>
             </div>
 
@@ -1159,11 +1074,11 @@ export default function ExamInterface() {
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold text-gray-500">Demerit Suspicion Points</span>
               <span className={`px-2 py-0.5 rounded text-xs font-extrabold ${
-                demerits >= 8 ? 'bg-red-100 text-red-700' :
-                demerits >= 5 ? 'bg-yellow-100 text-yellow-700' :
+                demerits >= 4 ? 'bg-red-100 text-red-700' :
+                demerits >= 2 ? 'bg-yellow-100 text-yellow-700' :
                 'bg-tomato-150 text-tomato-700'
               }`}>
-                {demerits} / 10
+                {demerits} / 5
               </span>
             </div>
             {/* Demerit bar graph */}
@@ -1209,141 +1124,38 @@ export default function ExamInterface() {
         </div>
       </div>
 
-      {/* 1. Prohibited Shortcut / Mouse Action Warning Modal */}
-      {showShortcutModal && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-t-4 border-amber-500 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 text-amber-600">
-              <ShieldAlert size={36} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              শর্টকাট বা কপি-পেস্ট নিষিদ্ধ!
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed mb-6 font-medium">
-              পরীক্ষার চলাকালীন <span className="font-semibold text-gray-900">Copy, Cut, Paste, Select All বা মাউস রাইট ক্লিক</span> করা সম্পূর্ণ নিষিদ্ধ। প্রথমবার সতর্ক করা হলো। এর পর প্রতিবার <span className="text-amber-600 font-bold">১ ডিমেরিট পয়েন্ট</span> যুক্ত হবে।
-            </p>
-            <button
-              onClick={() => setShowShortcutModal(false)}
-              className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95"
-            >
-              আমি বুঝতে পেরেছি (I Understand)
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 2. Tab Switch / Window Blur (>10s) Auto-Submit Warning Modal */}
-      {showTabSwitchModal && (
-        <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-t-4 border-red-500 text-center flex flex-col items-center relative">
-            <button 
-              onClick={handleDismissTabModal}
-              title="Close and submit"
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-lg"
-            >
-              <X size={20} />
-            </button>
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-600 animate-pulse">
-              <AlertTriangle size={36} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              ট্যাব পরিবর্তনের কারণে অটো-সাবমিট হচ্ছে!
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed mb-4 font-medium">
-              আপনি ১০ সেকেন্ডের বেশি সময় পরীক্ষার পেজের বাইরে ছিলেন। নিয়ম লঙ্ঘনের কারণে আপনার খাতা অটো-সাবমিট করা হচ্ছে।
-            </p>
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 w-full flex items-center justify-center gap-2 font-mono text-base font-bold">
-              <span>স্বয়ংক্রিয় সাবমিট হতে বাকি:</span>
-              <span className="text-xl text-red-600">{tabCountdown}s</span>
-            </div>
-            <button
-              onClick={handleDismissTabModal}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95"
-            >
-              এখনই সাবমিট করুন (Submit Now)
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 3. Mobile Phone Detected (>5s) Modal */}
-      {showPhoneModal && (
-        <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+      {/* Rule 8: Page Reload Confirmation Modal */}
+      {showReloadModal && (
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-t-4 border-red-500 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-600 animate-bounce">
-              <Smartphone size={36} />
+            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-600 animate-spin">
+              <RefreshCw size={36} />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              মোবাইল ফোন সনাক্ত হয়েছে!
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed mb-4 font-medium">
-              Please phone use koro na, nahole system paper auto submit korbe. ক্যামেরা ফ্রন্ট থেকে অবিলম্বে ফোন সরিয়ে কনফার্ম করুন।
-            </p>
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2.5 rounded-xl mb-6 w-full flex items-center justify-center gap-2 font-mono text-sm font-semibold">
-              <span>কনফার্ম না করলে অটো-সাবমিট:</span>
-              <span className="text-base text-red-600 font-bold">{phoneCountdown}s</span>
-            </div>
-            <button
-              onClick={handleConfirmPhoneRemoved}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
-            >
-              <CheckCircle size={18} />
-              <span>আমি ফোন সরিয়ে ফেলেছি (Confirm Removed)</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 4. Left Screen / Camera Absence (>10s) Auto-Submit Modal */}
-      {showAbsenceModal && (
-        <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-t-4 border-red-500 text-center flex flex-col items-center relative">
-            <button 
-              onClick={handleDismissAbsenceModal}
-              title="Close and submit"
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-lg"
-            >
-              <X size={20} />
-            </button>
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-600 animate-pulse">
-              <EyeOff size={36} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              ক্যামেরা থেকে অনুপস্থিতি সনাক্ত হয়েছে!
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed mb-4 font-medium">
-              আপনি ১০ সেকেন্ডের বেশি সময় ক্যামেরা স্ক্রিনের বাইরে ছিলেন বা স্ক্রিন ব্লাঙ্ক ছিল। আপনার খাতা অটো-সাবমিট করা হচ্ছে।
-            </p>
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 w-full flex items-center justify-center gap-2 font-mono text-base font-bold">
-              <span>স্বয়ংক্রিয় সাবমিট হতে বাকি:</span>
-              <span className="text-xl text-red-600">{absenceCountdown}s</span>
-            </div>
-            <button
-              onClick={handleDismissAbsenceModal}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95"
-            >
-              এখনই সাবমিট করুন (Submit Now)
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 5. Demerit Points Reached 10 Auto-Submit Modal */}
-      {showDemeritModal && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-t-4 border-red-600 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-4 text-red-600 animate-pulse">
-              <ShieldAlert size={38} />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              ১০ ডিমেরিট পয়েন্ট অতিক্রম!
+              পেজ রিলোড নিশ্চিতকরণ (Confirm Reload)
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed mb-6 font-medium">
-              সর্বোচ্চ ডিমেরিট পয়েন্ট সীমা (১০ পয়েন্ট) অতিক্রম করার কারণে সিস্টেম আপনার পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট করছে।
+              আপনি কি সত্যিই পেজ রিলোড করতে চান? <br />
+              <span className="text-red-600 font-bold">সতর্কতা: রিলোড করলে আপনার পরীক্ষার খাতা সাথে সাথে AUTO-SUBMIT হয়ে যাবে!</span>
             </p>
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 text-red-700 rounded-xl font-mono text-sm font-semibold">
-              <Clock size={16} className="animate-spin" />
-              <span>খাতা সাবমিট হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</span>
+            <div className="flex items-center gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => setShowReloadModal(false)}
+                className="flex-1 py-3 px-4 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer"
+              >
+                বাতিল (Cancel)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowReloadModal(false);
+                  handleSubmitExam(true, 'Auto-Submitted: Student confirmed page reload');
+                }}
+                className="flex-1 py-3 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-md transition cursor-pointer"
+              >
+                রিলোড ও সাবমিট
+              </button>
             </div>
           </div>
         </div>
@@ -1357,7 +1169,7 @@ export default function ExamInterface() {
               <WifiOff size={36} />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে!
+              ইন্টারনেট সংযোগ বিচ্ছিন্ন হয়েছে! (Offline)
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed mb-4 font-medium">
               আপনার নেটওয়ার্ক সংযোগ বিচ্ছিন্ন হওয়ায় পরীক্ষা সাময়িকভাবে <span className="text-amber-700 font-bold">স্থগিত (On Hold)</span> করা হয়েছে। কোনো প্রশ্নের উত্তর গ্রহণ বা পরিবর্তন করা যাবে না। ইন্টারনেট সংযোগ পুনরায় ফিরে আসা মাত্রই এই উইন্ডো স্বয়ংক্রিয়ভাবে বন্ধ হবে এবং পরীক্ষা চালু হবে।

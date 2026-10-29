@@ -21,22 +21,16 @@ exports.logIncident = async (req, res) => {
   let isInstantBlock = req.body.forceSubmit === true;
   
   if (req.body.overrideDemerits === undefined) {
-    if (activityType === 'watching phone' || activityType === 'taking photo') {
-      demeritPoints = 2;
-    } else if (activityType === 'talking') {
-      demeritPoints = 1;
+    if (activityType === 'talking') {
+      demeritPoints = 1; // Talking / Speech: +1
     } else if (['Tab Switching', 'Window Blur', 'Tab Switching / Window Blur'].includes(activityType)) {
-      demeritPoints = 2;
+      demeritPoints = 2; // Tab Switch / Screen Blur / Minimize: +2
     } else if (['shortcut copy', 'manual copy', 'pasting answer', 'Clipboard Activity', 'Shortcut Activity', 'Exit Attempt'].includes(activityType)) {
-      demeritPoints = 1;
+      demeritPoints = 1; // Copy / Paste / Cut / Select all shortcuts: +1
     } else if (activityType === 'AI Detection') {
-      demeritPoints = 0;
-      const lowerDetails = (details || '').toLowerCase();
-      
-      if (lowerDetails.includes('multiple persons')) demeritPoints += 2;
-      if (lowerDetails.includes('cell phone')) isInstantBlock = true;
-      if (/\bbook\b/.test(lowerDetails) || /\bnotebook\b/.test(lowerDetails)) demeritPoints += 1;
-      if (lowerDetails.includes('monitor') || lowerDetails.includes('screen') || lowerDetails.includes('laptop')) demeritPoints += 2;
+      demeritPoints = 0; // Object detection has NO demerit points!
+    } else {
+      demeritPoints = 1;
     }
   }
 
@@ -65,7 +59,7 @@ exports.logIncident = async (req, res) => {
       let newStatus = currentAttempt.status;
       let newBlockUntil = currentAttempt.block_until ? new Date(currentAttempt.block_until) : null;
 
-      if (isInstantBlock || newDemerits >= 10) {
+      if (isInstantBlock || newDemerits >= 5) {
         newStatus = 'completed';
         newBlockUntil = null;
         currentAttempt.demerit_points = newDemerits;
@@ -78,7 +72,7 @@ exports.logIncident = async (req, res) => {
         try {
           const submissionReason = isInstantBlock
             ? `Auto-Submitted: ${details || activityType}`
-            : 'Auto-Submitted: Exceeded 10 demerit points threshold';
+            : 'Auto-Submitted: Demerit points reached threshold (5+ points)';
 
           const submissionLog = new ProctoringLog({
             student_id: studentId,

@@ -55,18 +55,27 @@ SafeExam.Ai executes deep learning inference directly on the client's device usi
 
 Every violation incurs weighted **Demerit Points**. If an examinee accumulates penalty points surpassing the critical threshold, the session triggers an automatic freeze and instant examination auto-submission.
 
-### ⚖️ Violation & Penalty Demerit Matrix
+### ⚖️ Violation & Demerit Points Matrix
 
-| Violation Category | Detection Method | Penalty Points | Automatic System Action |
+| Action / Violation | Detection Method | Demerit Points | System Action |
 |:---|:---|:---:|:---|
-| 📱 **Cell Phone / Smart Device Detected** | Client-side COCO-SSD Object Recognition | **+4.0 pts** | High-priority flag + Instant warning banner |
-| 👥 **Multiple Faces / Unauthorized Person** | COCO-SSD Multi-Person Detection | **+3.0 pts** | Immediate warning + Evidence snapshot logged |
-| 🔄 **Tab Switching / Window Blur** | HTML5 Page Visibility API & Window Blur | **+2.0 pts** | Instant alert modal + Time-stamped event |
-| 🖥️ **Exiting Fullscreen Mode** | Fullscreen Change Event Monitor | **+2.0 pts** | Warning modal + Auto fullscreen re-request |
-| 👤 **Head Pose / Looking Away / Looking Down** | Face Orientation & Continuous Tracking | **+1.5 pts** | Progressive notification badge |
-| 🎙️ **Ambient Audio / Speech Anomaly** | Web Audio API AudioContext Decibel Analyzer | **+1.0 pts** | Audio spike logged in proctoring audit feed |
-| 📋 **Copy / Paste / DevTools Shortcut** | DOM Clipboard & Keyboard Event Trapping | **+1.5 pts** | Immediate action blockage + Audit record |
-| 🚨 **Threshold Breach (≥ 15.0 pts)** | Heuristic Aggregator | **CRITICAL** | **Automated Exam Lock & Immediate Forced Submission** |
+| 📋 **Copy / Paste / Cut / Select All** | Keyboard DOM Trapping (`Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Ctrl+A`) | **+1 pt** | Action blocked & logged |
+| 🔄 **Tab Switching / Window Blur / Minimize** | HTML5 Visibility API & Window Blur Event | **+2 pts** | Logged in live proctoring feed |
+| 🎙️ **Student Speaking / Talking** | Web Audio API Real-time Voice Analyzer | **+1 pt** | Logged with voice timestamp |
+| 📦 **Object Detection (Phone, Book, People)** | COCO-SSD Computer Vision | **0 pts** | No demerits added (Uses 5s Auto-Submit rule) |
+
+### 🚨 Comprehensive Auto-Submit Triggers
+
+| Trigger Condition | Threshold Time | Action & Behavior |
+|:---|:---:|:---|
+| 📱 **Cell Phone Detected** | **5 Seconds** | **Instant Auto-Submit** (No warning or countdown popup) |
+| 👥 **Multiple Persons in Camera** | **5 Seconds** | **Instant Auto-Submit** (No warning or countdown popup) |
+| 📖 **Book / Notebook in View** | **5 Seconds** | **Instant Auto-Submit** (No warning or countdown popup) |
+| 👤 **Student Absent / Camera Blur** | **5 Seconds** | **Instant Auto-Submit** (No face visible or camera obscured) |
+| ⚠️ **Demerit Points Threshold** | **5+ Points** | **Immediate Auto-Submit** upon reaching 5 points |
+| 🌐 **Network Disconnection** | **30 Seconds** | **Auto-Submit** if offline for more than 30s |
+| ⏳ **Exam Duration Expired** | **00:00 Countdown** | **Auto-Submit** when time limit is reached |
+| 🔄 **Page Reload Interception** | **F5 / Ctrl+R** | Confirmation Modal: If confirmed, **Auto-Submits**; if cancelled, exam continues |
 
 ---
 
