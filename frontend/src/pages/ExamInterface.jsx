@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import { useAlert } from '../context/AlertContext';
 
 export default function ExamInterface() {
   const { examId } = useParams();
@@ -175,11 +176,9 @@ export default function ExamInterface() {
     document.addEventListener('selectstart', handleMouseBlock);
 
     return () => {
-      clearInterval(awayMonitorTimer);
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleWindowBlur);
-      window.removeEventListener('focus', handleWindowFocus);
       document.removeEventListener('contextmenu', handleMouseBlock);
       document.removeEventListener('copy', handleMouseBlock);
       document.removeEventListener('cut', handleMouseBlock);
@@ -696,9 +695,6 @@ export default function ExamInterface() {
                 // Ignore audio read errors
               }
             }
-
-            const base64Frame = canvas.toDataURL('image/jpeg', 0.6);
-            setProcessedFrame(base64Frame);
           } catch (err) {
             console.warn("Detection error", err);
           }
