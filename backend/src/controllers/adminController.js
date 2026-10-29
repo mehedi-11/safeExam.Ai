@@ -8,6 +8,9 @@ const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
 const StudentExam = require('../models/StudentExam');
 const ProctoringLog = require('../models/ProctoringLog');
+const mongoose = require('mongoose');
+const ExamQuestion = require('../models/ExamQuestion');
+const StudentAnswer = require('../models/StudentAnswer');
 const bcrypt = require('bcryptjs');
 
 // Get Admin Profile

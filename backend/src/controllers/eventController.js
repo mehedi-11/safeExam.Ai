@@ -227,7 +227,12 @@ exports.bulkDeleteEvents = async (req, res) => {
       return res.status(400).json({ message: 'No event IDs provided' });
     }
 
-    let filter = { _id: { $in: eventIds } };
+    const validIds = eventIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+    if (validIds.length === 0) {
+      return res.status(400).json({ message: 'No valid event IDs provided' });
+    }
+
+    let filter = { _id: { $in: validIds } };
     if (req.user.role === 'teacher') {
       filter.created_by = req.user.id;
     }
