@@ -12,6 +12,8 @@ const StudentExam = require('../models/StudentExam');
 const ProctoringLog = require('../models/ProctoringLog');
 const bcrypt = require('bcryptjs');
 
+
+
 // Get Admin Profile
 exports.getProfile = async (req, res) => {
   try {
@@ -28,6 +30,8 @@ exports.getProfile = async (req, res) => {
     return res.status(500).json({ message: 'Server error fetching profile' });
   }
 };
+
+
 
 // Update Admin Profile
 exports.updateProfile = async (req, res) => {
@@ -57,6 +61,8 @@ exports.updateProfile = async (req, res) => {
     return res.status(500).json({ message: 'Server error updating profile' });
   }
 };
+
+
 
 // --- ADMIN MANAGEMENT ---
 
@@ -96,6 +102,8 @@ exports.addAdmin = async (req, res) => {
     return res.status(500).json({ message: 'Server error adding admin' });
   }
 };
+
+
 
 // --- TEACHER MANAGEMENT ---
 
@@ -170,6 +178,8 @@ exports.bulkDeleteTeachers = async (req, res) => {
     return res.status(500).json({ message: 'Server error bulk deleting teachers' });
   }
 };
+
+
 
 // --- STUDENT MANAGEMENT ---
 
@@ -263,6 +273,8 @@ exports.bulkDeleteStudents = async (req, res) => {
   }
 };
 
+
+
 // --- ADMIN EXAM MANAGEMENT ---
 exports.getAllExams = async (req, res) => {
   try {
@@ -323,8 +335,8 @@ exports.bulkDeleteExams = async (req, res) => {
     const liveExams = await Exam.find({ _id: { $in: validIds }, is_live: true }).select('title');
     if (liveExams.length > 0) {
       const titles = liveExams.map(e => `"${e.title}"`).join(', ');
-      return res.status(400).json({ 
-        message: `Cannot delete live exam(s): ${titles}. Please stop them before deleting.` 
+      return res.status(400).json({
+        message: `Cannot delete live exam(s): ${titles}. Please stop them before deleting.`
       });
     }
 
@@ -334,15 +346,17 @@ exports.bulkDeleteExams = async (req, res) => {
     await StudentAnswer.deleteMany({ exam_id: { $in: validIds } });
     await ProctoringLog.deleteMany({ exam_id: { $in: validIds } });
 
-    return res.json({ 
-      message: `${result.deletedCount} exam(s) deleted successfully`, 
-      deletedCount: result.deletedCount 
+    return res.json({
+      message: `${result.deletedCount} exam(s) deleted successfully`,
+      deletedCount: result.deletedCount
     });
   } catch (error) {
     console.error('Error bulk deleting exams:', error);
     return res.status(500).json({ message: 'Server error bulk deleting exams' });
   }
 };
+
+
 
 // --- ADMIN NOTIFICATIONS ---
 exports.getNotifications = async (req, res) => {
@@ -364,6 +378,8 @@ exports.markNotificationsRead = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: 'Server error updating notifications' });
   }
+
+
 };
 
 // --- DASHBOARD STATS ---
@@ -374,7 +390,7 @@ exports.getDashboardStats = async (req, res) => {
     const totalExamsCreated = await Exam.countDocuments();
     const totalLiveExams = await Exam.countDocuments({ is_live: true });
     const totalExamsDone = await StudentExam.countDocuments({ status: 'completed' });
-    
+
     // Event Statistics
     const totalEvents = await Event.countDocuments();
     const totalLiveEvents = await Event.countDocuments({ status: 'live' });
@@ -388,14 +404,16 @@ exports.getDashboardStats = async (req, res) => {
       { $limit: 5 },
       { $lookup: { from: 'events', localField: '_id', foreignField: '_id', as: 'event' } },
       { $unwind: "$event" },
-      { $project: {
+      {
+        $project: {
           id: "$event._id",
           title: "$event.title",
           event_date: "$event.event_date",
           status: "$event.status",
           registration_count: 1,
           _id: 0
-      }}
+        }
+      }
     ]);
 
     // Get top 5 teachers by number of exams created
@@ -438,6 +456,8 @@ exports.getDashboardStats = async (req, res) => {
     return res.status(500).json({ message: 'Server error fetching dashboard stats' });
   }
 };
+
+
 
 // --- BULK IMPORT ---
 exports.addBulkStudents = async (req, res) => {
@@ -500,13 +520,15 @@ exports.addBulkTeachers = async (req, res) => {
   }
 };
 
+
+
 // --- ANALYTICS ---
 exports.getAnalytics = async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
     const startOfYear = new Date(currentYear, 0, 1);
     const endOfYear = new Date(currentYear + 1, 0, 1);
-    
+
     const monthlyExamsAgg = await Exam.aggregate([
       { $match: { exam_date: { $gte: startOfYear, $lt: endOfYear } } },
       { $group: { _id: { $month: "$exam_date" }, count: { $sum: 1 } } },
@@ -534,6 +556,8 @@ exports.getAnalytics = async (req, res) => {
   }
 };
 
+
+
 // --- STUDENT EXAMS DETAILS ---
 exports.getStudentExamsDetails = async (req, res) => {
   const { studentId } = req.params;
@@ -541,7 +565,7 @@ exports.getStudentExamsDetails = async (req, res) => {
     const studentExams = await StudentExam.find({ student_id: studentId, status: 'completed' })
       .populate('exam_id', 'title')
       .sort({ completed_at: -1 });
-      
+
     const response = studentExams.map(se => ({
       title: se.exam_id ? se.exam_id.title : 'Unknown Exam',
       score: se.total_score,

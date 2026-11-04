@@ -28,7 +28,7 @@ const handleFailedLogin = async (identifier, role = 'admin') => {
     return null;
   } else {
     attempt.attempts += 1;
-    
+
     if (role === 'admin') {
       let blockUntil = null;
       if (attempt.attempts === 3) {
@@ -398,7 +398,7 @@ exports.verifyIdentifier = async (req, res) => {
   const { role, identifier } = req.body;
   try {
     let user = null;
-    
+
     if (role === 'student') {
       user = await Student.findOne({ id: identifier });
     } else if (role === 'teacher') {
@@ -410,14 +410,14 @@ exports.verifyIdentifier = async (req, res) => {
     }
 
     if (!user) return res.json({ success: false, message: 'Account not found' });
-    
+
     const resetToken = crypto.randomInt(100000, 999999).toString();
     const tokenExpiry = new Date();
     tokenExpiry.setMinutes(tokenExpiry.getMinutes() + 15);
-    
+
     const Model = role === 'student' ? Student : role === 'teacher' ? Teacher : Admin;
     await Model.updateOne({ _id: user._id }, { $set: { reset_token: resetToken, reset_token_expiry: tokenExpiry } }, { strict: false });
-    
+
     // Send email securely from backend (Single email sent via EmailJS REST API)
     await sendOtpEmail(user.email, user.name, resetToken, 'Password Reset');
 
@@ -442,7 +442,7 @@ exports.verifyResetOtp = async (req, res) => {
   try {
     let user = null;
     let Model = null;
-    
+
     if (role === 'student') {
       Model = Student;
       user = await Model.findOne({ id: identifier });
@@ -481,7 +481,7 @@ exports.resetPassword = async (req, res) => {
   try {
     let user = null;
     let Model = null;
-    
+
     if (role === 'student') {
       Model = Student;
       user = await Model.findOne({ id: identifier });
@@ -496,10 +496,10 @@ exports.resetPassword = async (req, res) => {
     }
 
     if (!user) return res.json({ success: false, message: 'Account not found' });
-    
+
     // Check reset token via lean document
     const rawUser = await Model.findById(user._id).lean();
-    
+
     if (!rawUser || !rawUser.reset_token || rawUser.reset_token !== String(tokenToVerify).trim() || new Date() > new Date(rawUser.reset_token_expiry)) {
       return res.json({ success: false, message: 'Invalid or expired OTP' });
     }

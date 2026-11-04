@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     const handleClickOutside = (event) => {
       const isOutsideNotif = notifRef.current && !notifRef.current.contains(event.target);
       const isOutsideMobileNotif = mobileNotifRef.current && !mobileNotifRef.current.contains(event.target);
-      
+
       if (isOutsideNotif && isOutsideMobileNotif) {
         setIsNotificationsOpen(false);
       }
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
     }
   };
 
-  
+
   const handleDeleteExam = async (exam) => {
     const examId = exam.id || exam._id;
     if (exam.is_live) {
@@ -494,7 +494,7 @@ export default function AdminDashboard() {
         } catch (err) {
           setError(
             `Error importing ${type}s: ` +
-              (err.response?.data?.message || err.message),
+            (err.response?.data?.message || err.message),
           );
         } finally {
           setLoading(false);
@@ -541,12 +541,12 @@ export default function AdminDashboard() {
           setError("No students found for this exam.");
           return;
         }
-        
+
         let csvContent = "Student ID,Name,Email,Score,Status\n";
         students.forEach(student => {
           csvContent += `"${student.student_id || ''}","${student.name || ''}","${student.email || ''}","${student.score || 0}","${student.status || ''}"\n`;
         });
-        
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -595,7 +595,7 @@ export default function AdminDashboard() {
                       try {
                         await api.put("/admin/notifications/mark-read");
                         fetchData();
-                      } catch (err) {}
+                      } catch (err) { }
                     }}
                     className="text-[10px] font-bold text-tomato-400 hover:underline"
                   >
@@ -629,9 +629,8 @@ export default function AdminDashboard() {
 
       {/* Sidebar Navigation */}
       <div
-        className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 w-64 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between shrink-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div>
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
@@ -648,14 +647,14 @@ export default function AdminDashboard() {
                 </span>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden p-1.5 text-gray-500 hover:text-white hover:bg-gray-100 rounded-lg transition-colors"
             >
               <X size={20} />
             </button>
           </div>
-          
+
           <div className="p-4 space-y-1.5">
             {[
               { id: "overview", label: "Dashboard", icon: LayoutDashboard },
@@ -677,11 +676,10 @@ export default function AdminDashboard() {
                     setError("");
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
-                    activeTab === tab.id
-                      ? "bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
-                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
-                  }`}
+                  className={`w-full flex items-center justify-between px-4 py-3 font-semibold text-sm rounded-xl transition-all ${activeTab === tab.id
+                    ? "bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
+                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <tab.icon size={18} />
@@ -689,11 +687,10 @@ export default function AdminDashboard() {
                   </div>
                   {unreadCount > 0 && (
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full ${
-                        activeTab === tab.id
-                          ? "bg-white text-tomato-400"
-                          : "bg-gray-900 text-white"
-                      }`}
+                      className={`text-[10px] px-2 py-0.5 rounded-full ${activeTab === tab.id
+                        ? "bg-white text-tomato-400"
+                        : "bg-gray-900 text-white"
+                        }`}
                     >
                       {unreadCount}
                     </span>
@@ -740,7 +737,7 @@ export default function AdminDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
-        <TopMenu 
+        <TopMenu
           pageName={activeTab}
           rightContent={
             <div className="relative" ref={notifRef}>
@@ -762,7 +759,7 @@ export default function AdminDashboard() {
                         try {
                           await api.put("/admin/notifications/mark-read");
                           fetchData();
-                        } catch (err) {}
+                        } catch (err) { }
                       }}
                       className="text-[10px] font-bold text-tomato-400 hover:underline"
                     >
@@ -1431,9 +1428,8 @@ export default function AdminDashboard() {
                             return (
                               <tr
                                 key={student.id}
-                                className={`hover:bg-gray-50/60 transition-colors ${
-                                  isSelected ? "bg-indigo-50/50" : ""
-                                }`}
+                                className={`hover:bg-gray-50/60 transition-colors ${isSelected ? "bg-indigo-50/50" : ""
+                                  }`}
                               >
                                 <td className="p-4 text-center w-12">
                                   <input
@@ -1691,9 +1687,8 @@ export default function AdminDashboard() {
                             return (
                               <tr
                                 key={teacher.id}
-                                className={`hover:bg-gray-50/60 transition-colors ${
-                                  isSelected ? "bg-indigo-50/50" : ""
-                                }`}
+                                className={`hover:bg-gray-50/60 transition-colors ${isSelected ? "bg-indigo-50/50" : ""
+                                  }`}
                               >
                                 <td className="p-4 text-center w-12">
                                   <input
@@ -1861,113 +1856,113 @@ export default function AdminDashboard() {
                       <th className="py-3.5 px-4 font-bold text-xs text-right">Actions</th>
                     </tr>
                   </thead>
-                    <tbody className="text-sm">
-                      {(() => {
-                        const sq = proctoringSearchQuery.toLowerCase();
-                        const filteredExams = allExams
-                          .slice()
-                          .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)))
-                          .filter((exam) => {
-                            const matchesSearch =
-                              (exam.title && exam.title.toLowerCase().includes(sq)) ||
-                              (exam.university_name && exam.university_name.toLowerCase().includes(sq)) ||
-                              (exam.course_name && exam.course_name.toLowerCase().includes(sq)) ||
-                              (exam.course_code && exam.course_code.toLowerCase().includes(sq));
+                  <tbody className="text-sm">
+                    {(() => {
+                      const sq = proctoringSearchQuery.toLowerCase();
+                      const filteredExams = allExams
+                        .slice()
+                        .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0) || String(b._id || b.id).localeCompare(String(a._id || a.id)))
+                        .filter((exam) => {
+                          const matchesSearch =
+                            (exam.title && exam.title.toLowerCase().includes(sq)) ||
+                            (exam.university_name && exam.university_name.toLowerCase().includes(sq)) ||
+                            (exam.course_name && exam.course_name.toLowerCase().includes(sq)) ||
+                            (exam.course_code && exam.course_code.toLowerCase().includes(sq));
 
-                            return matchesSearch;
-                          });
-
-                        if (filteredExams.length === 0) {
-                          return (
-                            <tr>
-                              <td colSpan="5" className="py-12 text-center text-gray-500">
-                                <div className="flex flex-col items-center justify-center space-y-3">
-                                  <FileText size={32} className="opacity-20" />
-                                  <p>No exams found</p>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        return filteredExams.map((exam) => {
-                          const examDate = new Date(exam.exam_date);
-                          const isLive = Boolean(exam.is_live);
-                          const isEnded = !isLive;
-                          const eId = exam._id || exam.id;
-
-                          return (
-                            <tr key={eId} className="border-b border-gray-100 hover:bg-white">
-                              <td className="py-3 px-4 text-sm text-gray-900">
-                                {exam.title}
-                                {exam.event_id && (
-                                  <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px]">Event Exam</span>
-                                )}
-                              </td>
-                              <td className="py-3 px-4 text-xs text-gray-500">
-                                {exam.course_name} {exam.course_code ? `(${exam.course_code})` : ''}
-                                <br />
-                                <span className="text-gray-500">{exam.university_name}</span>
-                              </td>
-                              <td className="py-3 px-4 text-xs text-gray-500">
-                                <div>{examDate.toLocaleDateString()}</div>
-                                <div>{examDate.toLocaleTimeString()}</div>
-                              </td>
-                              <td className="py-3 px-4 text-center">
-                                {isLive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
-                                    <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
-                                    Live Now
-                                  </span>
-                                ) : isEnded ? (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-gray-100 text-gray-500 border border-gray-200 w-max">
-                                    Ended
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
-                                    Upcoming
-                                  </span>
-                                )}
-                              </td>
-                              <td className="py-3 px-4 text-right space-x-2">
-                                <div className="flex items-center justify-end gap-2">
-                                  {isLive && (
-                                    <button
-                                      onClick={() => navigate(`/admin/proctoring/${eId}`)}
-                                      className="px-3 py-1.5 text-xs text-tomato-600 bg-tomato-50 border border-tomato-200 rounded-lg hover:bg-tomato-100 transition-colors flex items-center gap-1.5"
-                                    >
-                                      <Camera size={14} />
-                                      View Live
-                                    </button>
-                                  )}
-                                  
-                                  <div className="flex gap-2">
-                                    <button
-                                      onClick={() => downloadProctoringData(eId, 'logs')}
-                                      title="Download Incident Logs"
-                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-400 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
-                                    >
-                                      <Download size={14} />
-                                      <span className="text-[11px] font-bold">Logs</span>
-                                    </button>
-                                    <button
-                                      onClick={() => downloadProctoringData(eId, 'roster')}
-                                      title="Download Student Roster"
-                                      className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-400 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
-                                    >
-                                      <Users size={14} />
-                                      <span className="text-[11px] font-bold">Roster</span>
-                                    </button>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          );
+                          return matchesSearch;
                         });
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
+
+                      if (filteredExams.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan="5" className="py-12 text-center text-gray-500">
+                              <div className="flex flex-col items-center justify-center space-y-3">
+                                <FileText size={32} className="opacity-20" />
+                                <p>No exams found</p>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return filteredExams.map((exam) => {
+                        const examDate = new Date(exam.exam_date);
+                        const isLive = Boolean(exam.is_live);
+                        const isEnded = !isLive;
+                        const eId = exam._id || exam.id;
+
+                        return (
+                          <tr key={eId} className="border-b border-gray-100 hover:bg-white">
+                            <td className="py-3 px-4 text-sm text-gray-900">
+                              {exam.title}
+                              {exam.event_id && (
+                                <span className="inline-block mt-1 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-[10px]">Event Exam</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-xs text-gray-500">
+                              {exam.course_name} {exam.course_code ? `(${exam.course_code})` : ''}
+                              <br />
+                              <span className="text-gray-500">{exam.university_name}</span>
+                            </td>
+                            <td className="py-3 px-4 text-xs text-gray-500">
+                              <div>{examDate.toLocaleDateString()}</div>
+                              <div>{examDate.toLocaleTimeString()}</div>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              {isLive ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
+                                  <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
+                                  Live Now
+                                </span>
+                              ) : isEnded ? (
+                                <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-gray-100 text-gray-500 border border-gray-200 w-max">
+                                  Ended
+                                </span>
+                              ) : (
+                                <span className="inline-flex px-2.5 py-1 rounded-lg text-xs bg-tomato-50 text-tomato-600 border border-tomato-100 w-max">
+                                  Upcoming
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-right space-x-2">
+                              <div className="flex items-center justify-end gap-2">
+                                {isLive && (
+                                  <button
+                                    onClick={() => navigate(`/admin/proctoring/${eId}`)}
+                                    className="px-3 py-1.5 text-xs text-tomato-600 bg-tomato-50 border border-tomato-200 rounded-lg hover:bg-tomato-100 transition-colors flex items-center gap-1.5"
+                                  >
+                                    <Camera size={14} />
+                                    View Live
+                                  </button>
+                                )}
+
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => downloadProctoringData(eId, 'logs')}
+                                    title="Download Incident Logs"
+                                    className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-400 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
+                                  >
+                                    <Download size={14} />
+                                    <span className="text-[11px] font-bold">Logs</span>
+                                  </button>
+                                  <button
+                                    onClick={() => downloadProctoringData(eId, 'roster')}
+                                    title="Download Student Roster"
+                                    className="px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-tomato-400 bg-white border border-gray-200 rounded-lg hover:border-tomato-200 transition-colors"
+                                  >
+                                    <Users size={14} />
+                                    <span className="text-[11px] font-bold">Roster</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
@@ -2364,7 +2359,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Full Name
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -2379,7 +2374,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Email Address
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
@@ -2394,7 +2389,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Password
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="relative">
               <input
@@ -2415,8 +2410,8 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={submittingModal}
             className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
           >
@@ -2435,7 +2430,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Student ID
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -2450,7 +2445,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Full Name
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -2465,7 +2460,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Email Address
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
@@ -2480,7 +2475,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Password
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="relative">
               <input
@@ -2502,8 +2497,8 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="pt-2">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={submittingModal}
               className="tomato-btn w-full py-2.5 text-sm flex items-center justify-center gap-2"
             >
@@ -2524,7 +2519,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Full Name
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="text"
@@ -2539,7 +2534,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Email Address
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
@@ -2554,7 +2549,7 @@ export default function AdminDashboard() {
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               Password
- <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <div className="relative">
               <input
@@ -2575,8 +2570,8 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={submittingModal}
             className="tomato-btn w-full py-2.5 mt-2 flex items-center justify-center gap-2"
           >
@@ -2614,12 +2609,12 @@ export default function AdminDashboard() {
                     .slice()
                     .sort((a, b) => new Date(b.finished_at || 0) - new Date(a.finished_at || 0))
                     .map((exam, idx) => (
-                    <tr key={idx} className="hover:bg-white">
-                      <td className="px-4 py-3 text-gray-900">{exam.title}</td>
-                      <td className="px-4 py-3 text-xs">{new Date(exam.finished_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-right text-tomato-400">{exam.score}%</td>
-                    </tr>
-                  ))}
+                      <tr key={idx} className="hover:bg-white">
+                        <td className="px-4 py-3 text-gray-900">{exam.title}</td>
+                        <td className="px-4 py-3 text-xs">{new Date(exam.finished_at).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 text-right text-tomato-400">{exam.score}%</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -2647,7 +2642,7 @@ export default function AdminDashboard() {
         return (
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
-            <div 
+            <div
               className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
               style={{
                 width: '32px',
