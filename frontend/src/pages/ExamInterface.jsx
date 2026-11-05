@@ -872,7 +872,7 @@ export default function ExamInterface() {
             <div className="mt-6 flex justify-end">
               <button 
                 onClick={startExamSession}
-                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg cursor-pointer"
+                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-sm hover:shadow-tomato-500/30 transition-all text-white font-bold py-3 px-8 rounded-xl transition-colors text-lg cursor-pointer"
               >
                 I Understand, Start Exam
               </button>
@@ -887,7 +887,7 @@ export default function ExamInterface() {
         
         {/* Left Side: Exam content */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white border border-gray-200 p-6 rounded-2xl flex justify-between items-center shadow-md shadow-gray-200/50">
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl flex justify-between items-center shadow-sm">
             <div>
               <button 
                 onClick={async () => { 
@@ -912,7 +912,7 @@ export default function ExamInterface() {
             </div>
 
             {/* Timer widget */}
-            <div className="flex items-center gap-3 bg-tomato-50 text-tomato-650 py-2.5 px-4 rounded-xl border border-tomato-100 font-semibold shadow-md shadow-gray-200/50">
+            <div className="flex items-center gap-3 bg-tomato-50 text-tomato-650 py-2.5 px-4 rounded-xl border border-tomato-100 font-semibold shadow-sm">
               <Clock size={18} className="animate-pulse" />
               <div className="text-left font-mono">
                 <span className="text-[10px] block uppercase text-tomato-400 font-bold leading-3">Time Left</span>
@@ -922,7 +922,7 @@ export default function ExamInterface() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-md shadow-gray-200/50 animate-fade-in">
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm animate-fade-in">
               <ShieldAlert size={16} />
               <span>{error}</span>
             </div>
@@ -930,13 +930,13 @@ export default function ExamInterface() {
 
           {/* Questions Render */}
           {questions.length === 0 && !loading && !isBlocked ? (
-            <div className="bg-white border border-gray-200 py-16 text-center text-xs text-gray-500 rounded-2xl shadow-md shadow-gray-200/50">
+            <div className="bg-white border border-gray-200 py-16 text-center text-xs text-gray-500 rounded-2xl shadow-sm">
               Exam questions are not configured or are locked. Please contact your instructor.
             </div>
           ) : (
             <div className="space-y-6">
               {questions.map((q, idx) => (
-                <div key={q.id} className="bg-white border border-gray-200 p-6 rounded-2xl shadow-md shadow-gray-200/50">
+                <div key={q.id} className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
                   <h4 className="font-bold text-gray-900 text-sm mb-4 leading-relaxed">
                     Question {idx + 1}: {q.question_text}
                   </h4>
@@ -1006,7 +1006,7 @@ export default function ExamInterface() {
         <div className="lg:col-span-1 space-y-6">
           
           {/* Live webcam component */}
-          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-md shadow-gray-200/50 flex flex-col items-center">
+          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm flex flex-col items-center">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5 self-start">
               <Camera size={14} className="text-tomato-400" />
               <span>Camera Monitor Preview</span>
@@ -1065,7 +1065,7 @@ export default function ExamInterface() {
           </div>
 
           {/* Demerit points status */}
-          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-md shadow-gray-200/50">
+          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-500 mb-3">AI Integrity Score</h4>
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold text-gray-500">Demerit Suspicion Points</span>
@@ -1097,7 +1097,7 @@ export default function ExamInterface() {
 
 
           {/* Live AI Detection Logs */}
-          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-md shadow-gray-200/50">
+          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm">
             <h4 className="font-bold text-[10px] uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
               <Terminal size={14} className="text-tomato-400" />
               <span>Agent ELI - The Real-time AI Proctoring Engine</span>

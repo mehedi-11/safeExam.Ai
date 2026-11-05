@@ -6,16 +6,6 @@ import {
   ShieldCheck, ChevronRight, GraduationCap,
   Clock, Lightbulb, Brain, BookOpen
 } from 'lucide-react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Cell
-} from 'recharts';
 import api from '../api/axiosConfig';
 
 export default function SubjectInsights({ exams: propExams, profile: propProfile, onRefresh }) {
@@ -260,17 +250,7 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
     });
   }, [analytics.subjectsList, searchQuery, selectedFilter]);
 
-  // Chart data for subjects
-  const chartData = useMemo(() => {
-    return analytics.evaluatedSubjects.map(s => ({
-      name: s.name.length > 14 ? s.name.substring(0, 12) + '...' : s.name,
-      fullName: s.name,
-      code: s.code,
-      average: s.avgPercentage,
-      status: s.status
-    }));
-  }, [analytics.evaluatedSubjects]);
-
+  
   const getStatusColor = (status) => {
     switch (status) {
       case 'strength':
@@ -401,156 +381,86 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
       {/* Visual Analytics Row: Chart + Strengths & Growth Areas */}
       {analytics.evaluatedSubjects.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Recharts Subject Performance Bar Chart */}
-          <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-md shadow-gray-200/50 flex flex-col justify-between">
+          {/* Subject Performance Breakdown (No Graph) */}
+          <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-tomato-50 text-tomato-500 border border-tomato-100">
-                    <BarChart3 size={18} />
+                  <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    <Target size={18} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm md:text-base">Subject Score Comparison (%)</h3>
+                    <h3 className="font-bold text-gray-900 text-sm md:text-base">Subject Score Comparison</h3>
                     <p className="text-xs text-gray-500">Benchmark comparison against 75% distinction target</p>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                   {analytics.evaluatedSubjects.length} Evaluated
                 </span>
               </div>
 
-              <div className="h-64 w-full mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                    <XAxis 
-                      dataKey="name" 
-                      tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 500 }}
-                      interval={0}
-                      angle={-20}
-                      textAnchor="end"
-                    />
-                    <YAxis 
-                      domain={[0, 100]} 
-                      tick={{ fill: '#6b7280', fontSize: 11 }}
-                      tickFormatter={(val) => `${val}%`}
-                    />
-                    <Tooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-gray-900 text-white p-3 rounded-xl shadow-xl border border-gray-700 text-xs space-y-1">
-                              <p className="font-bold text-tomato-400">{data.fullName}</p>
-                              <p className="text-gray-300">Code: <span className="font-semibold text-white">{data.code}</span></p>
-                              <p className="text-gray-300">Score Average: <span className="font-black text-white">{data.average}%</span></p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Bar dataKey="average" radius={[6, 6, 0, 0]} maxBarSize={48}>
-                      {chartData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={
-                            entry.status === 'strength' 
-                              ? '#10b981' 
-                              : entry.status === 'moderate' 
-                              ? '#f59e0b' 
-                              : '#ef4444'
-                          } 
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="space-y-3 max-h-72 overflow-y-auto pr-1 mt-4">
+                {analytics.evaluatedSubjects.map((sub, idx) => (
+                  <div key={sub.name || idx} className="p-3.5 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-gray-900">{sub.name}</span>
+                        {sub.code && (
+                          <span className="text-[10px] font-semibold text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200">
+                            {sub.code}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-gray-900">{sub.avgPercentage}%</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          sub.avgPercentage >= 75
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : sub.avgPercentage >= 50
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {sub.avgPercentage >= 75 ? 'Strong' : sub.avgPercentage >= 50 ? 'Moderate' : 'Needs Focus'}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Native Progress Bar */}
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          sub.avgPercentage >= 75
+                            ? 'bg-emerald-500'
+                            : sub.avgPercentage >= 50
+                            ? 'bg-amber-500'
+                            : 'bg-red-500'
+                        }`}
+                        style={{ width: `${Math.min(100, Math.max(0, sub.avgPercentage))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-100 text-xs font-semibold text-gray-600">
+            <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-100 text-xs font-semibold text-gray-600 mt-4">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
                 ≥ 75% Strong
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
                 50-74% Moderate
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
                 &lt; 50% Needs Focus
               </span>
-            </div>
-          </div>
-
-          {/* Quick Summary Cards (Strengths & Urgent Action) */}
-          <div className="lg:col-span-4 space-y-4 flex flex-col justify-between">
-            {/* Strengths Card */}
-            <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-2 text-emerald-800 font-bold text-sm">
-                <CheckCircle2 size={18} className="text-emerald-600" />
-                <h4>Strongest Performers</h4>
-              </div>
-              {analytics.strengthsCount === 0 ? (
-                <p className="text-xs text-emerald-700/80">No subjects above 75% yet. Keep practicing to reach distinction!</p>
-              ) : (
-                <div className="space-y-2 mt-3">
-                  {analytics.evaluatedSubjects
-                    .filter(s => s.status === 'strength')
-                    .slice(0, 3)
-                    .map(s => (
-                      <div key={s.name} className="flex items-center justify-between text-xs bg-white/80 p-2.5 rounded-xl border border-emerald-100">
-                        <span className="font-bold text-gray-800 truncate mr-2">{s.name}</span>
-                        <span className="font-black text-emerald-600 shrink-0">{s.avgPercentage}%</span>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-
-            {/* Attention Required Card */}
-            <div className="bg-red-50/60 border border-red-200/80 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-2 text-red-800 font-bold text-sm">
-                <AlertTriangle size={18} className="text-red-600" />
-                <h4>Subjects Needing Focus</h4>
-              </div>
-              {analytics.attentionCount === 0 && analytics.moderateCount === 0 ? (
-                <p className="text-xs text-emerald-700">All evaluated subjects are in the strong mastery zone!</p>
-              ) : (
-                <div className="space-y-2 mt-3">
-                  {analytics.evaluatedSubjects
-                    .filter(s => s.status === 'attention' || s.status === 'moderate')
-                    .sort((a, b) => a.avgPercentage - b.avgPercentage)
-                    .slice(0, 3)
-                    .map(s => (
-                      <div key={s.name} className="flex items-center justify-between text-xs bg-white/80 p-2.5 rounded-xl border border-red-100">
-                        <span className="font-bold text-gray-800 truncate mr-2">{s.name}</span>
-                        <span className={`font-black shrink-0 ${s.status === 'attention' ? 'text-red-600' : 'text-amber-600'}`}>
-                          {s.avgPercentage}%
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-
-            {/* Study Streak / Motivation Tip */}
-            <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-tomato-500/20 text-tomato-400 flex items-center justify-center shrink-0 border border-tomato-500/30">
-                <Brain size={20} />
-              </div>
-              <div className="text-xs">
-                <p className="font-bold text-white">Study Habit Tip</p>
-                <p className="text-gray-300 text-[11px]">Testing yourself on tough topics produces 50% better retention than passive re-reading.</p>
-              </div>
             </div>
           </div>
         </div>
       ) : (
         /* Empty State when no exams have been graded yet */
-        <div className="bg-white rounded-3xl border border-gray-200 p-8 text-center shadow-md shadow-gray-200/50 space-y-4">
+        <div className="bg-white rounded-3xl border border-gray-200 p-8 text-center shadow-sm space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-tomato-50 text-tomato-500 mx-auto flex items-center justify-center border border-tomato-100">
             <GraduationCap size={32} />
           </div>
@@ -564,7 +474,7 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
       )}
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
         {/* Search */}
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -624,7 +534,7 @@ export default function SubjectInsights({ exams: propExams, profile: propProfile
               return (
                 <div 
                   key={subject.name} 
-                  className="bg-white rounded-2xl border border-gray-200 p-6 shadow-md shadow-gray-200/50 hover:border-gray-300 transition-all flex flex-col justify-between"
+                  className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:border-gray-300 transition-all flex flex-col justify-between"
                 >
                   <div>
                     {/* Header: Name, Code & Badge */}

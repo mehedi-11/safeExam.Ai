@@ -129,7 +129,7 @@ export default function StudentDashboard({ defaultTab }) {
 
 
   // UI State
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -238,7 +238,7 @@ export default function StudentDashboard({ defaultTab }) {
       {loading && <Loader />}
 
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-md shadow-gray-200/50">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
@@ -261,7 +261,7 @@ export default function StudentDashboard({ defaultTab }) {
           {/* Brand Logo Header */}
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-sm">
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
@@ -293,7 +293,7 @@ export default function StudentDashboard({ defaultTab }) {
                 key={tab.id}
                 onClick={() => switchTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${activeTab === tab.id
-                    ? 'bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in'
+                    ? 'bg-gray-900 text-white shadow-sm animate-fade-in'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
                   }`}
               >
@@ -344,21 +344,21 @@ export default function StudentDashboard({ defaultTab }) {
 
         {/* Status Alerts */}
         {success && (
-          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <CheckCircle2 size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
+          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <ShieldAlert size={16} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dynamic Panel */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
 
           {/* TAB: DASHBOARD */}
           {activeTab === 'dashboard' && (() => {
@@ -424,7 +424,7 @@ export default function StudentDashboard({ defaultTab }) {
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Dashboard Overview</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center shrink-0">
                       <Play size={24} />
                     </div>
@@ -434,7 +434,7 @@ export default function StudentDashboard({ defaultTab }) {
                     </div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center shrink-0">
                       <CheckCircle2 size={24} />
                     </div>
@@ -444,7 +444,7 @@ export default function StudentDashboard({ defaultTab }) {
                     </div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md shadow-gray-200/50 flex items-center gap-4">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center shrink-0">
                       <GraduationCap size={24} />
                     </div>
@@ -455,9 +455,9 @@ export default function StudentDashboard({ defaultTab }) {
                   </div>
                 </div>
 
-                <div className={`p-6 rounded-2xl border ${suggestionBg} mt-8 shadow-md shadow-gray-200/50 transition-colors duration-300`}>
+                <div className={`p-6 rounded-2xl border ${suggestionBg} mt-8 shadow-sm transition-colors duration-300`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-md shadow-gray-200/50`}>
+                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white border ${suggestionBg} shadow-sm`}>
                       <ShieldAlert size={20} className={suggestionColor} />
                     </div>
                     <div>
@@ -493,7 +493,7 @@ export default function StudentDashboard({ defaultTab }) {
 
                       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
                         {subjectAverages.map(s => (
-                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-md shadow-gray-200/50 flex items-center gap-1.5 hover:border-gray-800 transition-colors">
+                          <span key={s.subject} className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold border border-gray-200 text-gray-700 shadow-sm flex items-center gap-1.5 hover:border-gray-800 transition-colors">
                             <span className="truncate max-w-[120px]" title={s.subject}>{s.subject}</span>
                             <span className={`px-1.5 py-0.5 rounded-md ${s.average >= 75 ? 'bg-tomato-100 text-tomato-700' : s.average < 50 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {s.average}%
@@ -539,7 +539,7 @@ export default function StudentDashboard({ defaultTab }) {
                     ) : (
                       <div className="space-y-3">
                         {completedExams.sort((a, b) => new Date(b.finished_at) - new Date(a.finished_at)).slice(0, 3).map(exam => (
-                          <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-md shadow-gray-200/50">
+                          <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
                             <div className="min-w-0 pr-4">
                               <div className="flex items-center gap-2">
                                 <h5 className="font-bold text-gray-900 text-sm truncate">{exam.title}</h5>
@@ -579,7 +579,7 @@ export default function StudentDashboard({ defaultTab }) {
                       return (
                         <div className="space-y-3">
                           {upcoming.map(exam => (
-                            <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-md shadow-gray-200/50">
+                            <div key={exam.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center shadow-sm">
                               <div className="bg-tomato-50 border border-tomato-100 w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0">
                                 <span className="text-[10px] font-bold text-tomato-400 uppercase">{new Date(exam.exam_date).toLocaleString('default', { month: 'short' })}</span>
                                 <span className="text-lg font-black text-tomato-700 leading-none">{new Date(exam.exam_date).getDate()}</span>
@@ -639,7 +639,7 @@ export default function StudentDashboard({ defaultTab }) {
                   <div className="flex items-center gap-6">
                     <h3 className="text-lg font-bold text-gray-900">Available Exam Sittings</h3>
                     <div className="flex bg-gray-100 p-1 rounded-lg">
-                      <span className="px-4 py-1.5 text-xs font-bold bg-white text-gray-900 shadow-md shadow-gray-200/50 rounded-md flex items-center gap-1">
+                      <span className="px-4 py-1.5 text-xs font-bold bg-white text-gray-900 shadow-sm rounded-md flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
                         Live Exams Only
                       </span>
@@ -662,14 +662,14 @@ export default function StudentDashboard({ defaultTab }) {
                     <div className="flex items-center bg-gray-100 p-1 rounded-xl">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-md shadow-gray-200/50 text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
                         title="Grid View"
                       >
                         <LayoutGrid size={18} />
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-md shadow-gray-200/50 text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-tomato-400' : 'text-gray-500 hover:text-gray-700'}`}
                         title="List View"
                       >
                         <List size={18} />
@@ -683,7 +683,7 @@ export default function StudentDashboard({ defaultTab }) {
                     {searchQuery ? 'No exams match your search.' : 'There are no exams available at the moment.'}
                   </div>
                 ) : viewMode === 'list' ? (
-                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
+                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                     <table className="w-full text-left text-sm text-gray-500">
                       <thead className="text-xs text-gray-900 uppercase border-b border-gray-200">
                         <tr className="border-b border-gray-200">
@@ -902,7 +902,7 @@ export default function StudentDashboard({ defaultTab }) {
                     No results match your search "{resultsSearchQuery}".
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-md shadow-gray-200/50">
+                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                     <table className="w-full text-left text-sm text-gray-500">
                       <thead className="text-xs text-gray-900 uppercase border-b border-gray-200">
                         <tr className="border-b border-gray-200">
@@ -943,7 +943,7 @@ export default function StudentDashboard({ defaultTab }) {
                               </td>
                               <td className="px-6 py-4 text-center">
                                 {isPublished ? (
-                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs font-bold shadow-md shadow-gray-200/50 font-mono">
+                                  <span className="bg-tomato-50 text-tomato-700 border border-tomato-250 px-3 py-1 rounded-lg text-xs font-bold shadow-sm font-mono">
                                     {formatScore(exam.score, exam.total_marks)}
                                   </span>
                                 ) : (
@@ -967,7 +967,7 @@ export default function StudentDashboard({ defaultTab }) {
           {activeTab === "profile" && (
             <div className="max-w-4xl mx-auto animate-fade-in space-y-8">
               {/* Profile Card with Banner */}
-              <div className="bg-white rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100 overflow-hidden relative">
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
 
                 {/* Gradient Banner */}
                 <div className="h-40 w-full bg-gradient-to-r from-tomato-500 via-tomato-400 to-tomato-600 relative">
@@ -975,7 +975,7 @@ export default function StudentDashboard({ defaultTab }) {
                     <button
                       type="button"
                       onClick={() => setIsProfileModalOpen(true)}
-                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-md shadow-gray-200/50 flex items-center gap-2"
+                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
                     >
                       <Edit size={16} />
                       Edit Profile
@@ -1030,7 +1030,7 @@ export default function StudentDashboard({ defaultTab }) {
               </div>
 
               {/* Password Section */}
-              <div className="bg-white p-8 rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                   <KeyRound size={20} className="text-tomato-500" />
                   Security Options
@@ -1188,7 +1188,7 @@ export default function StudentDashboard({ defaultTab }) {
                 <button
                   type="submit"
                   disabled={profileSubmitting}
-                  className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-sm flex items-center justify-center gap-2"
                 >
                   {profileSubmitting && <RefreshCw className="animate-spin shrink-0" size={16} />}
                   <span>{profileSubmitting ? 'Saving Changes...' : 'Save Changes'}</span>
@@ -1259,7 +1259,7 @@ export default function StudentDashboard({ defaultTab }) {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div
-              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
+              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -1271,7 +1271,7 @@ export default function StudentDashboard({ defaultTab }) {
                 onClick={() => switchTab(tab.id)}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
-                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-md shadow-gray-200/50' : ''}`} />
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 ' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
               </button>
             ))}

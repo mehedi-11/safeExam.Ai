@@ -43,6 +43,6 @@ router.get('/student-exams/:studentId', adminController.getStudentExamsDetails);
 
 
 
-router.get('/analytics', adminController.getAnalytics);
+
 
 module.exports = router;

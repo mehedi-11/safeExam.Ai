@@ -74,7 +74,7 @@ export default function TeacherProctoring() {
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans h-screen overflow-hidden">
       {/* Header matching Student Exam UI */}
-      <div className="bg-white border-b border-gray-200 p-4 px-6 flex justify-between items-center shadow-md shadow-gray-200/50 z-10 flex-shrink-0">
+      <div className="bg-white border-b border-gray-200 p-4 px-6 flex justify-between items-center shadow-sm z-10 flex-shrink-0">
         <div className="flex items-center gap-4">
           <button
             onClick={() => {
@@ -98,7 +98,7 @@ export default function TeacherProctoring() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-tomato-50 border border-tomato-100 text-tomato-650 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md shadow-gray-200/50">
+        <div className="flex items-center gap-2 bg-tomato-50 border border-tomato-100 text-tomato-650 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
           <div className="w-2 h-2 bg-gray-900 rounded-full animate-pulse"></div>
           Monitoring Live
         </div>
@@ -109,7 +109,7 @@ export default function TeacherProctoring() {
         
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-shrink-0">
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md shadow-gray-200/50 flex items-center justify-between">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Joined</p>
               <h2 className="text-2xl font-black text-gray-900">{loadingStats ? '-' : stats.totalJoined}</h2>
@@ -118,7 +118,7 @@ export default function TeacherProctoring() {
               <Users size={20} />
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md shadow-gray-200/50 flex items-center justify-between">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Still In Exam</p>
               <h2 className="text-2xl font-black text-gray-900">{loadingStats ? '-' : stats.totalInExam}</h2>
@@ -127,7 +127,7 @@ export default function TeacherProctoring() {
               <Clock size={20} />
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md shadow-gray-200/50 flex items-center justify-between">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Submitted</p>
               <h2 className="text-2xl font-black text-gray-900">{loadingStats ? '-' : stats.totalSubmitted}</h2>
@@ -142,7 +142,7 @@ export default function TeacherProctoring() {
         <div className="flex flex-row gap-4 flex-1 overflow-hidden min-h-0">
           
           {/* Left Column: AI Log Feed (68%) */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-md shadow-gray-200/50 flex flex-col w-[68%] overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col w-[68%] overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShieldAlert size={16} className="text-tomato-400" />
@@ -327,7 +327,7 @@ export default function TeacherProctoring() {
           </div>
 
           {/* Right Column: Student Roster Tabs (32%) */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-md shadow-gray-200/50 flex flex-col w-[32%] overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col w-[32%] overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex-shrink-0 flex items-center justify-between">
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
                 <Users size={14} className="text-tomato-400" />

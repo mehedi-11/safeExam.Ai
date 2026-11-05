@@ -365,6 +365,7 @@ exports.getDashboardStats = async (req, res) => {
     const totalExamsCreated = await Exam.countDocuments();
     const totalLiveExams = await Exam.countDocuments({ is_live: true });
     const totalExamsDone = await StudentExam.countDocuments({ status: 'completed' });
+    const cheatingIncidents = await ProctoringLog.countDocuments({ $or: [{ status: 'flagged' }, { activity_type: { $ne: 'normal' } }] });
 
     // Event Statistics
     const totalEvents = await Event.countDocuments();
@@ -422,6 +423,7 @@ exports.getDashboardStats = async (req, res) => {
       totalLiveEvents,
       totalClosedEvents,
       totalEventRegistrations,
+      cheatingIncidents,
       topTeachers: topTeachersAgg,
       topStudents: topStudentsAgg,
       topEvents: topEventsAgg
@@ -497,39 +499,6 @@ exports.addBulkTeachers = async (req, res) => {
 
 
 
-// --- ANALYTICS ---
-exports.getAnalytics = async (req, res) => {
-  try {
-    const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1);
-    const endOfYear = new Date(currentYear + 1, 0, 1);
-
-    const monthlyExamsAgg = await Exam.aggregate([
-      { $match: { exam_date: { $gte: startOfYear, $lt: endOfYear } } },
-      { $group: { _id: { $month: "$exam_date" }, count: { $sum: 1 } } },
-      { $project: { month: "$_id", count: 1, _id: 0 } }
-    ]);
-
-    const cheatingStatsAgg = await ProctoringLog.aggregate([
-      { $group: { _id: "$activity_type", count: { $sum: 1 } } },
-      { $project: { activity_type: "$_id", count: 1, _id: 0 } }
-    ]);
-
-    const studentStatusStatsAgg = await Student.aggregate([
-      { $group: { _id: "$status", count: { $sum: 1 } } },
-      { $project: { status: "$_id", count: 1, _id: 0 } }
-    ]);
-
-    return res.json({
-      monthlyExams: monthlyExamsAgg,
-      cheatingStats: cheatingStatsAgg,
-      studentStatusStats: studentStatusStatsAgg
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error fetching analytics' });
-  }
-};
 
 
 

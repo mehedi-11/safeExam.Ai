@@ -39,15 +39,6 @@ import Modal from "../components/Modal";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
 import EventsManager from "./EventsManager";
 import Loader from "../components/Loader";
 
@@ -63,7 +54,6 @@ export default function AdminDashboard() {
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [admins, setAdmins] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
   const [allExams, setAllExams] = useState([]);
   const [stats, setStats] = useState({
     totalTeachers: 0,
@@ -78,6 +68,7 @@ export default function AdminDashboard() {
     topTeachers: [],
     topStudents: [],
     topEvents: [],
+    cheatingIncidents: 0,
   });
   const [profile, setProfile] = useState({
     name: "",
@@ -90,7 +81,7 @@ export default function AdminDashboard() {
   const [allExamsSearch, setAllExamsSearch] = useState("");
 
   // UI State
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -153,14 +144,13 @@ export default function AdminDashboard() {
     setLoading(true);
     setError("");
     try {
-      const [tRes, sRes, aRes, stRes, pRes, anRes, eRes] =
+      const [tRes, sRes, aRes, stRes, pRes, eRes] =
         await Promise.all([
           api.get("/admin/teachers"),
           api.get("/admin/students"),
           api.get("/admin/admins"),
           api.get("/admin/dashboard-stats"),
           api.get("/admin/profile"),
-          api.get("/admin/analytics"),
           api.get("/admin/all-exams"),
         ]);
 
@@ -169,7 +159,6 @@ export default function AdminDashboard() {
       setAdmins(aRes.data);
       setStats(stRes.data);
       setProfile({ ...pRes.data, password: "" });
-      setAnalytics(anRes.data);
       setAllExams(eRes.data);
     } catch (err) {
       console.error(err);
@@ -547,7 +536,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {loading && <Loader />}
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-40 shadow-md shadow-gray-200/50">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-extrabold text-sm">
             <LayoutDashboard size={16} />
@@ -574,7 +563,7 @@ export default function AdminDashboard() {
         <div>
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-sm">
                 <LayoutDashboard className="w-6 h-6" />
               </div>
               <div>
@@ -613,7 +602,7 @@ export default function AdminDashboard() {
                     setIsSidebarOpen(false);
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 font-semibold text-sm rounded-xl transition-all ${activeTab === tab.id
-                    ? "bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
+                    ? "bg-gray-900 text-white shadow-sm animate-fade-in"
                     : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
                     }`}
                 >
@@ -621,16 +610,7 @@ export default function AdminDashboard() {
                     <tab.icon size={18} />
                     <span>{tab.label}</span>
                   </div>
-                  {unreadCount > 0 && (
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full ${activeTab === tab.id
-                        ? "bg-white text-tomato-400"
-                        : "bg-gray-900 text-white"
-                        }`}
-                    >
-                      {unreadCount}
-                    </span>
-                  )}
+
                 </button>
               );
             })}
@@ -679,21 +659,21 @@ export default function AdminDashboard() {
         {/* Header Summary Removed */}
 
         {success && (
-          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <ShieldCheck size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
+          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <ShieldAlert size={16} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dynamic Content Sections */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
           {/* TAB: EVENTS */}
           {activeTab === "events" && (
             <div className="animate-fade-in">
@@ -843,205 +823,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Top Teachers Table */}
-              <div className="mt-8 border-t border-gray-200 pt-8">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <UserCheck size={18} className="text-tomato-400" />
-                  <span>Top 5 Teachers (By Exams Created)</span>
-                </h3>
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
-                        <tr className="border-b border-gray-200">
-                          <th className="px-6 py-4 font-bold text-left">Rank</th>
-                          <th className="px-6 py-4 font-bold text-left">Teacher Name</th>
-                          <th className="px-6 py-4 font-bold text-left">Email</th>
-                          <th className="px-6 py-4 font-bold text-right">Exams Created</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {stats?.topTeachers?.map((teacher, index) => (
-                          <tr key={teacher.id} className="hover:bg-white transition-colors">
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
-                                {index + 1}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-gray-900">{teacher.name}</td>
-                            <td className="px-6 py-4 text-xs">{teacher.email}</td>
-                            <td className="px-6 py-4 text-right text-tomato-400">{teacher.exam_count}</td>
-                          </tr>
-                        ))}
-                        {(!stats?.topTeachers || stats.topTeachers.length === 0) && (
-                          <tr>
-                            <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
-                              No data available
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Students Table */}
-              <div className="mt-8 border-t border-gray-200 pt-8">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Users size={18} className="text-tomato-400" />
-                  <span>Top 10 Students (By Average Score)</span>
-                </h3>
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
-                        <tr className="border-b border-gray-200">
-                          <th className="px-6 py-4 font-bold text-left">Rank</th>
-                          <th className="px-6 py-4 font-bold text-left">Student Name</th>
-                          <th className="px-6 py-4 font-bold text-left">Email</th>
-                          <th className="px-6 py-4 font-bold text-center">Avg Score</th>
-                          <th className="px-6 py-4 font-bold text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {stats?.topStudents?.map((student, index) => (
-                          <tr key={student.id} className="hover:bg-white transition-colors">
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
-                                {index + 1}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-gray-900">{student.name}</td>
-                            <td className="px-6 py-4 text-xs">{student.email}</td>
-                            <td className="px-6 py-4 text-center text-tomato-600">{Number(student.average_score).toFixed(2)}%</td>
-                            <td className="px-6 py-4 text-right">
-                              <button
-                                onClick={() => handleOpenStudentExamsModal(student)}
-                                className="px-3 py-1.5 bg-tomato-50 text-tomato-600 hover:bg-tomato-100 rounded-lg text-xs transition-colors"
-                              >
-                                View Details
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                        {(!stats?.topStudents || stats.topStudents.length === 0) && (
-                          <tr>
-                            <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                              No data available
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Events by Registrations */}
-              <div className="mt-8 border-t border-gray-200 pt-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <Calendar size={18} className="text-tomato-400" />
-                    <span>Top Events (By Participant Registrations)</span>
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab("events")}
-                    className="text-xs font-bold text-tomato-600 hover:text-tomato-700 transition-colors cursor-pointer"
-                  >
-                    View & Manage Events &rarr;
-                  </button>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                      <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
-                        <tr className="border-b border-gray-200">
-                          <th className="px-6 py-4 font-bold text-left">Rank</th>
-                          <th className="px-6 py-4 font-bold text-left">Event Title</th>
-                          <th className="px-6 py-4 font-bold text-left">Event Date</th>
-                          <th className="px-6 py-4 font-bold text-center">Status</th>
-                          <th className="px-6 py-4 font-bold text-right">Registrations</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {stats?.topEvents?.map((event, index) => (
-                          <tr key={event.id} className="hover:bg-white transition-colors">
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-100 text-yellow-600' : index === 1 ? 'bg-gray-200 text-gray-500' : index === 2 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
-                                {index + 1}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-gray-900">{event.title}</td>
-                            <td className="px-6 py-4 text-xs text-gray-500">{new Date(event.event_date).toLocaleString()}</td>
-                            <td className="px-6 py-4 text-center">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs ${event.status === 'live' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
-                                {event.status === 'live' ? 'LIVE' : 'CLOSED'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-right text-tomato-600">
-                              {event.registration_count}
-                            </td>
-                          </tr>
-                        ))}
-                        {(!stats?.topEvents || stats.topEvents.length === 0) && (
-                          <tr>
-                            <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                              No event registrations recorded yet.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* INJECTED ANALYTICS */}
-              <div className="mt-8 border-t border-gray-200 pt-8">
-                {analytics && (
-                  <div className="space-y-6 animate-fade-in">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      System Analytics
-                    </h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="bg-white border border-gray-200 p-4 rounded-xl">
-                        <h4 className="font-bold text-sm mb-4">
-                          Exams Created (This Year)
-                        </h4>
-                        <div className="h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={analytics.monthlyExams}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="month" />
-                              <YAxis />
-                              <Tooltip />
-                              <Bar dataKey="count" fill="#ff6347" />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
-                      <div className="bg-white border border-gray-200 p-4 rounded-xl">
-                        <h4 className="font-bold text-sm mb-4">
-                          Proctoring Alerts Summary
-                        </h4>
-                        <div className="h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={analytics.cheatingStats}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="activity_type" />
-                              <YAxis />
-                              <Tooltip />
-                              <Bar dataKey="count" fill="#3b82f6" />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
             </div>
           )}
 
@@ -1115,13 +896,13 @@ export default function AdminDashboard() {
                 <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
                   <button
                     onClick={() => setActiveUserTab("teachers")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-white shadow-md shadow-gray-200/50 text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "teachers" ? "bg-white shadow-sm text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
                   >
                     Teachers
                   </button>
                   <button
                     onClick={() => setActiveUserTab("students")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-md shadow-gray-200/50 text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeUserTab === "students" ? "bg-white shadow-sm text-tomato-400" : "text-gray-500 hover:text-gray-900"}`}
                   >
                     Students
                   </button>
@@ -1692,7 +1473,7 @@ export default function AdminDashboard() {
                     <div>
                       <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Cheating Incidents</p>
                       <h4 className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
-                        {analytics?.cheatingStats?.reduce((sum, c) => sum + (c.count || 0), 0) || 0}
+                        {stats?.cheatingIncidents || 0}
                       </h4>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center border border-red-200">
@@ -2069,7 +1850,7 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md shadow-gray-200/50">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-gray-500">
                     <thead className="text-xs uppercase text-gray-900 border-b border-gray-200">
@@ -2534,7 +2315,7 @@ export default function AdminDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div
-              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
+              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -2546,7 +2327,7 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
-                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-md shadow-gray-200/50' : ''}`} />
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 ' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
               </button>
             ))}

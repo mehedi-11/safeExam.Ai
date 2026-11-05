@@ -199,19 +199,19 @@ export default function Login() {
           <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
             <button 
               onClick={() => navigate('/login/admin')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'admin' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'admin' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Admin
             </button>
             <button 
               onClick={() => navigate('/login/teacher')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'teacher' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'teacher' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Teacher
             </button>
             <button 
               onClick={() => navigate('/login/student')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'student' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${role === 'student' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Student
             </button>

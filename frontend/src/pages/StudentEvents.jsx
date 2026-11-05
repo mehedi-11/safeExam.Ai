@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../api/axiosConfig';
 import Modal from '../components/Modal';
+import { Skeleton, CardsSkeleton, TableSkeleton } from '../components/Loader';
 
 const StudentEvents = () => {
   const [activeTab, setActiveTab] = useState('events'); // 'events' | 'registered'
@@ -184,9 +185,16 @@ const StudentEvents = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-10 h-10 border-4 border-tomato-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-gray-500 text-sm font-medium">Loading events portal...</p>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-4">
+          <Skeleton className="h-8 w-64 rounded-xl" />
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-32 rounded-xl" />
+            <Skeleton className="h-10 w-32 rounded-xl" />
+          </div>
+        </div>
+        <CardsSkeleton count={3} />
+        <TableSkeleton rows={3} />
       </div>
     );
   }
@@ -320,7 +328,7 @@ const StudentEvents = () => {
                             setFormError("");
                             setIsRegisterModalOpen(true); 
                           }}
-                          className="flex-1 bg-gray-900 hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-gray-200/50 flex justify-center items-center gap-1.5"
+                          className="flex-1 bg-gray-900 hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex justify-center items-center gap-1.5"
                         >
                           <UserCheck size={14} /> Register for Event
                         </button>
@@ -552,7 +560,7 @@ const StudentEvents = () => {
             <button 
               type="submit" 
               disabled={registering}
-              className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-sm flex items-center justify-center gap-2"
             >
               {registering ? (
                 <>

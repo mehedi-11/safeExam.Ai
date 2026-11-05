@@ -1,3 +1,4 @@
+import Loader from '../components/Loader';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
@@ -62,7 +63,7 @@ const EventDetails = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center">Loading Details...</div>;
+  if (loading) return <Loader variant="details" />;
   if (!event) return <div className="min-h-screen bg-white flex items-center justify-center">Event not found.</div>;
 
   const isEnded = event.end_date && new Date(event.end_date) < new Date();
@@ -87,7 +88,7 @@ const EventDetails = () => {
 
       {/* Main Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
           <div className="flex justify-between items-start mb-6">
             <h2 className="text-2xl font-bold text-gray-900">{event.title}</h2>
             <span className={`px-3 py-1 ${isEnded ? 'bg-gray-100 text-gray-500' : 'bg-tomato-100 text-tomato-700'} rounded-full text-xs font-bold uppercase tracking-wider`}>
@@ -123,7 +124,7 @@ const EventDetails = () => {
         </div>
 
         {/* Registration Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50 text-center">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm text-center">
           {isRegistered ? (
             <div className="space-y-4">
               <div className="w-16 h-16 bg-tomato-100 text-tomato-400 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -160,7 +161,7 @@ const EventDetails = () => {
                   setFormError("");
                   setIsRegisterModalOpen(true);
                 }}
-                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-gray-200/50 transition-colors inline-flex items-center gap-2"
+                className="bg-gray-900 hover:bg-black shadow-md hover:shadow-sm hover:shadow-tomato-500/30 transition-all text-white px-8 py-3 rounded-xl font-bold shadow-sm transition-colors inline-flex items-center gap-2"
               >
                 <UserCheck size={18} /> Register for Event
               </button>
@@ -228,7 +229,7 @@ const EventDetails = () => {
             <button 
               type="submit" 
               disabled={registering}
-              className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-sm flex items-center justify-center gap-2"
             >
               {registering ? (
                 <>

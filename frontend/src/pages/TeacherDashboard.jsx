@@ -77,7 +77,7 @@ export default function TeacherDashboard() {
   const [manualGrades, setManualGrades] = useState({});
 
   // UI State
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -631,7 +631,7 @@ export default function TeacherDashboard() {
       {loading && <Loader />}
 
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-md shadow-gray-200/50">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 sticky top-0 z-[60] shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-extrabold text-sm">
             <BookOpen size={16} />
@@ -658,7 +658,7 @@ export default function TeacherDashboard() {
         <div>
           {/* Brand Logo Header */}
           <div className="p-6 border-b border-gray-200 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg shadow-tomato-500/20">
+            <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-sm">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
@@ -690,7 +690,7 @@ export default function TeacherDashboard() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm rounded-xl transition-all ${
                   activeTab === tab.id
-                    ? "bg-gray-900 text-white shadow-lg shadow-tomato-500/20 animate-fade-in"
+                    ? "bg-gray-900 text-white shadow-sm animate-fade-in"
                     : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
                 }`}
               >
@@ -747,16 +747,16 @@ export default function TeacherDashboard() {
 
             
             {activeTab === 'add_exam' && (
-              <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-md shadow-gray-200/50">
+              <div className="flex bg-white border border-gray-200 p-1.5 rounded-xl w-max shadow-sm">
                 <button
                   onClick={() => setExamCategoryFilter("academic")}
-                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-tomato-50 text-tomato-600 shadow-md shadow-gray-200/50 scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "academic" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
                 >
                   Academic Exams
                 </button>
                 <button
                   onClick={() => setExamCategoryFilter("event")}
-                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-tomato-50 text-tomato-600 shadow-md shadow-gray-200/50 scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
+                  className={`px-8 py-2 text-sm font-bold rounded-lg transition-all ${examCategoryFilter === "event" ? "bg-tomato-50 text-tomato-600 shadow-sm scale-100" : "text-gray-500 hover:text-gray-900 scale-95"}`}
                 >
                   Event Exams
                 </button>
@@ -767,21 +767,21 @@ export default function TeacherDashboard() {
 
         {/* Status Feedback Alerts */}
         {success && (
-          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
+          <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <Check size={16} />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
+          <div className="bg-red-50 border border-red-200 text-red-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-sm">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dynamic Panel */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-md shadow-gray-200/50">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
           {/* TAB: DASHBOARD */}
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-fade-in">
@@ -1048,13 +1048,13 @@ export default function TeacherDashboard() {
                   <div className="flex flex-wrap bg-gray-100 p-1 rounded-lg w-full sm:w-max">
                     <button
                       onClick={() => setExamFilter("all")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "all" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       All
                     </button>
                     <button
                       onClick={() => setExamFilter("live")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1 flex-1 sm:flex-none ${examFilter === "live" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1 flex-1 sm:flex-none ${examFilter === "live" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       {examFilter === "live" && (
                         <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
@@ -1063,13 +1063,13 @@ export default function TeacherDashboard() {
                     </button>
                     <button
                       onClick={() => setExamFilter("upcoming")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "upcoming" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "upcoming" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       Upcoming
                     </button>
                     <button
                       onClick={() => setExamFilter("ended")}
-                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "ended" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+                      className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex-1 sm:flex-none text-center ${examFilter === "ended" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       Ended
                     </button>
@@ -1500,7 +1500,7 @@ export default function TeacherDashboard() {
                       className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
                         isPublished 
                         ? "bg-gray-100 text-gray-700 hover:bg-dark-600" 
-                        : "bg-gray-900 text-white shadow-md shadow-tomato-500/20 hover:bg-black"
+                        : "bg-gray-900 text-white shadow-sm hover:bg-black"
                       }`}
                     >
                       {isPublished ? (
@@ -1856,7 +1856,7 @@ export default function TeacherDashboard() {
               </div>
 
               {/* Profile Card with Banner */}
-              <div className="bg-white rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100 overflow-hidden relative">
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
                 
                 {/* Gradient Banner */}
                 <div className="h-40 w-full bg-gradient-to-r from-tomato-500 via-tomato-400 to-tomato-600 relative">
@@ -1864,7 +1864,7 @@ export default function TeacherDashboard() {
                     <button
                       type="button"
                       onClick={() => setIsProfileModalOpen(true)}
-                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-md shadow-gray-200/50 flex items-center gap-2"
+                      className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
                     >
                       <Edit size={16} />
                       Edit Profile
@@ -1894,8 +1894,8 @@ export default function TeacherDashboard() {
                   {/* Info Cards Grid */}
                   <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Info Item */}
-                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
                         <Activity size={24} />
                       </div>
                       <div>
@@ -1904,8 +1904,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Info Item */}
-                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
                         <Calendar size={24} />
                       </div>
                       <div>
@@ -1916,8 +1916,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Info Item */}
-                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
                         <BookOpen size={24} />
                       </div>
                       <div>
@@ -1926,8 +1926,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Info Item */}
-                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform">
+                    <div className="bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform">
                         <Award size={24} />
                       </div>
                       <div>
@@ -1938,8 +1938,8 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                     {/* Full Width Address Item */}
-                    <div className="md:col-span-2 bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-md shadow-gray-200/50 transition-all group">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-md shadow-gray-200/50 group-hover:scale-110 transition-transform shrink-0">
+                    <div className="md:col-span-2 bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:border-tomato-200 hover:shadow-sm transition-all group">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-tomato-400 shadow-sm group-hover:scale-110 transition-transform shrink-0">
                         <MapPin size={24} />
                       </div>
                       <div>
@@ -1952,7 +1952,7 @@ export default function TeacherDashboard() {
               </div>
 
               {/* Password Section */}
-              <div className="bg-white p-8 rounded-3xl shadow-md shadow-gray-200/50 border border-gray-100">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                 <h4 className="font-bold text-sm text-gray-900 mb-6 flex items-center gap-1.5">
                   <Key size={16} className="text-tomato-400" />
                   <span>Update Password</span>
@@ -2138,7 +2138,7 @@ export default function TeacherDashboard() {
                         <button
                           type="submit"
                           disabled={savingProfile}
-                          className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-md shadow-gray-200/50 flex items-center justify-center gap-2"
+                          className="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black smooth-transition shadow-sm flex items-center justify-center gap-2"
                         >
                           {savingProfile && <RefreshCw className="animate-spin shrink-0" size={16} />}
                           <span>{savingProfile ? "Saving Changes..." : "Save Changes"}</span>
@@ -2379,7 +2379,7 @@ export default function TeacherDashboard() {
           <button
             type="submit"
             disabled={makingLive}
-            className="w-full py-2.5 mt-2 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
+            className="w-full py-2.5 mt-2 bg-gray-900 hover:bg-black shadow-md hover:shadow-sm hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
           >
             {makingLive ? <RefreshCw className="animate-spin shrink-0" size={16} /> : <Play size={16} />}
             <span>{makingLive ? "Starting Live Exam..." : "Start Live Exam Now"}</span>
@@ -2412,7 +2412,7 @@ export default function TeacherDashboard() {
               fetchQuestions(examForm.id);
               setIsManageQuestionsModalOpen(true);
             }}
-            className="w-full py-2.5 bg-gray-900 hover:bg-black shadow-md hover:shadow-lg shadow-tomato-500/10 hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold shadow-md transition-colors"
+            className="w-full py-2.5 bg-gray-900 hover:bg-black shadow-md hover:shadow-sm hover:shadow-tomato-500/30 transition-all text-white rounded-xl font-bold shadow-md transition-colors"
           >
             Go to Set Questions
           </button>
@@ -2614,14 +2614,14 @@ export default function TeacherDashboard() {
           <button
             type="button"
             onClick={() => setQuestionTab("MCQ")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "MCQ" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "MCQ" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
           >
             MCQ
           </button>
           <button
             type="button"
             onClick={() => setQuestionTab("Written")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "Written" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${questionTab === "Written" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
           >
             Written
           </button>
@@ -3073,7 +3073,7 @@ export default function TeacherDashboard() {
               <button
                 onClick={confirmStopLive}
                 disabled={stoppingLive}
-                className="px-5 py-2 rounded-xl font-bold bg-gray-900 text-white hover:bg-black shadow-lg shadow-tomato-500/30 transition-all flex items-center justify-center gap-2"
+                className="px-5 py-2 rounded-xl font-bold bg-gray-900 text-white hover:bg-black shadow-sm transition-all flex items-center justify-center gap-2"
               >
                 {stoppingLive && <RefreshCw className="animate-spin shrink-0" size={16} />}
                 <span>{stoppingLive ? "Stopping..." : "OK"}</span>
@@ -3144,7 +3144,7 @@ export default function TeacherDashboard() {
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex items-center justify-between pb-safe shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.05)]">
             {/* Animated Top Line */}
             <div 
-              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-md shadow-gray-200/50"
+              className="absolute top-0 h-1 bg-gray-900 rounded-b-full transition-all duration-300 ease-in-out shadow-sm"
               style={{
                 width: '32px',
                 left: `calc(${(currentIndex * tabWidth)}% + ${tabWidth / 2}% - 16px)`
@@ -3156,7 +3156,7 @@ export default function TeacherDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 transition-all duration-300 ${activeTab === tab.id ? 'text-tomato-400' : 'text-gray-500 hover:text-gray-500'}`}
               >
-                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 drop-shadow-md shadow-gray-200/50' : ''}`} />
+                <tab.icon size={20} className={`mb-1 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 ' : ''}`} />
                 <span className={`text-[9px] font-bold truncate max-w-full transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-80 font-medium'}`}>{tab.label}</span>
               </button>
             ))}

@@ -1,3 +1,4 @@
+import { Skeleton, CardsSkeleton, TableSkeleton } from '../components/Loader';
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Image as ImageIcon, Edit, Trash2, Search, Calendar, Users, Clock, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import ReactQuill from 'react-quill';
@@ -249,7 +250,18 @@ const EventsManager = ({ isAdmin = false }) => {
     return matchesSearch && matchesFilter;
   }).sort((a, b) => new Date(b.created_at || b.event_date || 0) - new Date(a.created_at || a.event_date || 0) || String(b._id || b.id || '').localeCompare(String(a._id || a.id || '')));
 
-  if (loading) return <div className="text-center py-10">Loading Events...</div>;
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-48 rounded-xl" />
+          <Skeleton className="h-10 w-32 rounded-xl" />
+        </div>
+        <CardsSkeleton count={4} />
+        <TableSkeleton rows={4} />
+      </div>
+    );
+  }
 
   const totalEventsCount = events.length;
   const liveEventsCount = events.filter((e) => e.status === 'live').length;
@@ -350,13 +362,13 @@ const EventsManager = ({ isAdmin = false }) => {
           <div className="flex bg-gray-100 p-1 rounded-lg">
             <button
               onClick={() => setEventFilter("all")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               All Events
             </button>
             <button
               onClick={() => setEventFilter("live")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors flex items-center gap-1 ${eventFilter === "live" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               {eventFilter === "live" && (
                 <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse"></span>
@@ -365,7 +377,7 @@ const EventsManager = ({ isAdmin = false }) => {
             </button>
             <button
               onClick={() => setEventFilter("closed")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-white text-gray-900 shadow-md shadow-gray-200/50" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${eventFilter === "closed" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               Inactive
             </button>
