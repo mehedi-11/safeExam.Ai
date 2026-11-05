@@ -9,7 +9,7 @@ import {
   Calendar, BookOpen, KeyRound, CheckCircle2, ShieldAlert,
   Hourglass, Play, RefreshCw, GraduationCap, Clock,
   Menu, LogOut, Eye, EyeOff, LayoutGrid, List, LayoutDashboard, FileText, Settings, X, Edit, User, Search,
-  Sparkles, ArrowRight, RotateCcw
+  BarChart3, Sparkles, ArrowRight, RotateCcw
 } from 'lucide-react';
 import Loader from '../components/Loader';
 
@@ -284,7 +284,7 @@ export default function StudentDashboard({ defaultTab }) {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'exams', label: 'My Exams', icon: FileText },
-              { id: 'insights', label: 'Subject Insights', icon: Sparkles },
+              { id: 'insights', label: 'Subject Insights', icon: BarChart3 },
               { id: 'events', label: 'Events', icon: Calendar },
               { id: 'results', label: 'My Results', icon: CheckCircle2 },
               { id: 'profile', label: 'Student Profile', icon: Settings }
@@ -338,7 +338,7 @@ export default function StudentDashboard({ defaultTab }) {
 
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
-        <TopMenu pageName={activeTab === 'insights' ? 'Subject Insights & Suggestions' : activeTab} />
+        <TopMenu pageName={activeTab === 'insights' ? 'Subject Insights & Performance' : activeTab} />
         {activeTab === "dashboard" && <WelcomeHeader userName={user?.name || user?.username} />}
         {/* Header Summary Removed */}
 
@@ -506,7 +506,7 @@ export default function StudentDashboard({ defaultTab }) {
                         className="w-full mt-4 py-2.5 px-4 rounded-xl bg-white border border-gray-200 hover:border-gray-900 hover:bg-gray-900 hover:text-white text-xs font-bold text-gray-700 transition-all flex items-center justify-center gap-2 group shadow-sm active:scale-98"
                       >
                         <Sparkles size={15} className="text-tomato-500 group-hover:scale-110 transition-transform" />
-                        <span>View Full Subject Insights & AI Suggestions</span>
+                        <span>View Full Subject Insights & Performance</span>
                         <ArrowRight size={14} />
                       </button>
                     </div>
@@ -518,7 +518,7 @@ export default function StudentDashboard({ defaultTab }) {
                         className="w-full mt-3 py-2 px-3 rounded-xl bg-white border border-gray-200 hover:border-gray-900 hover:bg-gray-900 hover:text-white text-xs font-bold text-gray-700 transition-all flex items-center justify-center gap-2 group shadow-sm active:scale-98"
                       >
                         <Sparkles size={14} className="text-tomato-500 group-hover:scale-110 transition-transform" />
-                        <span>Open Subject Insights & Suggestions Page</span>
+                        <span>Open Subject Insights & Performance Page</span>
                         <ArrowRight size={14} />
                       </button>
                     </div>
@@ -1246,7 +1246,7 @@ export default function StudentDashboard({ defaultTab }) {
         const mobileTabs = [
           { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
           { id: 'exams', label: 'Exams', icon: FileText },
-          { id: 'insights', label: 'Insights', icon: Sparkles },
+          { id: 'insights', label: 'Insights', icon: BarChart3 },
           { id: 'events', label: 'Events', icon: Calendar },
           { id: 'results', label: 'Results', icon: CheckCircle2 },
           { id: 'profile', label: 'Profile', icon: Settings }

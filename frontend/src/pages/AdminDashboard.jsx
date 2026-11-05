@@ -19,7 +19,6 @@ import {
   LayoutDashboard,
   Shield,
   FileText,
-  Bell,
   Search,
   Activity,
   Download,
@@ -59,27 +58,11 @@ export default function AdminDashboard() {
   const [proctoringSearchQuery, setProctoringSearchQuery] = useState("");
   const [activeUserTab, setActiveUserTab] = useState("teachers");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const notifRef = useRef(null);
-  const mobileNotifRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const isOutsideNotif = notifRef.current && !notifRef.current.contains(event.target);
-      const isOutsideMobileNotif = mobileNotifRef.current && !mobileNotifRef.current.contains(event.target);
-
-      if (isOutsideNotif && isOutsideMobileNotif) {
-        setIsNotificationsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [admins, setAdmins] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [allExams, setAllExams] = useState([]);
   const [stats, setStats] = useState({
@@ -170,14 +153,13 @@ export default function AdminDashboard() {
     setLoading(true);
     setError("");
     try {
-      const [tRes, sRes, aRes, stRes, pRes, nRes, anRes, eRes] =
+      const [tRes, sRes, aRes, stRes, pRes, anRes, eRes] =
         await Promise.all([
           api.get("/admin/teachers"),
           api.get("/admin/students"),
           api.get("/admin/admins"),
           api.get("/admin/dashboard-stats"),
           api.get("/admin/profile"),
-          api.get("/admin/notifications"),
           api.get("/admin/analytics"),
           api.get("/admin/all-exams"),
         ]);
@@ -187,7 +169,6 @@ export default function AdminDashboard() {
       setAdmins(aRes.data);
       setStats(stRes.data);
       setProfile({ ...pRes.data, password: "" });
-      setNotifications(nRes.data);
       setAnalytics(anRes.data);
       setAllExams(eRes.data);
     } catch (err) {
@@ -575,49 +556,7 @@ export default function AdminDashboard() {
             SExam<span className="text-tomato-400">.AI</span>
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative" ref={mobileNotifRef}>
-            <button
-              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors relative"
-            >
-              {isNotificationsOpen ? <X size={20} /> : <Bell size={20} />}
-              {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gray-900 rounded-full"></span>
-              )}
-            </button>
-            {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-white">
-                  <span className="font-bold text-sm text-gray-900">Notifications</span>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await api.put("/admin/notifications/mark-read");
-                        fetchData();
-                      } catch (err) { }
-                    }}
-                    className="text-[10px] font-bold text-tomato-400 hover:underline"
-                  >
-                    Mark all read
-                  </button>
-                </div>
-                <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                  {notifications.slice(0, 10).map((n) => (
-                    <div
-                      key={n.id}
-                      className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-tomato-50 text-gray-900 font-semibold"}`}
-                    >
-                      {n.message}
-                    </div>
-                  ))}
-                  {notifications.length === 0 && (
-                    <p className="text-xs text-gray-500 p-2 text-center">No notifications</p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+                <div className="flex items-center gap-3">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
@@ -664,10 +603,7 @@ export default function AdminDashboard() {
               { id: "events", label: "Events", icon: Calendar },
               { id: "settings", label: "Admin Profile", icon: Settings },
             ].map((tab) => {
-              const unreadCount =
-                tab.id === "notifications"
-                  ? notifications.filter((n) => !n.is_read).length
-                  : 0;
+
               return (
                 <button
                   key={tab.id}
@@ -738,52 +674,7 @@ export default function AdminDashboard() {
       {/* Main Content Area */}
       <div className="flex-grow flex-1 min-w-0 p-3 pb-16 md:p-4 md:pb-4 max-h-screen overflow-y-auto">
         <TopMenu
-          pageName={activeTab}
-          rightContent={
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-white relative transition-colors"
-              >
-                {isNotificationsOpen ? <X size={20} /> : <Bell size={20} />}
-                {notifications.filter((n) => !n.is_read).length > 0 && !isNotificationsOpen && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gray-900 rounded-full"></span>
-                )}
-              </button>
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                  <div className="p-3 border-b border-gray-200 flex justify-between items-center bg-white">
-                    <span className="font-bold text-sm text-gray-900">Notifications</span>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await api.put("/admin/notifications/mark-read");
-                          fetchData();
-                        } catch (err) { }
-                      }}
-                      className="text-[10px] font-bold text-tomato-400 hover:underline"
-                    >
-                      Mark all read
-                    </button>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                    {notifications.slice(0, 10).map((n) => (
-                      <div
-                        key={n.id}
-                        className={`p-2 text-xs rounded-lg ${n.is_read ? "text-gray-500" : "bg-tomato-50 text-gray-900 font-semibold"}`}
-                      >
-                        {n.message}
-                      </div>
-                    ))}
-                    {notifications.length === 0 && (
-                      <p className="text-xs text-gray-500 p-2 text-center">No notifications</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          }
-        />
+          pageName={activeTab} />
         {activeTab === "overview" && <WelcomeHeader />}
         {/* Header Summary Removed */}
 

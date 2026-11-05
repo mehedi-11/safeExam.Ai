@@ -2,7 +2,6 @@ const Admin = require('../models/Admin');
 const Teacher = require('../models/Teacher');
 const Student = require('../models/Student');
 const LoginAttempt = require('../models/LoginAttempt');
-const AdminNotification = require('../models/AdminNotification');
 const Otp = require('../models/Otp');
 const { sendOtpEmail } = require('../utils/sendEmail');
 const bcrypt = require('bcryptjs');
@@ -56,13 +55,6 @@ const handleFailedLogin = async (identifier, role = 'admin') => {
           user = await Student.findOneAndUpdate({ id: identifier }, { status: 'suspended' }, { new: true });
         }
 
-        if (user) {
-          const notif = new AdminNotification({
-            title: 'Account Suspended',
-            message: `${role === 'teacher' ? 'Teacher' : 'Student'} ${user.name} (${identifier}) is blocked due to this reason: Exceeded maximum login attempts with wrong password.`
-          });
-          await notif.save();
-        }
         return 'suspended';
       }
       return null;
@@ -158,11 +150,6 @@ exports.registerTeacher = async (req, res) => {
     // Invalidate consumed OTP
     await Otp.deleteMany({ email: normalizedEmail, purpose: 'registration' });
 
-    const notif = new AdminNotification({
-      title: 'New Teacher Registration',
-      message: `New teacher registered: ${name} (${normalizedEmail})`
-    });
-    await notif.save();
 
     return res.status(201).json({ message: 'Teacher registration request submitted. Awaiting Admin approval.' });
   } catch (error) {
@@ -211,11 +198,6 @@ exports.registerStudent = async (req, res) => {
     // Invalidate consumed OTP
     await Otp.deleteMany({ email: normalizedEmail, purpose: 'registration' });
 
-    const notif = new AdminNotification({
-      title: 'New Student Registration',
-      message: `New student registered: ${name} (${normalizedId})`
-    });
-    await notif.save();
 
     return res.status(201).json({ message: 'Student registration successful. You can now login.' });
   } catch (error) {

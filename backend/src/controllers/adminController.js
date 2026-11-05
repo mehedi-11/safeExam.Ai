@@ -5,7 +5,6 @@ const Student = require('../models/Student');
 const Exam = require('../models/Exam');
 const ExamQuestion = require('../models/ExamQuestion');
 const StudentAnswer = require('../models/StudentAnswer');
-const AdminNotification = require('../models/AdminNotification');
 const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
 const StudentExam = require('../models/StudentExam');
@@ -357,30 +356,6 @@ exports.bulkDeleteExams = async (req, res) => {
 };
 
 
-
-// --- ADMIN NOTIFICATIONS ---
-exports.getNotifications = async (req, res) => {
-  try {
-    const notifications = await AdminNotification.find().sort({ created_at: -1 });
-    const response = notifications.map(a => { const obj = a.toObject(); obj.id = obj._id; return obj; });
-    return res.json(response);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error fetching notifications' });
-  }
-};
-
-exports.markNotificationsRead = async (req, res) => {
-  try {
-    await AdminNotification.updateMany({ is_read: false }, { $set: { is_read: true } });
-    return res.json({ message: 'Notifications marked as read' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error updating notifications' });
-  }
-
-
-};
 
 // --- DASHBOARD STATS ---
 exports.getDashboardStats = async (req, res) => {

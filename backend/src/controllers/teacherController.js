@@ -4,7 +4,6 @@ const ExamQuestion = require('../models/ExamQuestion');
 const StudentExam = require('../models/StudentExam');
 const StudentAnswer = require('../models/StudentAnswer');
 const ProctoringLog = require('../models/ProctoringLog');
-const AdminNotification = require('../models/AdminNotification');
 const Student = require('../models/Student');
 const Event = require('../models/Event');
 const EventRegistration = require('../models/EventRegistration');
@@ -152,11 +151,6 @@ exports.createExam = async (req, res) => {
     });
     await newExam.save();
 
-    const notif = new AdminNotification({
-      title: 'New Exam Created',
-      message: `Teacher ${req.user.name} created a new exam: ${title}`
-    });
-    await notif.save();
 
     return res.status(201).json({ message: 'Exam created successfully', examId: newExam._id });
   } catch (error) {
@@ -197,11 +191,6 @@ exports.updateExam = async (req, res) => {
     
     if (result.matchedCount === 0) return res.status(404).json({ message: 'Exam not found or unauthorized' });
 
-    const notif = new AdminNotification({
-      title: 'Exam Updated',
-      message: `Teacher ${req.user.name} updated the exam: ${title}`
-    });
-    await notif.save();
 
     return res.json({ message: 'Exam updated successfully' });
   } catch (error) {
@@ -226,11 +215,6 @@ exports.deleteExam = async (req, res) => {
     await StudentExam.deleteMany({ exam_id: id });
     await StudentAnswer.deleteMany({ exam_id: id });
 
-    const notif = new AdminNotification({
-      title: 'Exam Deleted',
-      message: `Teacher ${req.user.name} deleted the exam: ${examTitle}`
-    });
-    await notif.save();
 
     return res.json({ message: 'Exam deleted successfully' });
   } catch (error) {
@@ -257,11 +241,6 @@ exports.bulkDeleteExams = async (req, res) => {
     await StudentExam.deleteMany({ exam_id: { $in: deletableIds } });
     await StudentAnswer.deleteMany({ exam_id: { $in: deletableIds } });
 
-    const notif = new AdminNotification({
-      title: 'Bulk Exams Deleted',
-      message: `Teacher ${req.user.name} deleted ${deletableIds.length} exams`
-    });
-    await notif.save();
 
     return res.json({ message: `${deletableIds.length} exam(s) deleted successfully`, deletedCount: deletableIds.length });
   } catch (error) {
@@ -292,11 +271,6 @@ exports.toggleExamLive = async (req, res) => {
     await exam.save();
 
     const statusStr = is_live ? 'LIVE' : 'OFFLINE';
-    const notif = new AdminNotification({
-      title: 'Exam Status Changed',
-      message: `Teacher ${req.user.name} changed exam status to ${statusStr}: ${exam.title}`
-    });
-    await notif.save();
 
     return res.json({ message: is_live ? 'Exam is now live!' : 'Exam is no longer live.' });
   } catch (error) {

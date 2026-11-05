@@ -1,5 +1,4 @@
 import React from 'react';
-import { Bell } from 'lucide-react';
 
 export default function TopMenu({ pageName, rightContent }) {
   return (
@@ -7,15 +6,11 @@ export default function TopMenu({ pageName, rightContent }) {
       <h2 className="text-xl font-bold text-gray-900 capitalize tracking-tight">
         {pageName ? pageName.replace(/_/g, ' ') : 'Dashboard'}
       </h2>
-      <div className="flex items-center">
-        {rightContent ? (
-          rightContent
-        ) : (
-          <button className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-white relative transition-colors cursor-pointer">
-            <Bell size={20} />
-          </button>
-        )}
-      </div>
+      {rightContent && (
+        <div className="flex items-center">
+          {rightContent}
+        </div>
+      )}
     </div>
   );
 }

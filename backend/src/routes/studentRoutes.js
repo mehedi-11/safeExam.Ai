@@ -21,9 +21,6 @@ router.get('/exams/:examId/answers', studentController.getSavedAnswers);
 router.post('/exams/:examId/auto-save', studentController.autoSaveExam);
 router.post('/exams/:examId/submit', studentController.submitExam);
 router.post('/exams/:examId/heartbeat', studentController.recordHeartbeat);
-// AI Diagnostics & Subject Insights (Powered by Agent ELI)
-router.get('/ai-insights', studentController.getAiInsights);
-router.post('/ai-insights', studentController.getAiInsights);
 
 module.exports = router;
 

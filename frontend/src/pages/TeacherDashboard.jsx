@@ -765,7 +765,7 @@ export default function TeacherDashboard() {
           </div>
         </div>
 
-        {/* Global Notifications */}
+        {/* Status Feedback Alerts */}
         {success && (
           <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 py-3 px-5 rounded-xl text-xs font-semibold mb-6 flex items-center gap-2 animate-fade-in shadow-md shadow-gray-200/50">
             <Check size={16} />
