@@ -400,7 +400,7 @@ exports.verifyIdentifier = async (req, res) => {
     const Model = role === 'student' ? Student : role === 'teacher' ? Teacher : Admin;
     await Model.updateOne({ _id: user._id }, { $set: { reset_token: resetToken, reset_token_expiry: tokenExpiry } }, { strict: false });
 
-    // Send email securely from backend (Single email sent via EmailJS REST API)
+    // Send email securely from backend via Gmail Nodemailer
     await sendOtpEmail(user.email, user.name, resetToken, 'Password Reset');
 
     return res.json({

@@ -1,52 +1,74 @@
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
+const userEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'firegamingv8@gmail.com';
+const userPass = (process.env.SMTP_PASS || process.env.EMAIL_PASS || 'ycev mgtp uqkm sfta').replace(/\s+/g, '');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: userEmail,
+    pass: userPass,
+  },
+});
+
 /**
- * Send OTP / Verification Email via EmailJS REST API
+ * Load and render HTML email template
+ */
+const getEmailHtml = (templateName, variables = {}) => {
+  try {
+    const templatePath = path.join(__dirname, '../templates', `${templateName}.html`);
+    let html = fs.readFileSync(templatePath, 'utf8');
+    for (const [key, val] of Object.entries(variables)) {
+      html = html.replace(new RegExp(`{{${key}}}`, 'g'), val);
+    }
+    return html;
+  } catch (err) {
+    console.error(`Error loading email template ${templateName}:`, err);
+    return null;
+  }
+};
+
+/**
+ * Send OTP / Verification Email via Gmail Nodemailer
  */
 const sendOtpEmail = async (email, name, otp, purpose = 'Verification') => {
   try {
     console.log(`\n==============================================`);
-    console.log(`[EMAILJS OTP] To: ${name || 'User'} <${email}>`);
+    console.log(`[GMAIL SMTP OTP] To: ${name || 'User'} <${email}>`);
     console.log(`Purpose: ${purpose} | Code: ${otp}`);
     console.log(`==============================================\n`);
 
     const isRegister = purpose.toLowerCase().includes('register');
-    const templateId = isRegister ? 'template_4db7mzc' : 'template_tex9fhq';
+    const templateName = isRegister ? 'registrationEmail' : 'passwordResetEmail';
+    const subjectTitle = isRegister ? 'Account Registration Code' : 'Password Reset Code';
 
-    const emailJsRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'origin': 'http://localhost:5173',
-        'User-Agent': 'Mozilla/5.0'
-      },
-      body: JSON.stringify({
-        service_id: 'service_1xya9pm',
-        template_id: templateId,
-        user_id: 'bUF4GpGI4G1vouutS',
-        template_params: {
-          to_name: name || 'User',
-          to_email: email,
-          email: email,
-          otp: String(otp)
-        }
-      })
+    const renderedHtml = getEmailHtml(templateName, {
+      NAME: name || 'User',
+      OTP: String(otp),
+      YEAR: String(new Date().getFullYear()),
     });
 
-    if (emailJsRes.ok) {
-      console.log(`[EmailJS] OTP sent successfully to ${email}`);
-      return true;
-    } else {
-      const errorText = await emailJsRes.text();
-      console.warn(`[EmailJS] Response status: ${emailJsRes.status} - ${errorText}`);
-      return false;
-    }
+    const mailOptions = {
+      from: `"SafeExam.AI" <${userEmail}>`,
+      to: email,
+      subject: `SafeExam.AI - ${subjectTitle}: ${otp}`,
+      html: renderedHtml,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[Gmail SMTP] Email sent successfully to ${email}. MessageId: ${info.messageId}`);
+    return true;
   } catch (error) {
-    console.error(`Error in sendOtpEmail via EmailJS:`, error.message);
+    console.error(`Error in sendOtpEmail via Nodemailer/Gmail:`, error);
     return false;
   }
 };
 
 module.exports = {
-  sendOtpEmail
+  sendOtpEmail,
+  getEmailHtml,
+  transporter,
 };

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeExam.AI - Registration Verification</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px 12px;
+      background-color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+    }
+    .wrapper {
+      max-width: 540px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    }
+    .header {
+      background: #0f172a;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      display: inline-block;
+    }
+    .logo-accent {
+      color: #f97316;
+    }
+    .tagline {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .body-content {
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: #fff7ed;
+      color: #ea580c;
+      border: 1px solid #ffedd5;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 12px;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #64748b;
+      margin: 0 0 20px;
+    }
+    .otp-container {
+      background: #fafaf9;
+      border: 2px dashed #f97316;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 24px auto;
+      display: inline-block;
+    }
+    .otp-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .otp-code {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 10px;
+      color: #0f172a;
+      font-family: 'Courier New', Courier, monospace;
+      padding-left: 10px;
+    }
+    .note-box {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #64748b;
+      text-align: left;
+      margin-top: 24px;
+    }
+    .note-box strong {
+      color: #334155;
+    }
+    .footer {
+      border-top: 1px solid #f1f5f9;
+      padding: 22px 24px;
+      text-align: center;
+      background: #fcfdfe;
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <div class="logo">SExam<span class="logo-accent">.AI</span></div>
+      <div class="tagline">Smart & Secure Proctoring Platform</div>
+    </div>
+    <div class="body-content">
+      <div class="badge">Verification Required</div>
+      <h2>Account Registration</h2>
+      <p>
+        Hello <strong>{{NAME}}</strong>,<br>
+        Thank you for joining <strong>SafeExam.AI</strong>! Please use the following 6-digit one-time password (OTP) to verify your email and activate your account.
+      </p>
+
+      <div class="otp-container">
+        <div class="otp-label">Your Verification Code</div>
+        <div class="otp-code">{{OTP}}</div>
+      </div>
+
+      <div class="note-box">
+        &#9888; <strong>Security Notice:</strong> This OTP is valid for <strong>15 minutes</strong>. Never share this code with anyone. SafeExam.AI staff will never ask for your verification code.
+      </div>
+    </div>
+    <div class="footer">
+      This is an automated system email. Please do not reply directly to this message.<br>
+      &copy; {{YEAR}} SafeExam.AI. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+

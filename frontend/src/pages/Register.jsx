@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import emailjs from '@emailjs/browser';
 import { UserSquare, Mail, KeyRound, ArrowLeft, ShieldAlert, BadgeCheck, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
@@ -35,38 +34,17 @@ export default function Register() {
     setError('');
     setSuccess('');
 
-    // Step 1: Request OTP from backend & send via EmailJS
+    // Step 1: Request OTP from backend (Backend sends OTP via Gmail Nodemailer)
     if (otpStep === 1) {
       try {
-        const res = await api.post('/auth/send-registration-otp', {
+        await api.post('/auth/send-registration-otp', {
           role,
           email: formData.email,
           name: formData.name,
           id: formData.id
         });
 
-        const { email, name, otp } = res.data;
-
-        const templateParams = {
-          to_name: name || formData.name,
-          to_email: email || formData.email,
-          email: email || formData.email,
-          otp: otp
-        };
-
-        try {
-          await emailjs.send(
-            'service_1xya9pm',
-            'template_4db7mzc',
-            templateParams,
-            { publicKey: 'bUF4GpGI4G1vouutS' }
-          );
-          setSuccess('OTP has been sent to your registered Gmail.');
-        } catch (emailErr) {
-          console.warn('Browser EmailJS error:', emailErr);
-          setSuccess('OTP has been sent to your email.');
-        }
-
+        setSuccess('OTP has been sent to your registered Gmail.');
         setOtpStep(2);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to send OTP. Please check your credentials or try again.');
@@ -94,7 +72,7 @@ export default function Register() {
       payload = { 
         name: formData.name, 
         email: formData.email, 
-        password: formData.password,
+        password: formData.password, 
         otp: enteredOtp.trim() 
       };
     } else {
@@ -103,7 +81,7 @@ export default function Register() {
         id: formData.id, 
         name: formData.name, 
         email: formData.email, 
-        password: formData.password,
+        password: formData.password, 
         otp: enteredOtp.trim() 
       };
     }
@@ -148,40 +126,34 @@ export default function Register() {
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs flex items-start gap-2 mb-6 animate-fade-in">
-              <ShieldAlert size={16} className="mt-0.5 shrink-0" />
+              <ShieldAlert size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="bg-tomato-50 border border-tomato-200 text-tomato-700 p-4 rounded-xl text-xs flex flex-col gap-2 mb-6 animate-fade-in">
-              <div className="flex items-center gap-2 font-semibold text-sm">
-                <BadgeCheck size={18} className="text-tomato-600 shrink-0" />
-                <span>Request Submitted!</span>
-              </div>
-              <p className="text-tomato-600 leading-normal">{success}</p>
-              <Link to={`/login/${role}`} className="tomato-btn py-2 text-center text-xs mt-2 w-full">
-                Go to Sign In
-              </Link>
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-xs flex items-start gap-2 mb-6 animate-fade-in">
+              <BadgeCheck size={16} className="shrink-0 mt-0.5" />
+              <span>{success}</span>
             </div>
           )}
 
           {!success && otpStep === 1 && (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {role === 'student' && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID <span className="text-red-500 ml-1">*</span></label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Student ID <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
-                      <UserSquare size={18} />
-                    </span>
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                      <UserSquare size={16} />
+                    </div>
                     <input
                       type="text"
                       name="id"
                       value={formData.id}
                       onChange={handleChange}
                       required
-                      placeholder="e.g. STU1002"
+                      placeholder="e.g. 20210001"
                       className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                     />
                   </div>
@@ -189,62 +161,62 @@ export default function Register() {
               )}
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name <span className="text-red-500">*</span></label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
-                    <UserSquare size={18} />
-                  </span>
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                    <UserSquare size={16} />
+                  </div>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    placeholder="e.g. John Smith"
+                    placeholder="Enter your name"
                     className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address <span className="text-red-500">*</span></label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
-                    <Mail size={18} />
-                  </span>
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                    <Mail size={16} />
+                  </div>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="e.g. john@student.com"
+                    placeholder="user@example.com"
                     className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password <span className="text-red-500 ml-1">*</span></label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password <span className="text-red-500">*</span></label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
-                    <KeyRound size={18} />
-                  </span>
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                    <KeyRound size={16} />
+                  </div>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     required
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition font-mono"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-gray-800 focus:ring-1 focus:ring-tomato-500 smooth-transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-500 hover:text-tomato-400 smooth-transition"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
